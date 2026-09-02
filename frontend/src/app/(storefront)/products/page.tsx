@@ -1,0 +1,83 @@
+import type { Metadata } from "next";
+import { getProducts } from "@/lib/api/endpoints/products";
+import { getCategories } from "@/lib/api/endpoints/categories";
+import { ProductGrid } from "@/components/product/ProductGrid";
+import { ProductFilters } from "@/components/product/ProductFilters";
+import { ProductSort } from "@/components/product/ProductSort";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { Icon } from "@/components/ui/Icon";
+import { toProductFilters, type RawSearchParams } from "@/lib/utils/searchParams";
+
+export const metadata: Metadata = { title: "Product Catalog" };
+
+const PAGE_SIZE = 12;
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawSearchParams>;
+}) {
+  const raw = await searchParams;
+  const filters = toProductFilters(raw);
+  const currentPage = filters.page ?? 1;
+
+  const [products, categories] = await Promise.all([
+    getProducts(filters),
+    getCategories().catch(() => []),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(products.count / PAGE_SIZE));
+
+  return (
+    <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
+      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Products" }]} />
+      <h1 className="headline-md mt-4 text-on-surface">Product Catalog</h1>
+
+      <div className="mt-8 flex flex-col gap-8 md:flex-row">
+        <ProductFilters categories={categories} />
+
+        <div className="flex-1">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <form action="/products" method="get" className="relative w-full md:max-w-sm">
+              {Object.entries(raw)
+                .filter(([key]) => key !== "search" && key !== "page")
+                .map(([key, value]) => (
+                  <input key={key} type="hidden" name={key} value={Array.isArray(value) ? value[0] : value} />
+                ))}
+              <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant" />
+              <input
+                type="search"
+                name="search"
+                defaultValue={filters.search}
+                placeholder="Search products..."
+                className="h-11 w-full rounded-full border border-outline-variant bg-surface-container-lowest pl-11 pr-4 body-md focus:border-secondary focus:outline-none"
+              />
+            </form>
+            <ProductSort />
+          </div>
+
+          <p className="label-md mb-4 text-on-surface-variant">{products.count} products found</p>
+
+          <ProductGrid products={products.results} />
+
+          <div className="mt-10">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              buildHref={(page) => {
+                const params = new URLSearchParams(
+                  Object.entries(raw).flatMap(([key, value]) =>
+                    value === undefined ? [] : [[key, Array.isArray(value) ? value[0]! : value]]
+                  )
+                );
+                params.set("page", String(page));
+                return `/products?${params.toString()}`;
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

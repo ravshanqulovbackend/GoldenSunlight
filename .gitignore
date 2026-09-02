@@ -1,0 +1,36 @@
+# Environment / secrets
+.env
+.env.local
+*.env
+!*.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+db.sqlite3
+staticfiles/
+media/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+frontend/.env*
+
+# OS / editor
+.DS_Store
+*.swp
+
+# Misc
+.mimocode/
+*.log
+
+# Docs kept local-only, not published to the public repo
+/README.md
+
+# Design mockups kept local-only, not published to the repo
+/Mockups/

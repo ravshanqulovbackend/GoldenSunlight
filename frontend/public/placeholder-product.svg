@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#f3f3f6"/>
+  <g fill="none" stroke="#c4c9d0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M130 150 L200 115 L270 150 L270 260 L200 295 L130 260 Z"/>
+    <path d="M130 150 L200 185 L270 150"/>
+    <path d="M200 185 L200 295"/>
+  </g>
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="18" fill="#75787c" text-anchor="middle">
+    Rasm mavjud emas
+  </text>
+</svg>
