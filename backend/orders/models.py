@@ -63,9 +63,6 @@ class Order(models.Model):
     PAYMENT_CHOICES = [
         ('cash', 'Cash'),
         ('card', 'Card'),
-        ('click', 'Click'),
-        ('payme', 'Payme'),
-        ('uzum', 'Uzum Bank'),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
@@ -78,7 +75,7 @@ class Order(models.Model):
     notes = models.TextField(blank=True, default='')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15000)
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)

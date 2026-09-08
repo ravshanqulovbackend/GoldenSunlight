@@ -35,7 +35,7 @@ class ActivityLog(models.Model):
 
 class SiteSettings(models.Model):
     site_name = models.CharField(max_length=255, default='GoldenSunlight')
-    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15000)
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15)
 
     class Meta:
         verbose_name = 'Site Settings'

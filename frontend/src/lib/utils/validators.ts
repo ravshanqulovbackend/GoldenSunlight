@@ -38,7 +38,7 @@ export const checkoutSchema = z
     address_text: z.string().optional(),
     landmark: z.string().optional(),
     notes: z.string().optional(),
-    payment_method: z.enum(["cash", "card", "click", "payme", "uzum"]),
+    payment_method: z.enum(["cash", "card"]),
     coupon_code: z.string().optional(),
   })
   .refine((data) => data.address_id || (data.address_text && data.address_text.trim().length > 0), {

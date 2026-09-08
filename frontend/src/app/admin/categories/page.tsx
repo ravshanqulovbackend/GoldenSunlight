@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteCategoryPermanently, getAllAdminCategories, setCategoryActive } from "@/lib/api/endpoints/adminCategories";
+import { revalidateCategories } from "@/lib/actions/revalidateCategories";
+import { revalidateProducts } from "@/lib/actions/revalidateProducts";
 import { CategoryFormModal } from "@/components/admin/CategoryFormModal";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
@@ -30,8 +32,10 @@ export default function AdminCategoriesPage() {
 
   const toggleActive = useMutation({
     mutationFn: ({ slug, isActive }: { slug: string; isActive: boolean }) => setCategoryActive(slug, isActive),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateCategories();
+      await revalidateProducts();
       toast("Status updated", "success");
     },
     onError: (error) => toast(parseApiError(error).message || "An error occurred", "error"),
@@ -39,8 +43,10 @@ export default function AdminCategoriesPage() {
 
   const deleteCategory = useMutation({
     mutationFn: (slug: string) => deleteCategoryPermanently(slug),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateCategories();
+      await revalidateProducts();
       toast("Category permanently deleted", "success");
       setConfirmingSlug(null);
     },

@@ -105,7 +105,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
             </div>
             <div className="flex items-center gap-2 label-md text-on-surface-variant">
               <Icon name="local_shipping" className="text-[18px] text-secondary" />
-              Fast delivery across Tashkent
+              Fast delivery across Dubai
             </div>
           </div>
         </div>
@@ -138,6 +138,16 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
                       ))}
                     </div>
                     {review.comment && <p className="body-md mt-2 text-on-surface-variant">{review.comment}</p>}
+                    {review.image && (
+                      <a href={getImageUrl(review.image)} target="_blank" rel="noopener noreferrer">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={getImageUrl(review.image)}
+                          alt=""
+                          className="mt-2 h-20 w-20 rounded-lg object-cover"
+                        />
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

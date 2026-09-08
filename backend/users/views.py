@@ -5,8 +5,10 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.db.models import Case, When, IntegerField
+from django.forms.models import model_to_dict
 from .serializers import UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from .permissions import IsAdminRole
+from common.utils import log_activity, diff_instance
 
 User = get_user_model()
 
@@ -54,7 +56,7 @@ class ChangePasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
-        return Response({'detail': 'Parol muvaffaqiyatli o\'zgartirildi'})
+        return Response({'detail': 'Password changed successfully'})
 
 
 class LogoutView(APIView):
@@ -92,12 +94,15 @@ class UserListView(generics.ListAPIView):
 
 
 def _guard_actor_vs_target(actor, target, new_role=None):
-    """Admin/superadmin ierarxiyasi: hech kim o'zini o'zgartira/o'chira olmaydi,
-    va oddiy admin superadminga (mavjud yoki bo'lajak) tega olmaydi."""
+    """Admin/superadmin hierarchy: nobody can modify/delete themselves, and a
+    regular admin cannot touch another admin/superadmin (existing or future) —
+    admin only manages customers (staff), staff members are managed by superadmin only."""
     if target.pk == actor.pk:
-        raise PermissionDenied("O'zingizga nisbatan bu amalni bajara olmaysiz.")
-    if actor.role == 'admin' and (target.role == 'superadmin' or new_role == 'superadmin'):
-        raise PermissionDenied("Superadmin bilan bog'liq amalni faqat superadmin bajara oladi.")
+        raise PermissionDenied("You cannot perform this action on yourself.")
+    if actor.role == 'admin' and (
+        target.role in ('admin', 'superadmin') or new_role in ('admin', 'superadmin')
+    ):
+        raise PermissionDenied("Only a superadmin can perform actions involving an admin/superadmin.")
 
 
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -110,14 +115,26 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
         role = request.data.get('role')
         if role and role in dict(User.ROLE_CHOICES):
             _guard_actor_vs_target(request.user, user, new_role=role)
-            user.role = role
-            user.save()
+            if role == 'superadmin' and User.objects.filter(role='superadmin').exclude(pk=user.pk).exists():
+                raise ValidationError("There can only be one superadmin.")
         return super().update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        before = model_to_dict(serializer.instance)
+        role = self.request.data.get('role')
+        # 'role' — UserSerializer'da read_only, shuning uchun serializer.save() orqali
+        # emas, .save(role=...) qo'shimcha argumenti bilan yoziladi (validate_data'ni chetlab).
+        if role and role in dict(User.ROLE_CHOICES):
+            instance = serializer.save(role=role)
+        else:
+            instance = serializer.save()
+        log_activity(self.request.user, 'updated', instance, 'User', diff_instance(before, instance))
 
     def perform_destroy(self, instance):
         _guard_actor_vs_target(self.request.user, instance)
         if instance.role == 'superadmin' and not User.objects.filter(role='superadmin').exclude(pk=instance.pk).exists():
-            raise PermissionDenied("Oxirgi superadminni o'chirib bo'lmaydi.")
+            raise PermissionDenied("Cannot delete the last superadmin.")
         if instance.orders.exists():
-            raise ValidationError("Buyurtmalari mavjud foydalanuvchini o'chirib bo'lmaydi.")
+            raise ValidationError("Cannot delete a user who has existing orders.")
+        log_activity(self.request.user, 'deleted', instance, 'User')
         instance.delete()

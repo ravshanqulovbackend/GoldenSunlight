@@ -16,7 +16,11 @@ interface MenuAction {
 
 function getMenuActions(role: string | undefined): MenuAction[] {
   const passwordItem: MenuAction = { label: "Change password", icon: "lock_reset", href: "/profile/password" };
-  const usersItem: MenuAction = { label: "Admin Panel", icon: "group", href: "/admin/dashboard" };
+  const usersItem: MenuAction = {
+    label: "Admin Panel",
+    icon: "group",
+    href: role === "superadmin" ? "/admin/dashboard" : "/admin/orders",
+  };
   const editInfoItem: MenuAction = {
     label: role === "staff" ? "Edit information" : "Change profile information",
     icon: "edit",

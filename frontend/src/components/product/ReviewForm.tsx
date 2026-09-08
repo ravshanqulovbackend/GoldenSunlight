@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createReview } from "@/lib/api/endpoints/reviews";
+import { revalidateReviews } from "@/lib/actions/revalidateReviews";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { toast } from "@/lib/stores/toastStore";
 import { parseApiError } from "@/lib/api/parseApiError";
@@ -17,10 +18,11 @@ import { reviewSchema, type ReviewFormValues } from "@/lib/utils/validators";
 
 export function ReviewForm({ productId, productSlug }: { productId: number; productSlug: string }) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const access = useAuthStore((s) => s.access);
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const [hoverRating, setHoverRating] = useState(0);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -37,15 +39,29 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
 
   const mutation = useMutation({
     mutationFn: (values: ReviewFormValues) =>
-      createReview(productId, { rating: values.rating, comment: values.comment }),
-    onSuccess: () => {
+      createReview(productId, { rating: values.rating, comment: values.comment, image: imageFile }),
+    onSuccess: async () => {
       toast("Review added", "success");
       reset({ rating: 0, comment: "" });
-      queryClient.invalidateQueries({ queryKey: ["reviews", productId] });
+      removeImage();
+      await revalidateReviews(productId, productSlug);
       router.refresh();
     },
     onError: (error) => toast(parseApiError(error).message || "Failed to add review", "error"),
   });
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  function removeImage() {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  }
 
   if (!isHydrated) return null;
 
@@ -88,6 +104,27 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
       {errors.rating && <span className="label-sm text-error">{errors.rating.message}</span>}
 
       <Textarea placeholder="Share your thoughts (optional)" {...register("comment")} />
+
+      {imagePreview ? (
+        <div className="relative w-fit">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imagePreview} alt="" className="h-24 w-24 rounded-lg object-cover" />
+          <button
+            type="button"
+            onClick={removeImage}
+            aria-label="Remove image"
+            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-inverse-surface text-inverse-on-surface"
+          >
+            <Icon name="close" className="text-[14px]" />
+          </button>
+        </div>
+      ) : (
+        <label className="label-md flex w-fit cursor-pointer items-center gap-2 text-primary hover:underline">
+          <Icon name="add_photo_alternate" className="text-[20px]" />
+          Add a photo
+          <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+        </label>
+      )}
 
       <Button type="submit" variant="outline" size="sm" disabled={mutation.isPending} className="w-fit">
         {mutation.isPending ? "Submitting..." : "Leave a Review"}

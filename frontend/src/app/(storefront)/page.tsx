@@ -40,7 +40,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative flex h-[600px] items-center overflow-hidden bg-gradient-to-br from-primary via-primary-container to-primary md:h-[700px]">
+      <section className="relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-primary via-primary-container to-primary py-20">
         <div className="relative z-10 mx-auto w-full max-w-container-max-width px-margin-mobile md:px-margin-desktop">
           <div className="max-w-2xl">
             <p className="label-md mb-4 uppercase tracking-widest text-primary-fixed-dim">GoldenSunlight</p>
@@ -48,7 +48,7 @@ export default async function HomePage() {
               Cleanliness and care by your side every day
             </h1>
             <p className="body-lg mt-6 text-primary-fixed-dim">
-              Uzbekistan&apos;s leading manufacturer of hygiene and household cleaning products —
+              Dubai&apos;s leading manufacturer of hygiene and household cleaning products —
               wet wipes, feminine hygiene, baby products and cleaning supplies all in one place.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
@@ -63,8 +63,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto -mt-12 max-w-container-max-width px-margin-mobile md:px-margin-desktop">
-        <div className="grid grid-cols-2 gap-4 rounded-lg bg-surface-container-lowest p-6 shadow-lg lg:grid-cols-4">
+      <section className="relative z-10 mx-auto -mt-8 mb-8 max-w-container-max-width px-margin-mobile md:px-margin-desktop">
+        <div className="grid grid-cols-2 gap-4 rounded-lg bg-surface-container-lowest p-8 shadow-xl lg:grid-cols-4">
           {STATS.map((stat) => (
             <div key={stat.label} className="flex flex-col items-center gap-1 border-outline-variant p-4 text-center first:border-0 lg:border-l">
               <span className="display-lg text-[2.5rem] text-primary">{stat.value}</span>

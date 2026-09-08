@@ -34,15 +34,15 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         if instance.products.exists() or instance.children.exists():
             raise ValidationError(
-                "Bu kategoriyada mahsulot yoki bo'lim-kategoriyalar bor — "
-                "avval ularni boshqa joyga o'tkazing yoki o'chiring."
+                "This category has products or sub-categories — "
+                "move or delete them first."
             )
         actor = self.request.user
         name = instance.name
         log_activity(actor, 'deleted', instance, 'Category')
         instance.delete()
         notify_superadmins(
-            "Kategoriya o'chirildi",
-            f'{actor.get_full_name() or actor.username} "{name}" nomli kategoriyani butunlay o\'chirdi.',
+            "Category deleted",
+            f'{actor.get_full_name() or actor.username} permanently deleted the category "{name}".',
             exclude_user=actor,
         )

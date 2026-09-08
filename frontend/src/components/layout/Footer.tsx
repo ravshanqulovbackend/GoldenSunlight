@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 
-const SOCIAL_ICONS = ["facebook", "photo_camera", "chat"];
+const SOCIAL_ICONS = ["thumb_up", "photo_camera", "chat"];
 
 export function Footer() {
   return (
@@ -54,13 +54,13 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <span className="label-sm uppercase text-primary-fixed-dim">Contact</span>
             <span className="flex items-center gap-2 body-md text-primary-fixed">
-              <Icon name="location_on" className="text-[18px]" /> Tashkent, Uzbekistan
+              <Icon name="location_on" className="text-[18px]" /> Dubai, United Arab Emirates
             </span>
             <span className="flex items-center gap-2 body-md text-primary-fixed">
-              <Icon name="call" className="text-[18px]" /> +998 90 123 45 67
+              <Icon name="call" className="text-[18px]" /> +971 4 123 4567
             </span>
             <span className="flex items-center gap-2 body-md text-primary-fixed">
-              <Icon name="mail" className="text-[18px]" /> info@goldensunlight.uz
+              <Icon name="mail" className="text-[18px]" /> info@goldensunlight.ae
             </span>
           </div>
         </div>

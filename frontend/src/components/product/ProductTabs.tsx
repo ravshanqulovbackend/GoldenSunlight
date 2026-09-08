@@ -46,7 +46,7 @@ export function ProductTabs({ description, ingredients }: ProductTabsProps) {
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <Icon name="local_shipping" className="mt-0.5 text-[20px] text-secondary" />
-              <span>Delivered within 1-2 days across Tashkent, and 3-5 days to other regions.</span>
+              <span>Delivered within 1-2 days across Dubai, and 3-5 days to other Emirates.</span>
             </div>
             <div className="flex items-start gap-3">
               <Icon name="thermostat" className="mt-0.5 text-[20px] text-secondary" />

@@ -49,7 +49,7 @@ export function Header() {
             GoldenSunlight
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => (
               <NavLink key={link.href} href={link.href}>
                 {link.label}

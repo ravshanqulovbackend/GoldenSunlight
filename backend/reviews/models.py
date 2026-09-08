@@ -8,10 +8,10 @@ class Review(models.Model):
     product = models.ForeignKey('products.Product', on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True, default='')
+    image = models.ImageField(upload_to='reviews/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'product')
         ordering = ['-created_at']
 
     def __str__(self):

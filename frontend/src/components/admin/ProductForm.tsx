@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProduct, getBrandsForAdmin, updateProduct } from "@/lib/api/endpoints/adminProducts";
 import { getAllAdminCategories } from "@/lib/api/endpoints/adminCategories";
+import { revalidateProducts } from "@/lib/actions/revalidateProducts";
 import { toast } from "@/lib/stores/toastStore";
 import { parseApiError } from "@/lib/api/parseApiError";
 import { Input } from "@/components/ui/Input";
@@ -89,10 +90,12 @@ export function ProductForm({ product }: ProductFormProps) {
       isEdit
         ? updateProduct(product!.slug, { ...values, image: imageFile ?? undefined })
         : createProduct({ ...values, image: imageFile ?? undefined }),
-    onSuccess: () => {
+    onSuccess: async (saved) => {
       toast(isEdit ? "Product updated" : "Product added", "success");
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateProducts(saved.slug);
+      if (isEdit && product && product.slug !== saved.slug) await revalidateProducts(product.slug);
       router.push("/admin/products");
     },
     onError: (error) => toast(parseApiError(error).message || "An error occurred", "error"),
@@ -184,7 +187,7 @@ export function ProductForm({ product }: ProductFormProps) {
           {...register("slug", { onChange: () => setSlugTouched(true) })}
         />
 
-        <Input label="Price (so'm)" type="number" error={errors.price?.message} {...register("price")} />
+        <Input label="Price (AED)" type="number" step="0.01" error={errors.price?.message} {...register("price")} />
         <Input label="Old Price (optional)" type="number" {...register("old_price")} />
 
         <Input label="SKU (optional)" {...register("sku")} />

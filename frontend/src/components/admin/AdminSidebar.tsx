@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils/cn";
 import { ProfileMenu } from "@/components/layout/ProfileMenu";
 
 const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/orders", label: "Orders", icon: "receipt_long" },
   { href: "/admin/products", label: "Products", icon: "inventory_2" },
   { href: "/admin/categories", label: "Categories", icon: "category" },
@@ -23,7 +22,8 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "Settings", icon: "settings" },
 ];
 
-const SUPERADMIN_NAV_ITEM = { href: "/admin/notifications", label: "Notifications", icon: "notifications" };
+const DASHBOARD_NAV_ITEM = { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" };
+const NOTIFICATIONS_NAV_ITEM = { href: "/admin/notifications", label: "Notifications", icon: "notifications" };
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -31,7 +31,7 @@ export function AdminSidebar() {
   const isSuperAdmin = user?.role === "superadmin";
   const { data: notifications } = useNotifications();
   const unreadCount = isSuperAdmin ? (notifications?.results.filter((n) => !n.is_read).length ?? 0) : 0;
-  const navItems = isSuperAdmin ? [...NAV_ITEMS, SUPERADMIN_NAV_ITEM] : NAV_ITEMS;
+  const navItems = isSuperAdmin ? [DASHBOARD_NAV_ITEM, ...NAV_ITEMS, NOTIFICATIONS_NAV_ITEM] : NAV_ITEMS;
 
   return (
     <aside className="fixed left-0 top-0 flex h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low py-6">

@@ -36,16 +36,18 @@ export function ConversationList({ selectedCustomerId, onSelect }: ConversationL
             type="button"
             onClick={() => onSelect(conversation.id)}
             className={cn(
-              "flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors hover:bg-surface-container-low",
+              "flex w-full items-stretch justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-surface-container-low",
               selectedCustomerId === conversation.id && "bg-primary-container/30"
             )}
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-col gap-1">
               <span className="label-md font-semibold text-on-surface">{conversation.full_name}</span>
-              {conversation.unread_count > 0 && <Badge tone="error">{conversation.unread_count}</Badge>}
+              <p className="label-sm truncate normal-case text-on-surface-variant">{conversation.last_message}</p>
             </div>
-            <p className="label-sm truncate normal-case text-on-surface-variant">{conversation.last_message}</p>
-            <span className="label-sm text-on-surface-variant">{formatDate(conversation.last_message_at)}</span>
+            <div className="flex shrink-0 flex-col items-end justify-between gap-1">
+              {conversation.unread_count > 0 && <Badge tone="error">{conversation.unread_count}</Badge>}
+              <span className="label-sm ml-auto text-on-surface-variant">{formatDate(conversation.last_message_at)}</span>
+            </div>
           </button>
         </li>
       ))}

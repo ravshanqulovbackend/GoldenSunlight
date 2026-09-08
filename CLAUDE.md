@@ -6,11 +6,14 @@ Ushbu fayl ushbu repo ustida ishlaydigan Claude Code (yoki boshqa AI agent) uchu
 
 **GoldenSunlight** — gigiena va maishiy tozalash mahsulotlari (nam salfetkalar, ayollar
 gigienasi, bolalar mahsulotlari, tozalash vositalari) ishlab chiqaruvchi/distribyutor korxona
-uchun to'liq stack e-commerce platforma (O'zbek tilida). Katalog Sunlight, Peri, Rio, Natural
-Fresh va Venzi brendlarini qamrab oladi. Asl loyiha nomi: `stitch_modern_shirinliklar_do_koni_platformasi`
-(loyiha dastlab qandolat do'koni sifatida boshlangan, keyinchalik haqiqiy mahsulot yo'nalishiga
-mos ravishda gigiena tovarlari domeniga qayta brendlangan — kod tuzilishi generik bo'lgani
-uchun bu asosan kontent/brending o'zgarishi bo'ldi).
+uchun to'liq stack e-commerce platforma. Korxona **Dubay, BAA**da joylashgan deb hisoblanadi —
+barcha foydalanuvchiga ko'rinadigan matn **ingliz tilida**, narxlar **AED** valyutasida
+ko'rsatiladi (ilgari O'zbekiston/so'm kontekstida bo'lgan, keyinchalik BAA/AED'ga qayta
+brendlangan). Katalog Sunlight, Peri, Rio, Natural Fresh va Comforta brendlarini qamrab oladi.
+Asl loyiha nomi: `stitch_modern_shirinliklar_do_koni_platformasi` (loyiha dastlab qandolat
+do'koni sifatida boshlangan, keyinchalik haqiqiy mahsulot yo'nalishiga mos ravishda gigiena
+tovarlari domeniga qayta brendlangan — kod tuzilishi generik bo'lgani uchun bu asosan
+kontent/brending o'zgarishi bo'ldi).
 
 - **Backend:** Django 5 + Django REST Framework — to'liq ishlab chiqilgan, 16 ta app.
 - **Frontend:** Next.js 16 (App Router) — **Phase 1 (mijoz-tomon xarid oqimi) to'liq qurilgan va
@@ -24,7 +27,28 @@ Eslatma: repo tub papkasida `README.md` yo'q (`.gitignore`da istisno qilingan) �
 haqida to'liq va aniq ma'lumot uchun to'g'ridan-to'g'ri `backend/*/urls.py` va pastdagi "Repo
 tuzilishi" / "joriy holat" bo'limlariga tayaning.
 
-## Muhim: joriy holat (2026-09-02 holatiga)
+## Muhim: joriy holat (2026-09-08 holatiga)
+
+✅ **BAA/AED'ga qayta brendlash deyarli tugallangan.** Backend'dagi barcha xato xabarlari,
+Django admin action label'lari/`help_text`'lari va `seed.py`dagi kompaniya ma'lumotlari
+o'zbekchadan ingliz tiliga o'tkazilgan (frontend UI matni allaqachon ingliz tilida edi).
+`SiteSettings.delivery_fee`/`Order.delivery_fee` default qiymati `15000` (so'm) o'rniga `15`
+(AED) bo'ldi, `frontend/src/lib/utils/money.ts`dagi `formatPrice()` endi `"78 000 so'm"` emas,
+`"AED 78,000.00"` formatida qaytaradi. To'lov usullaridan O'zbekistonga xos `click`/`payme`/
+`uzum` olib tashlangan — endi faqat `cash`/`card` qoladi (checkout sahifasida alohida to'lov
+usuli tanlash UI'i ham olib tashlangan, `PaymentMethodSelect.tsx` o'chirilgan).
+
+✅ **Admin activity log endi deyarli barcha admin CRUD resurslarini qamraydi.** `common/utils.py`
+dagi `log_activity`/`diff_instance` `products`/`categories`dan tashqari endi `certificates`,
+`gallery` (ikkala viewset), `news`, `pages.Company`, `orders` (Admin detail/status), `reviews`
+(o'chirish) va `users` (Admin update/destroy) view'lariga ham ulangan. `DIFF_EXCLUDE`ga
+`password`/`avatar`/`last_login` qo'shilgan — activity log diff'ida parol xeshi ko'rinmaydi.
+
+✅ **Foydalanuvchi rol ierarxiyasi qattiqlashtirilgan.** Endi faqat bitta `superadmin` bo'lishi
+mumkin (`User.clean()` + `AdminUserDetailView.update` darajasida tekshiriladi), va oddiy
+`admin` boshqa `admin`/`superadmin`ga tegishli hech qanday amalni (ko'rish/o'zgartirish/
+o'chirishdan tashqari — bunga umuman ruxsat yo'q) bajara olmaydi — faqat mijozlarni (`staff`)
+boshqaradi (`users/views.py`dagi `_guard_actor_vs_target`).
 
 ✅ **Frontend Phase 1 tayyor.** `frontend/` — Next.js 16 + TypeScript + Tailwind v4 (App Router,
 Server Components + TanStack Query gibrid arxitektura, JWT auth + Zustand, `frontend/Dockerfile`
@@ -80,7 +104,9 @@ python3.12 -m venv .venv            # aynan 3.12 — Dockerfile ham shu versiyan
 source .venv/bin/activate           # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
-python seed.py                      # demo ma'lumotlarni yuklaydi (admin + 10 user + 39 mahsulot)
+python seed.py                      # demo katalog ma'lumotlarini yuklaydi (166 mahsulot,
+                                     # brendlar, kategoriyalar, kupon, yangiliklar, kompaniya —
+                                     # user/admin/buyurtma/sharh ENDI YARATILMAYDI)
 python manage.py runserver          # http://localhost:8000
 ```
 
@@ -140,7 +166,9 @@ docker-compose.yml   db, redis, backend, celery, celery-beat, frontend, nginx se
 
 ## Konventsiyalar
 
-- Foydalanuvchiga ko'rinadigan matn, model `verbose_name`lari, xato xabarlari — **o'zbek tilida**.
+- Foydalanuvchiga ko'rinadigan matn, model `verbose_name`lari, xato xabarlari — **ingliz tilida**
+  (loyiha BAA/Dubay bozoriga qayta brendlangan; avval bu qoida "o'zbek tilida" edi — eski kod
+  yoki eski hujjatlarda o'zbekcha matn uchrasa, ingliz tiliga o'tkazing).
 - `AUTH_USER_MODEL = users.User`, rollar: `staff` (oddiy mijoz — verbose_name "Mijoz"), `admin`
   (xodim), `superadmin` (korxona egasi). Admin huquqi `role` maydoni orqali tekshiriladi
   (`IsAdminRole`), Django'ning `is_staff`/`is_superuser` bilan ALOQASI YO'Q.
@@ -155,9 +183,22 @@ docker-compose.yml   db, redis, backend, celery, celery-beat, frontend, nginx se
 - Django admin `/django-admin/` da (odatiy `/admin/` emas — u Next.js admin panelga ajratilgan,
   `settings.py`dagi `ADMIN_URL` orqali sozlangan).
 - **Narx/sana formatlash hech qachon `Intl.NumberFormat`/`Intl.DateTimeFormat` orqali qilinmaydi**
-  (`frontend/src/lib/utils/money.ts`) — Node (server) va brauzer (client) ICU ma'lumotlari
-  "uz-UZ" uchun boshqa-boshqa natija berib, Next.js hydration mismatch xatosiga olib kelgan edi.
-  Buning o'rniga qo'lda, deterministik formatlash ishlatiladi.
+  (`frontend/src/lib/utils/money.ts`) — Node (server) va brauzer (client) ICU ma'lumotlari bir
+  xil locale uchun ham boshqa-boshqa guruhlash belgisi qaytarishi mumkin, bu esa Next.js
+  hydration mismatch xatosiga olib keladi. Buning o'rniga qo'lda, deterministik formatlash
+  ishlatiladi. Valyuta — **AED** (`formatPrice()` → `"AED 12,345.00"`), so'm/UZS emas.
+- **Faqat bitta `superadmin` bo'lishi mumkin** (`users/models.py`ning `User.clean()`i va
+  `AdminUserDetailView.update`) va oddiy `admin` boshqa `admin`/`superadmin`ga tegishli hech
+  qanday amal bajara olmaydi — faqat `staff` (mijoz) rolidagi userlarni boshqaradi
+  (`users/views.py`dagi `_guard_actor_vs_target`).
+- **Admin CRUD amallari `common/utils.py`dagi `log_activity`/`diff_instance` orqali
+  loglanadi** — deyarli barcha admin resurslarda (`products`, `categories`, `certificates`,
+  `gallery`, `news`, `pages.Company`, `orders`, `reviews`, `users`) qo'llanadi. `DIFF_EXCLUDE`
+  to'plamiga kiruvchi maydonlar (`image`, `avatar`, `password`, `last_login`, `created_at`,
+  `updated_at`, `rating`, `review_count`) diff'ga kiritilmaydi.
+- **To'lov usullari — faqat `cash`/`card`** (`orders/models.py` `Order.PAYMENT_CHOICES`) —
+  O'zbekistonga xos `click`/`payme`/`uzum` olib tashlangan. Checkout sahifasida alohida to'lov
+  usuli tanlash UI'i yo'q.
 - **Logout doim `logoutAndRedirect()` orqali** (`frontend/src/lib/stores/authStore.ts`) — oddiy
   `logout(); router.push(...)` himoyalangan sahifada `RequireAuth`ning reaktiv redirect'i bilan
   poyga qiladi va foydalanuvchini `/auth/login`ga tashlab yuboradi.
@@ -168,15 +209,15 @@ docker-compose.yml   db, redis, backend, celery, celery-beat, frontend, nginx se
   (`django-redis` paketi `requirements.txt`da bor, lekin ishlatilmaydi — Django 4+ ichki redis
   backend'i ishlatiladi).
 
-## Demo login/parollar (seed.py orqali yaratiladi)
+## Demo ma'lumotlar (seed.py orqali yaratiladi)
 
-| Login | Parol | Rol |
-|---|---|---|
-| `admin` | `admin123` | Super Admin |
-| `admin1` | `admin1234` | Admin (xodim) |
-| `user1` ... `user10` | `user1234` | Mijoz (`staff`) |
+⚠️ `seed.py` endi **demo user/admin/buyurtma/sharh/sevimli/manzil yaratmaydi** — faqat
+brendlar, kategoriyalar, mahsulotlar (166 ta), kuponlar, yangiliklar va kompaniya ma'lumotini
+yuklaydi. Real admin/superadmin akkaunt kerak bo'lsa `python manage.py createsuperuser`
+ishlating (yoki Django admin orqali oddiy userga `pending_role='admin'` belgilang — yuqoridagi
+"Admin huquqi berish ikki bosqichli" bo'limiga qarang).
 
-Foydali kupon kodlari (seed.py): `CHEGIRMA10` (10%, min 50 000 so'm), `YANGIYIL` (15%, min
-100 000), `MEGA20` (20%, min 200 000).
+Foydali kupon kodlari (seed.py): `WELCOME10` (10%, min 50 AED), `NEWYEAR15` (15%, min 100 AED),
+`MEGA20` (20%, min 200 AED).
 
 Faqat lokal/dev muhit uchun. Productionga chiqarishdan oldin albatta o'zgartiring.

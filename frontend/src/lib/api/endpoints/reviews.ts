@@ -11,9 +11,12 @@ export function getProductReviews(productId: number) {
 }
 
 export async function createReview(productId: number, payload: Omit<CreateReviewPayload, "product">): Promise<Review> {
-  const { data } = await http.post<Review>(`/reviews/product/${productId}/`, {
-    product: productId,
-    ...payload,
-  });
+  const formData = new FormData();
+  formData.append("product", String(productId));
+  formData.append("rating", String(payload.rating));
+  if (payload.comment) formData.append("comment", payload.comment);
+  if (payload.image) formData.append("image", payload.image);
+
+  const { data } = await http.post<Review>(`/reviews/product/${productId}/`, formData);
   return data;
 }

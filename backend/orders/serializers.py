@@ -44,7 +44,7 @@ class CreateOrderSerializer(serializers.Serializer):
     address_text = serializers.CharField(required=False, default='', allow_blank=True)
     landmark = serializers.CharField(required=False, default='', allow_blank=True)
     notes = serializers.CharField(required=False, default='', allow_blank=True)
-    payment_method = serializers.ChoiceField(choices=['cash', 'card', 'click', 'payme', 'uzum'])
+    payment_method = serializers.ChoiceField(choices=['cash', 'card'])
     coupon_code = serializers.CharField(required=False, default='', allow_blank=True)
 
 

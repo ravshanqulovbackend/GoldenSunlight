@@ -3,17 +3,18 @@
  * cart.total_price/total_items xom JSON son sifatida keladi — ikkalasi ham qabul qilinadi.
  *
  * `Intl.NumberFormat`/`Intl.DateTimeFormat` ATAYLAB ishlatilmaydi: Node (server) va
- * brauzer (client) ICU ma'lumotlari "uz-UZ" uchun turlicha guruhlash belgisi qaytarishi
- * mumkin ("78 000" vs "78,000"), bu esa Next.js'da hydration mismatch'ga olib keladi
- * (server va client boshqa-boshqa matn render qiladi). Shu sabab qo'lda, determinstik
- * formatlash ishlatiladi — server va client har doim bir xil natija beradi.
+ * brauzer (client) ICU ma'lumotlari bir xil locale uchun ham turlicha guruhlash belgisi
+ * qaytarishi mumkin, bu esa Next.js'da hydration mismatch'ga olib keladi (server va
+ * client boshqa-boshqa matn render qiladi). Shu sabab qo'lda, determinstik formatlash
+ * ishlatiladi — server va client har doim bir xil natija beradi.
  */
 export function formatPrice(value: string | number | null | undefined): string {
-  if (value === null || value === undefined) return "0 so'm";
+  if (value === null || value === undefined) return "AED 0.00";
   const numeric = typeof value === "string" ? parseFloat(value) : value;
-  if (Number.isNaN(numeric)) return "0 so'm";
-  const grouped = Math.round(numeric).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return `${grouped} so'm`;
+  if (Number.isNaN(numeric)) return "AED 0.00";
+  const [whole, decimals] = numeric.toFixed(2).split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `AED ${grouped}.${decimals}`;
 }
 
 /**

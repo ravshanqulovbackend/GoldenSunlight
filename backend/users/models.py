@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -14,8 +15,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
     pending_role = models.CharField(
         max_length=20, choices=ROLE_CHOICES, blank=True, default='',
-        help_text="Django admin orqali berilgan, lekin foydalanuvchi profilini "
-                  "(ism, familiya, telefon, rasm) to'ldirmaguncha kuchga kirmaydigan rol.",
+        help_text="Role granted via Django admin, but not yet in effect until the user "
+                  "completes their profile (first name, last name, phone, avatar).",
     )
     is_verified = models.BooleanField(default=False)
     email_verified = models.BooleanField(default=False)
@@ -29,6 +30,15 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_full_name() or self.username
+
+    def clean(self):
+        super().clean()
+        if self.role == 'superadmin':
+            existing = User.objects.filter(role='superadmin')
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError({'role': "There can only be one superadmin."})
 
     @property
     def is_admin_user(self):

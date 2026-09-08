@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.forms.models import model_to_dict
 from rest_framework import generics, permissions, status, filters
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from cart.models import Cart
 from products.models import Product
 from notifications.models import Notification
 from users.permissions import IsAdminRole
+from common.utils import log_activity, diff_instance
 
 TERMINAL_STATUSES = ('delivered', 'cancelled', 'refunded')
 
@@ -17,7 +19,7 @@ TERMINAL_STATUSES = ('delivered', 'cancelled', 'refunded')
 def _adjust_stock(product, delta):
     """delta > 0 — zaxiradan kamaytiradi (yetarli bo'lmasa xato), delta < 0 — qaytaradi."""
     if delta > 0 and product.stock < delta:
-        raise ValidationError(f"{product.name} uchun yetarli zaxira yo'q ({product.stock} ta qoldi)")
+        raise ValidationError(f"Not enough stock for {product.name} ({product.stock} left)")
     product.stock -= delta
     product.save(update_fields=['stock'])
 
@@ -45,19 +47,23 @@ class OrderListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user).prefetch_related('items__product__category', 'items__product__brand')
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         if request.user.is_admin_user:
-            return Response({'detail': 'Admin va superadmin buyurtma bera olmaydi'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Admins cannot place orders'}, status=status.HTTP_403_FORBIDDEN)
         serializer = CreateOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         cart = Cart.objects.filter(user=request.user).first()
         if not cart or not cart.items.exists():
-            return Response({'detail': 'Savat bo\'sh'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
 
-        cart_items = cart.items.select_related('product').all()
+        # select_for_update — checkout paytida boshqa parallel so'rov bir xil mahsulot
+        # zaxirasini o'qib/kamaytirib ulgurmasligi uchun (aks holda ikkala so'rov ham
+        # eski stock qiymatini ko'rib, uni manfiyga tushirishi mumkin).
+        cart_items = cart.items.select_related('product').select_for_update(of=('product',)).all()
         subtotal = sum(item.product.price * item.quantity for item in cart_items)
-        delivery_fee = 15000
+        delivery_fee = 15
         discount = 0
         coupon = None
 
@@ -65,7 +71,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         for cart_item in cart_items:
             if cart_item.product.stock < cart_item.quantity:
                 return Response(
-                    {'detail': f'{cart_item.product.name} mahsulotida yetarli zaxira yo\'q ({cart_item.product.stock} ta qoldi)'},
+                    {'detail': f'Not enough stock for {cart_item.product.name} ({cart_item.product.stock} left)'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -135,9 +141,9 @@ class CancelOrderView(APIView):
         try:
             order = Order.objects.get(pk=pk, user=request.user)
         except Order.DoesNotExist:
-            return Response({'detail': 'Buyurtma topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         if order.status not in ('pending', 'confirmed'):
-            return Response({'detail': 'Bu buyurtmani bekor qilib bo\'lmaydi'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'This order cannot be cancelled'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'cancelled'
         order.save()
         # Stockni qaytarish
@@ -157,7 +163,7 @@ class ValidateCouponView(APIView):
         try:
             coupon = Coupon.objects.get(code=serializer.validated_data['code'], is_active=True)
             if not coupon.is_valid:
-                return Response({'detail': 'Kupon muddati tugagan yoki limiti oshgan'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Coupon has expired or reached its usage limit'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({
                 'code': coupon.code,
                 'discount_percent': str(coupon.discount_percent),
@@ -165,7 +171,7 @@ class ValidateCouponView(APIView):
                 'min_order_amount': str(coupon.min_order_amount),
             })
         except Coupon.DoesNotExist:
-            return Response({'detail': 'Kupon topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Coupon not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class AdminOrderListView(generics.ListAPIView):
@@ -187,6 +193,11 @@ class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         return Order.objects.select_related('user').prefetch_related('items__product__category', 'items__product__brand').all()
 
+    def perform_update(self, serializer):
+        before = model_to_dict(serializer.instance)
+        instance = serializer.save()
+        log_activity(self.request.user, 'updated', instance, 'Order', diff_instance(before, instance))
+
 
 class AdminOrderStatusView(APIView):
     permission_classes = [IsAdminRole]
@@ -195,11 +206,12 @@ class AdminOrderStatusView(APIView):
         try:
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
-            return Response({'detail': 'Buyurtma topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         new_status = request.data.get('status')
         valid_statuses = [s[0] for s in Order.STATUS_CHOICES]
         if new_status not in valid_statuses:
-            return Response({'detail': 'Noto\'g\'ri status'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+        before = model_to_dict(order)
         # Bekor qilish/qaytarishga o'tilganda (avval shunday bo'lmagan bo'lsa) zaxira qaytariladi —
         # mijozning o'zi bekor qilgandagi CancelOrderView bilan bir xil xulq-atvor.
         if new_status in ('cancelled', 'refunded') and order.status not in ('cancelled', 'refunded'):
@@ -211,6 +223,7 @@ class AdminOrderStatusView(APIView):
         if request.data.get('tracking_number'):
             order.tracking_number = request.data['tracking_number']
         order.save()
+        log_activity(request.user, 'updated', order, 'Order', diff_instance(before, order))
         return Response(OrderSerializer(order).data)
 
 
@@ -223,27 +236,28 @@ class AdminOrderItemCreateView(APIView):
         try:
             order = Order.objects.select_for_update().get(pk=pk)
         except Order.DoesNotExist:
-            return Response({'detail': 'Buyurtma topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         if order.status in TERMINAL_STATUSES:
-            return Response({'detail': 'Yakunlangan buyurtmani tahrirlab bo\'lmaydi'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Completed orders cannot be edited'}, status=status.HTTP_400_BAD_REQUEST)
 
         product_id = request.data.get('product_id')
         quantity = int(request.data.get('quantity', 1))
         if quantity < 1:
-            return Response({'detail': 'Miqdor kamida 1 bo\'lishi kerak'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Quantity must be at least 1'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             product = Product.objects.select_for_update().get(pk=product_id)
         except Product.DoesNotExist:
-            return Response({'detail': 'Mahsulot topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
         if order.items.filter(product=product).exists():
             return Response(
-                {'detail': 'Bu mahsulot buyurtmada allaqachon bor — miqdorini o\'zgartiring'},
+                {'detail': 'This product is already in the order — update its quantity instead'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         _adjust_stock(product, quantity)
         OrderItem.objects.create(order=order, product=product, product_name=product.name, quantity=quantity, price=product.price)
         order.recalculate_totals()
+        log_activity(request.user, 'updated', order, 'Order', {'item_added': ['None', f'{product.name} x{quantity}']})
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
@@ -255,47 +269,54 @@ class AdminOrderItemDetailView(APIView):
     def patch(self, request, pk, item_id):
         order, item = self._get_order_and_item(pk, item_id)
         if order.status in TERMINAL_STATUSES:
-            return Response({'detail': 'Yakunlangan buyurtmani tahrirlab bo\'lmaydi'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Completed orders cannot be edited'}, status=status.HTTP_400_BAD_REQUEST)
 
         new_quantity = int(request.data.get('quantity', 0))
         if new_quantity < 1:
-            return Response({'detail': 'Miqdor kamida 1 bo\'lishi kerak — o\'chirish uchun DELETE ishlating'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Quantity must be at least 1 — use DELETE to remove it'}, status=status.HTTP_400_BAD_REQUEST)
 
         if item.product:
             product = Product.objects.select_for_update().get(pk=item.product_id)
             _adjust_stock(product, new_quantity - item.quantity)
+        old_quantity = item.quantity
         item.quantity = new_quantity
         item.save(update_fields=['quantity'])
         order.recalculate_totals()
+        log_activity(
+            request.user, 'updated', order, 'Order',
+            {'item_quantity': [f'{item.product_name} x{old_quantity}', f'{item.product_name} x{new_quantity}']},
+        )
         return Response(OrderSerializer(order).data)
 
     @transaction.atomic
     def delete(self, request, pk, item_id):
         order, item = self._get_order_and_item(pk, item_id)
         if order.status in TERMINAL_STATUSES:
-            return Response({'detail': 'Yakunlangan buyurtmani tahrirlab bo\'lmaydi'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Completed orders cannot be edited'}, status=status.HTTP_400_BAD_REQUEST)
         if order.items.count() <= 1:
             return Response(
-                {'detail': 'Buyurtmadagi oxirgi mahsulotni o\'chirib bo\'lmaydi — to\'liq bekor qilish uchun statusni o\'zgartiring'},
+                {'detail': 'Cannot remove the last item in an order — change the order status to cancel it instead'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if item.product:
             product = Product.objects.select_for_update().get(pk=item.product_id)
             _adjust_stock(product, -item.quantity)
+        removed_repr = f'{item.product_name} x{item.quantity}'
         item.delete()
         order.recalculate_totals()
+        log_activity(request.user, 'updated', order, 'Order', {'item_removed': [removed_repr, 'None']})
         return Response(OrderSerializer(order).data)
 
     def _get_order_and_item(self, pk, item_id):
         try:
             order = Order.objects.select_for_update().get(pk=pk)
         except Order.DoesNotExist:
-            raise NotFound({'detail': 'Buyurtma topilmadi'})
+            raise NotFound({'detail': 'Order not found'})
         try:
             item = order.items.get(pk=item_id)
         except OrderItem.DoesNotExist:
-            raise NotFound({'detail': 'Buyurtma qatori topilmadi'})
+            raise NotFound({'detail': 'Order item not found'})
         return order, item
 
 
@@ -306,10 +327,10 @@ class AdminOrderNotifyReadyView(APIView):
         try:
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
-            return Response({'detail': 'Buyurtma topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         Notification.objects.create(
             user=order.user,
-            title=f'Buyurtma #{order.id} tayyor!',
-            message=f'Buyurtmangiz (#{order.id}) tayyor bo\'ldi va yetkazib berish/olib ketish uchun kutmoqda.',
+            title=f'Order #{order.id} is ready!',
+            message=f'Your order (#{order.id}) is ready and awaiting delivery/pickup.',
         )
-        return Response({'detail': 'Xabar yuborildi'})
+        return Response({'detail': 'Notification sent'})

@@ -26,7 +26,7 @@ class SupportMessageSerializer(serializers.ModelSerializer):
         message = attrs.get('message', '') or ''
         image = attrs.get('image')
         if not message.strip() and not image:
-            raise serializers.ValidationError("Xabar matni yoki rasm kiritilishi shart")
+            raise serializers.ValidationError("Message text or an image is required")
         return attrs
 
 
@@ -51,4 +51,4 @@ class ConversationSerializer(serializers.ModelSerializer):
             return ''
         if last.message:
             return last.message[:100]
-        return "[rasm]" if last.image else ''
+        return "[image]" if last.image else ''

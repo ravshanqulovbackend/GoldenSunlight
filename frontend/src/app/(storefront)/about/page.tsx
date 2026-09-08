@@ -60,7 +60,7 @@ export default async function AboutPage() {
 
       {stats.length > 0 && (
         <section className="mx-auto -mt-8 max-w-container-max-width px-margin-mobile md:px-margin-desktop">
-          <div className="grid grid-cols-2 gap-4 rounded-lg bg-surface-container-lowest p-8 shadow-lg lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 rounded-lg bg-surface-container-lowest p-8 shadow-xl lg:grid-cols-4">
             {stats.map((stat) => (
               <div key={stat.label} className="flex flex-col items-center gap-1 border-outline-variant p-4 text-center first:border-0 lg:border-l">
                 <span className="display-lg text-[2.5rem] text-primary">{stat.value}</span>

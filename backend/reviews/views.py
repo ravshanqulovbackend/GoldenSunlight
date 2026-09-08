@@ -2,6 +2,7 @@ from rest_framework import generics, permissions, filters
 from .models import Review
 from .serializers import ReviewSerializer, AdminReviewSerializer
 from users.permissions import IsAdminRole
+from common.utils import log_activity
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):
@@ -32,5 +33,6 @@ class AdminReviewDeleteView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance):
         product = instance.product
+        log_activity(self.request.user, 'deleted', instance, 'Review')
         instance.delete()
         Review.recalculate_product_rating(product)

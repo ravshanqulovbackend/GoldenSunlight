@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
             <Tbody>
               {data.results.map((user) => {
                 const isSelf = user.id === currentUser?.id;
-                const canDelete = !isSelf && !(currentUser?.role === "admin" && user.role === "superadmin");
+                const canDelete = !isSelf && (isSuperAdmin || user.role === "staff");
                 return (
                   <Tr key={user.id}>
                     <Td>
@@ -173,7 +173,6 @@ export default function AdminUsersPage() {
                         >
                           <option value="staff">{ROLE_LABELS.staff}</option>
                           <option value="admin">{ROLE_LABELS.admin}</option>
-                          <option value="superadmin">{ROLE_LABELS.superadmin}</option>
                         </Select>
                       ) : (
                         <Badge tone={user.role === "staff" ? "neutral" : "primary"}>{ROLE_LABELS[user.role]}</Badge>

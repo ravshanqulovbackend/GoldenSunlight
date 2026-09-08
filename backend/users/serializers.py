@@ -21,12 +21,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Bu username allaqachon band")
+            raise serializers.ValidationError("This username is already taken")
         return value
 
     def validate_phone(self, value):
         if value and User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError("Bu telefon raqami allaqachon ro'yxatdan o'tgan")
+            raise serializers.ValidationError("This phone number is already registered")
         return value
 
     def create(self, validated_data):
@@ -41,5 +41,5 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_old_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
-            raise serializers.ValidationError("Joriy parol noto'g'ri")
+            raise serializers.ValidationError("Current password is incorrect")
         return value

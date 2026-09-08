@@ -3,9 +3,9 @@ from django.forms.models import model_to_dict
 from .models import ActivityLog
 from notifications.models import Notification
 
-# Fayl maydonlari (solishtirish ma'nosiz) va avtomatik/hisoblab chiqiladigan maydonlar
-# diff'ga kiritilmaydi.
-DIFF_EXCLUDE = {'image', 'created_at', 'updated_at', 'rating', 'review_count'}
+# Fayl maydonlari (solishtirish ma'nosiz), avtomatik/hisoblab chiqiladigan maydonlar va
+# maxfiy maydonlar (parol xesh) diff'ga kiritilmaydi.
+DIFF_EXCLUDE = {'image', 'avatar', 'created_at', 'updated_at', 'rating', 'review_count', 'password', 'last_login'}
 
 
 def log_activity(user, action, instance, model_name, changes=None):

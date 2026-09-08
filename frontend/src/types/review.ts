@@ -5,6 +5,7 @@ export interface Review {
   product: number;
   rating: number;
   comment: string;
+  image: string | null;
   created_at: string;
 }
 
@@ -12,6 +13,7 @@ export interface CreateReviewPayload {
   product: number;
   rating: number;
   comment?: string;
+  image?: File | null;
 }
 
 export interface AdminReview extends Review {

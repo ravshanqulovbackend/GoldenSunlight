@@ -23,7 +23,7 @@ class NotificationMarkReadView(APIView):
                 notification.is_read = True
                 notification.save(update_fields=['is_read'])
             except Notification.DoesNotExist:
-                return Response({'detail': 'Bildirishnoma topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'detail': 'Notification not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-        return Response({'detail': 'Yangilandi'})
+        return Response({'detail': 'Updated'})

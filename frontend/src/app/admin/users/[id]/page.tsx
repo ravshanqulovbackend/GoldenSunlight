@@ -30,7 +30,7 @@ export default function AdminUserDetailPage() {
 
   const isSelf = userId === currentUser?.id;
   const isSuperAdmin = currentUser?.role === "superadmin";
-  const canDelete = user && !isSelf && !(currentUser?.role === "admin" && user.role === "superadmin");
+  const canDelete = user && !isSelf && (isSuperAdmin || user.role === "staff");
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,7 +74,6 @@ export default function AdminUserDetailPage() {
               >
                 <option value="staff">{ROLE_LABELS.staff}</option>
                 <option value="admin">{ROLE_LABELS.admin}</option>
-                <option value="superadmin">{ROLE_LABELS.superadmin}</option>
               </Select>
             ) : (
               <Badge tone={user.role === "staff" ? "neutral" : "primary"}>{ROLE_LABELS[user.role]}</Badge>

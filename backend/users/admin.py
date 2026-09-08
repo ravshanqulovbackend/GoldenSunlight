@@ -3,21 +3,21 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from .models import User
 
 
-@admin.action(description="Admin huquqini berish (profil to'ldirilgach faollashadi)")
+@admin.action(description="Grant admin role (activates once the profile is completed)")
 def grant_pending_admin(modeladmin, request, queryset):
     eligible = queryset.exclude(role__in=['admin', 'superadmin'])
     updated = eligible.update(pending_role='admin')
     skipped = queryset.count() - updated
-    message = f"{updated} ta foydalanuvchiga admin huquqi \"kutilmoqda\" holatida belgilandi."
+    message = f"Admin role marked as \"pending\" for {updated} user(s)."
     if skipped:
-        message += f" {skipped} tasi allaqachon admin/superadmin bo'lgani uchun o'tkazib yuborildi."
+        message += f" {skipped} were skipped because they are already admin/superadmin."
     modeladmin.message_user(request, message)
 
 
-@admin.action(description="Kutilayotgan rolni bekor qilish")
+@admin.action(description="Cancel pending role")
 def cancel_pending_role(modeladmin, request, queryset):
     updated = queryset.exclude(pending_role='').update(pending_role='')
-    modeladmin.message_user(request, f"{updated} ta foydalanuvchida kutilayotgan rol bekor qilindi.")
+    modeladmin.message_user(request, f"Pending role cancelled for {updated} user(s).")
 
 
 class UserAdmin(DjangoUserAdmin):
@@ -26,7 +26,7 @@ class UserAdmin(DjangoUserAdmin):
     actions = [grant_pending_admin, cancel_pending_role]
     readonly_fields = DjangoUserAdmin.readonly_fields + ('pending_role',)
     fieldsets = DjangoUserAdmin.fieldsets + (
-        ("Qo'shimcha", {
+        ("Additional", {
             'fields': ('phone', 'avatar', 'role', 'pending_role', 'is_verified', 'email_verified', 'date_of_birth'),
         }),
     )

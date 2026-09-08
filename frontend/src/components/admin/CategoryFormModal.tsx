@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCategory, updateCategory } from "@/lib/api/endpoints/adminCategories";
+import { revalidateCategories } from "@/lib/actions/revalidateCategories";
+import { revalidateProducts } from "@/lib/actions/revalidateProducts";
 import { toast } from "@/lib/stores/toastStore";
 import { parseApiError } from "@/lib/api/parseApiError";
 import { Input } from "@/components/ui/Input";
@@ -80,9 +82,11 @@ export function CategoryFormModal({ open, onClose, category, categories }: Categ
       isEdit
         ? updateCategory(category!.slug, { ...values, image: imageFile ?? undefined })
         : createCategory({ ...values, image: imageFile ?? undefined }),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast(isEdit ? "Category updated" : "Category added", "success");
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateCategories();
+      await revalidateProducts();
       onClose();
     },
     onError: (error) => toast(parseApiError(error).message || "An error occurred", "error"),

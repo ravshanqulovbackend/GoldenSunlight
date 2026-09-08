@@ -4,12 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useReviews, useDeleteReview } from "@/lib/query/hooks/useReviews";
 import { formatDate } from "@/lib/utils/money";
+import { getImageUrl } from "@/lib/utils/image";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { AppImage } from "@/components/ui/AppImage";
 import type { AdminReview } from "@/types/review";
 
 const PAGE_SIZE = 12;
@@ -140,6 +142,7 @@ export default function AdminReviewsPage() {
                 <Th>User</Th>
                 <Th>Rating</Th>
                 <Th>Review</Th>
+                <Th>Image</Th>
                 <Th>Date</Th>
                 <Th className="text-right">Actions</Th>
               </Tr>
@@ -160,6 +163,15 @@ export default function AdminReviewsPage() {
                   </Td>
                   <Td className="max-w-xs truncate text-on-surface-variant" title={review.comment}>
                     {review.comment || "—"}
+                  </Td>
+                  <Td>
+                    {review.image ? (
+                      <a href={getImageUrl(review.image)} target="_blank" rel="noopener noreferrer">
+                        <AppImage src={getImageUrl(review.image)} alt="" className="h-10 w-10 rounded-md" />
+                      </a>
+                    ) : (
+                      <span className="text-on-surface-variant">—</span>
+                    )}
                   </Td>
                   <Td className="text-on-surface-variant">{formatDate(review.created_at)}</Td>
                   <Td>

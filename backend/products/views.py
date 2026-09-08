@@ -94,7 +94,7 @@ class AdminProductViewSet(viewsets.ModelViewSet):
         log_activity(actor, 'deleted', instance, 'Product')
         instance.delete()
         notify_superadmins(
-            "Mahsulot o'chirildi",
-            f'{actor.get_full_name() or actor.username} "{name}" nomli mahsulotni butunlay o\'chirdi.',
+            "Product deleted",
+            f'{actor.get_full_name() or actor.username} permanently deleted the product "{name}".',
             exclude_user=actor,
         )

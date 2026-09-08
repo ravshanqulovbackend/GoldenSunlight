@@ -1,7 +1,9 @@
+from django.forms.models import model_to_dict
 from rest_framework import generics, permissions
 from .models import Company, PartnershipRequest
 from .serializers import CompanySerializer, PartnershipRequestSerializer
 from users.permissions import IsAdminRole
+from common.utils import log_activity, diff_instance
 
 
 class CompanyView(generics.RetrieveUpdateAPIView):
@@ -15,6 +17,11 @@ class CompanyView(generics.RetrieveUpdateAPIView):
         if self.request.method in permissions.SAFE_METHODS:
             return [permissions.AllowAny()]
         return [IsAdminRole()]
+
+    def perform_update(self, serializer):
+        before = model_to_dict(serializer.instance)
+        instance = serializer.save()
+        log_activity(self.request.user, 'updated', instance, 'Company', diff_instance(before, instance))
 
 
 class PartnershipRequestCreateView(generics.CreateAPIView):

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteProductPermanently, getAdminProducts, setProductActive } from "@/lib/api/endpoints/adminProducts";
+import { revalidateProducts } from "@/lib/actions/revalidateProducts";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -42,9 +43,10 @@ export default function AdminProductsPage() {
 
   const toggleActive = useMutation({
     mutationFn: ({ slug, isActive }: { slug: string; isActive: boolean }) => setProductActive(slug, isActive),
-    onSuccess: () => {
+    onSuccess: async (_data, { slug }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateProducts(slug);
       toast("Status updated", "success");
     },
     onError: (error) => toast(parseApiError(error).message || "An error occurred", "error"),
@@ -52,9 +54,10 @@ export default function AdminProductsPage() {
 
   const deleteProduct = useMutation({
     mutationFn: (slug: string) => deleteProductPermanently(slug),
-    onSuccess: () => {
+    onSuccess: async (_data, slug) => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      await revalidateProducts(slug);
       toast("Product permanently deleted", "success");
       setConfirmingSlug(null);
     },

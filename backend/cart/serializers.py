@@ -40,12 +40,12 @@ class AddToCartSerializer(serializers.Serializer):
         try:
             product = Product.objects.get(pk=value, is_active=True)
         except Product.DoesNotExist:
-            raise serializers.ValidationError("Mahsulot topilmadi yoki faol emas")
+            raise serializers.ValidationError("Product not found or inactive")
         return value
 
     def validate_quantity(self, value):
         if value < 1:
-            raise serializers.ValidationError("Miqdor kamida 1 bo'lishi kerak")
+            raise serializers.ValidationError("Quantity must be at least 1")
         return value
 
 

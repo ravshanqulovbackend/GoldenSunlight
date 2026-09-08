@@ -26,8 +26,8 @@ class SupportMessage(models.Model):
 
     class Meta:
         ordering = ['created_at']
-        verbose_name = "qo'llab-quvvatlash xabari"
-        verbose_name_plural = "qo'llab-quvvatlash xabarlari"
+        verbose_name = "support message"
+        verbose_name_plural = "support messages"
 
     def __str__(self):
         sender_name = self.sender.username if self.sender else "?"

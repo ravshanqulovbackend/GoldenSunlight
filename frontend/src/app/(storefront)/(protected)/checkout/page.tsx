@@ -9,7 +9,6 @@ import { useAddresses } from "@/lib/query/hooks/useAddresses";
 import { useCreateOrder } from "@/lib/query/hooks/useOrders";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { AddressForm } from "@/components/checkout/AddressForm";
-import { PaymentMethodSelect } from "@/components/checkout/PaymentMethodSelect";
 import { CouponInput } from "@/components/checkout/CouponInput";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Input } from "@/components/ui/Input";
@@ -23,7 +22,7 @@ import { formatPrice } from "@/lib/utils/money";
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/utils/validators";
 import type { CouponPreview } from "@/types/order";
 
-const DELIVERY_FEE = 15000;
+const DELIVERY_FEE = 15;
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -70,7 +69,6 @@ export default function CheckoutPage() {
 
   const selectedAddressId = watch("address_id") ?? null;
   const addressText = watch("address_text") ?? "";
-  const paymentMethod = watch("payment_method");
 
   const isLoading = cartLoading || addressesLoading;
 
@@ -158,11 +156,6 @@ export default function CheckoutPage() {
               error={errors.address_text?.message}
             />
             <Input label="Landmark (optional)" placeholder="e.g. blue gate" {...register("landmark")} />
-          </Card>
-
-          <Card className="flex flex-col gap-4 p-6">
-            <h2 className="title-lg text-on-surface">Payment Method</h2>
-            <PaymentMethodSelect value={paymentMethod} onChange={(value) => setValue("payment_method", value)} />
           </Card>
 
           <Card className="flex flex-col gap-4 p-6">

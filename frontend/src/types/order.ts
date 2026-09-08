@@ -10,7 +10,7 @@ export type OrderStatus =
   | "cancelled"
   | "refunded";
 
-export type PaymentMethod = "cash" | "card" | "click" | "payme" | "uzum";
+export type PaymentMethod = "cash" | "card";
 
 export interface OrderItem {
   id: number;
@@ -80,7 +80,4 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   cash: "Cash",
   card: "Card",
-  click: "Click",
-  payme: "Payme",
-  uzum: "Uzum Bank",
 };

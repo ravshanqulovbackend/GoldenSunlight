@@ -2,24 +2,16 @@ import os
 import sys
 import shutil
 import django
-import random
-from datetime import timedelta
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 from categories.models import Category
 from products.models import Product, ProductImage, Brand
-from orders.models import Order, OrderItem, Coupon, Address
-from reviews.models import Review
-from favorites.models import Favorite
+from orders.models import Coupon
 from products_catalog_data import PRODUCTS_DATA
-
-User = get_user_model()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SEED_ASSETS_DIR = os.path.join(BASE_DIR, 'seed_assets')
@@ -37,51 +29,6 @@ def seed_image(filename, subdir='products'):
     return f'{subdir}/{filename}'
 
 
-# ─── Create Superadmin (business owner) ───────────────────────
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@goldensunlight.uz', 'admin123', phone='+998901234567', role='superadmin')
-    print('Superadmin user created (admin / admin123)')
-
-# ─── Create demo Admin (staff) ──────────────────────────────────
-if not User.objects.filter(username='admin1').exists():
-    admin1 = User.objects.create_user(
-        'admin1', 'admin1@goldensunlight.uz', 'admin1234',
-        first_name='Farrux', last_name='Nazarov', phone='+998901230000', role='admin',
-    )
-    print('Admin (staff) user created (admin1 / admin1234)')
-
-# ─── Create Demo Users (online customers — "staff" role) ──────────
-demo_users = [
-    {'username': 'user1', 'email': 'user1@example.com', 'first_name': 'Aziz', 'last_name': 'Karimov', 'phone': '+998901112233', 'password': 'user1234'},
-    {'username': 'user2', 'email': 'user2@example.com', 'first_name': 'Nodira', 'last_name': 'Aliyeva', 'phone': '+998902223344', 'password': 'user1234'},
-    {'username': 'user3', 'email': 'user3@example.com', 'first_name': 'Sardor', 'last_name': 'Rahimov', 'phone': '+998903334455', 'password': 'user1234'},
-    {'username': 'user4', 'email': 'user4@example.com', 'first_name': 'Gulnora', 'last_name': 'Toshmatova', 'phone': '+998904445566', 'password': 'user1234'},
-    {'username': 'user5', 'email': 'user5@example.com', 'first_name': 'Jamshid', 'last_name': 'Oripov', 'phone': '+998905556677', 'password': 'user1234'},
-    {'username': 'user6', 'email': 'user6@example.com', 'first_name': 'Dilnoza', 'last_name': 'Yuldasheva', 'phone': '+998906667788', 'password': 'user1234'},
-    {'username': 'user7', 'email': 'user7@example.com', 'first_name': 'Bobur', 'last_name': 'Mirzayev', 'phone': '+998907778899', 'password': 'user1234'},
-    {'username': 'user8', 'email': 'user8@example.com', 'first_name': 'Malika', 'last_name': 'Ergasheva', 'phone': '+998908889900', 'password': 'user1234'},
-    {'username': 'user9', 'email': 'user9@example.com', 'first_name': 'Suhrob', 'last_name': 'Jumayev', 'phone': '+998909990011', 'password': 'user1234'},
-    {'username': 'user10', 'email': 'user10@example.com', 'first_name': 'Nilufar', 'last_name': 'Rashidova', 'phone': '+998900001122', 'password': 'user1234'},
-]
-
-users = []
-for u_data in demo_users:
-    user, created = User.objects.get_or_create(
-        username=u_data['username'],
-        defaults={
-            'email': u_data['email'],
-            'first_name': u_data['first_name'],
-            'last_name': u_data['last_name'],
-            'phone': u_data['phone'],
-        }
-    )
-    if created:
-        user.set_password(u_data['password'])
-        user.save()
-        print(f'  Created user: {user.username}')
-    users.append(user)
-print(f'Users ready ({len(users)} total)')
-
 # ─── Create Brands ────────────────────────────────────────────
 # Peri is the only brand with a clean standalone logo asset among the source
 # photography (others only appear embossed on packaging).
@@ -90,9 +37,7 @@ brands_data = [
     {'name': 'Peri', 'slug': 'peri', 'description': "Feminine hygiene products — sanitary pads and panty liners"},
     {'name': 'Natural Fresh', 'slug': 'natural-fresh', 'description': 'Wet wipes for babies and the whole family'},
     {'name': 'Rio', 'slug': 'rio', 'description': "Baby and universal wet wipes"},
-    {'name': 'Venzi', 'slug': 'venzi', 'description': "Disposable razors for men"},
     {'name': 'Comforta', 'slug': 'comforta', 'description': 'Scented and classic sanitary pads'},
-    {'name': 'Nika', 'slug': 'nika', 'description': "Disposable razors for women"},
 ]
 brands_data[1]['image'] = seed_image('peri.png', subdir='brands')
 
@@ -108,16 +53,7 @@ categories_data = [
     {'name': 'Universal & Antibacterial Wipes', 'slug': 'universal-wipes', 'description': 'Everyday, antibacterial, and scented wet wipes for adults'},
     {'name': 'Specialty Wipes', 'slug': 'specialty-wipes', 'description': 'Makeup remover, intimate care, and facial wipes'},
     {'name': "Feminine Hygiene", 'slug': 'feminine-hygiene', 'description': 'Sanitary pads and panty liners'},
-    {'name': "Men's Grooming", 'slug': 'mens-grooming', 'description': "Disposable razors and shaving supplies for men"},
-    {'name': "Women's Grooming", 'slug': 'womens-grooming', 'description': "Disposable razors for women"},
-    {'name': 'Toilet Paper', 'slug': 'toilet-paper', 'description': 'Soft, absorbent toilet paper in multiple scents'},
-    {'name': 'Paper Towels', 'slug': 'paper-towels', 'description': 'Kitchen paper towel rolls'},
-    {'name': 'Paper Napkins', 'slug': 'paper-napkins', 'description': 'Table and dispenser paper napkins'},
-    {'name': 'Facial Tissues', 'slug': 'facial-tissues', 'description': 'Boxed facial tissues in decorative designs'},
-    {'name': 'Cotton Pads & Buds', 'slug': 'cotton-care', 'description': '100% cotton pads and cotton buds'},
-    {'name': 'Dental Care', 'slug': 'dental-care', 'description': 'Dental floss and dental patient bibs'},
     {'name': 'Household Cleaning', 'slug': 'household-cleaning', 'description': 'Disposable cleaning wipes, rolls, and mops'},
-    {'name': 'Laundry Care', 'slug': 'laundry-care', 'description': '3-in-1 laundry detergent capsules'},
     {'name': 'HoReCa Disposables', 'slug': 'horeca-disposables', 'description': 'Disposable non-woven bed sheets for hotels, spas, and clinics'},
 ]
 categories = {}
@@ -152,125 +88,13 @@ print(f'Products ready ({len(products)} total)')
 
 # ─── Create Coupons ───────────────────────────────────────────
 coupons_data = [
-    {'code': 'WELCOME10', 'discount_percent': 10, 'min_order_amount': 50000, 'max_uses': 100},
-    {'code': 'NEWYEAR15', 'discount_percent': 15, 'min_order_amount': 100000, 'max_uses': 50},
-    {'code': 'MEGA20', 'discount_percent': 20, 'min_order_amount': 200000, 'max_uses': 30},
+    {'code': 'WELCOME10', 'discount_percent': 10, 'min_order_amount': 50, 'max_uses': 100},
+    {'code': 'NEWYEAR15', 'discount_percent': 15, 'min_order_amount': 100, 'max_uses': 50},
+    {'code': 'MEGA20', 'discount_percent': 20, 'min_order_amount': 200, 'max_uses': 30},
 ]
 for c_data in coupons_data:
     Coupon.objects.get_or_create(code=c_data['code'], defaults=c_data)
 print('Coupons created')
-
-# ─── Create Demo Orders ──────────────────────────────────────
-if Order.objects.count() == 0:
-    statuses = ['pending', 'confirmed', 'processing', 'packaging', 'delivering', 'delivered', 'cancelled']
-    payment_methods = ['cash', 'card']
-    now = timezone.now()
-
-    for i in range(30):
-        user = random.choice(users)
-        product = random.choice(products)
-        qty = random.randint(1, 5)
-        subtotal = float(product.price) * qty
-        delivery_fee = 15000
-        total = subtotal + delivery_fee
-
-        order = Order.objects.create(
-            user=user,
-            status=random.choice(statuses),
-            full_name=f'{user.first_name} {user.last_name}',
-            phone=user.phone,
-            address_text='Tashkent, Amir Temur Street, Building 15',
-            payment_method=random.choice(payment_methods),
-            subtotal=subtotal,
-            delivery_fee=delivery_fee,
-            total_amount=total,
-            created_at=now - timedelta(days=random.randint(0, 60)),
-        )
-        OrderItem.objects.create(order=order, product=product, product_name=product.name, quantity=qty, price=product.price)
-    print('30 demo orders created')
-else:
-    print('Orders already exist, skipping')
-
-# ─── Create Demo Reviews ──────────────────────────────────────
-if Review.objects.count() == 0:
-    review_comments = [
-        'Very soft and gentle, no irritation at all.',
-        "Bought this for my kid, no allergic reaction at all.",
-        'Fast, professional delivery.',
-        'Great value for the price.',
-        'Recommended it to friends, everyone is happy with it.',
-        'Well packaged, arrived in perfect condition.',
-        'The scent is pleasant but not overpowering.',
-        'I always choose this brand now.',
-        'Very comfortable, reliable protection even overnight.',
-        "Extremely soft, doesn't irritate sensitive skin at all.",
-        'Absorbs well, better than I expected.',
-        'A loyal customer now — quality is always consistent.',
-        'Affordable price, but the quality is excellent.',
-        'I always keep antibacterial wipes at home now.',
-        'Works great for the car too.',
-        'Very sharp razor, no nicks or cuts.',
-        'Sturdy paper towels, they don\'t tear easily.',
-        "Good quality cotton buds, they don't bend.",
-        'Delivered within a day — excellent service.',
-        'Lovely chamomile scent, my child loves it.',
-        'Large pack, lasts a long time.',
-        'Worked great even on sensitive skin, no irritation.',
-        'Confirmed this is a genuine, original product.',
-        'Ordering online was quick and easy.',
-        'I always order from this site now.',
-    ]
-
-    for i in range(60):
-        user = random.choice(users)
-        product = random.choice(products)
-        rating = random.choice([3, 4, 4, 4, 5, 5, 5])
-        comment = random.choice(review_comments)
-
-        review, created = Review.objects.get_or_create(
-            user=user, product=product,
-            defaults={'rating': rating, 'comment': comment}
-        )
-        if created:
-            product.review_count = product.reviews.count()
-            avg = sum(r.rating for r in product.reviews.all()) / product.review_count
-            product.rating = round(avg, 1)
-            product.save()
-    print('60 demo reviews created')
-else:
-    print('Reviews already exist, skipping')
-
-# ─── Create Demo Favorites ────────────────────────────────────
-if Favorite.objects.count() == 0:
-    for user in users[:5]:
-        fav_products = random.sample(products, min(5, len(products)))
-        for product in fav_products:
-            Favorite.objects.get_or_create(user=user, product=product)
-    print('Demo favorites created')
-else:
-    print('Favorites already exist, skipping')
-
-# ─── Create Demo Addresses ────────────────────────────────────
-from orders.models import Address as OrderAddress
-if OrderAddress.objects.count() == 0:
-    for user in users[:5]:
-        OrderAddress.objects.get_or_create(
-            user=user, title='Home',
-            defaults={
-                'full_name': f'{user.first_name} {user.last_name}',
-                'phone': user.phone,
-                'city': 'Tashkent',
-                'district': 'Yunusabad',
-                'street': 'Amir Temur Street',
-                'building': '15',
-                'apartment': 'Floor 2',
-                'landmark': 'Near the metro station',
-                'is_default': True,
-            }
-        )
-    print('Demo addresses created')
-else:
-    print('Addresses already exist, skipping')
 
 # ─── Create News ─────────────────────────────────────────────
 from news.models import News
@@ -319,20 +143,19 @@ from pages.models import Company
 company, _ = Company.objects.get_or_create(pk=1, defaults={
     'name': 'GoldenSunlight',
     'tagline': 'Cleanliness and care by your side every day',
-    'description': 'Founded in 2005, GoldenSunlight has grown from a small production workshop into one of the largest manufacturers of hygiene and household cleaning products in Uzbekistan. Under the Sunlight, Peri, Rio, Natural Fresh, Venzi, Comforta, and Nika brands, we produce wet wipes, feminine hygiene products, baby products, and cleaning supplies.',
+    'description': 'Founded in 2005, GoldenSunlight has grown from a small production workshop into one of the leading manufacturers and distributors of hygiene and household cleaning products in the UAE. Under the Sunlight, Peri, Rio, Natural Fresh, and Comforta brands, we produce wet wipes, feminine hygiene products, baby products, and cleaning supplies for homes across Dubai and the wider Emirates.',
     'mission': 'Bringing cleanliness, trust, and care into every home.',
     'founded_year': 2005,
     'employee_count': '500+',
-    'phone': '+998 71 123 45 67',
-    'email': 'info@goldensunlight.uz',
-    'address': 'Tashkent, Yunusabad District, Block 5',
+    'phone': '+971 4 123 4567',
+    'email': 'info@goldensunlight.ae',
+    'address': 'Al Quoz Industrial Area 3, Dubai, UAE',
     'experience_years': '20+',
-    'product_types': '300+',
+    'product_types': '150+',
     'export_countries': '10+',
     'partner_stores': '200+',
 })
 print('Company info created')
 
 print('\n=== Seed completed successfully! ===')
-print('Admin: admin / admin123')
-print('User: user1 / user1234 (or user2-user10 / user1234)')
+print('No default users were created — run `python manage.py createsuperuser` to create a real admin account.')
