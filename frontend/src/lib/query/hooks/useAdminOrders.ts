@@ -91,9 +91,13 @@ export function useAddOrderItem(id: number) {
 }
 
 export function useNotifyOrderReady(id: number) {
+  const invalidate = useInvalidateOrder(id);
   return useMutation({
     mutationFn: () => notifyOrderReady(id),
-    onSuccess: () => toast("Customer notified", "success"),
+    onSuccess: () => {
+      invalidate();
+      toast("Order marked as ready — customer notified", "success");
+    },
     onError: (error) => toast(parseApiError(error).message || "Failed to send notification", "error"),
   });
 }

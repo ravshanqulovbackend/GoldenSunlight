@@ -16,9 +16,12 @@ interface ConversationThreadProps {
   customerId: number | null;
   conversation: Conversation | null;
   onDeleted: () => void;
+  /** Only passed on narrow screens, where the list and thread occupy the same pane —
+   * lets the customer switch back to the conversation list. */
+  onBack?: () => void;
 }
 
-export function ConversationThread({ customerId, conversation, onDeleted }: ConversationThreadProps) {
+export function ConversationThread({ customerId, conversation, onDeleted, onBack }: ConversationThreadProps) {
   const user = useAuthStore((s) => s.user);
   const isSuperAdmin = user?.role === "superadmin";
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -42,10 +45,22 @@ export function ConversationThread({ customerId, conversation, onDeleted }: Conv
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-outline-variant p-4">
-        <h2 className="title-lg text-on-surface">{conversation?.full_name ?? "Conversation"}</h2>
+      <div className="flex items-center justify-between gap-2 border-b border-outline-variant p-4">
+        <div className="flex min-w-0 items-center gap-2">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to conversations"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high md:hidden"
+            >
+              <Icon name="arrow_back" className="text-[20px]" />
+            </button>
+          )}
+          <h2 className="title-lg truncate text-on-surface">{conversation?.full_name ?? "Conversation"}</h2>
+        </div>
         {isSuperAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             {confirmingDelete ? (
               <>
                 <span className="label-sm text-on-surface-variant">Are you sure you want to delete this?</span>

@@ -25,7 +25,12 @@ const NAV_ITEMS = [
 const DASHBOARD_NAV_ITEM = { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" };
 const NOTIFICATIONS_NAV_ITEM = { href: "/admin/notifications", label: "Notifications", icon: "notifications" };
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
   const isSuperAdmin = user?.role === "superadmin";
@@ -34,19 +39,20 @@ export function AdminSidebar() {
   const navItems = isSuperAdmin ? [DASHBOARD_NAV_ITEM, ...NAV_ITEMS, NOTIFICATIONS_NAV_ITEM] : NAV_ITEMS;
 
   return (
-    <aside className="fixed left-0 top-0 flex h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low py-6">
-      <div className="mb-8 px-6">
+    <>
+      <div className="mb-8 shrink-0 px-6">
         <h1 className="headline-md text-primary">Admin Panel</h1>
         <p className="label-sm text-on-surface-variant">GoldenSunlight</p>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 label-md transition-colors",
                 isActive
@@ -66,9 +72,10 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="mt-auto border-t border-outline-variant px-3 pt-4">
+      <div className="mt-auto shrink-0 border-t border-outline-variant px-3 pt-4">
         <Link
           href="/"
+          onClick={onNavigate}
           className="flex items-center gap-3 rounded-lg px-4 py-3 label-md text-on-surface-variant hover:bg-surface-container-high"
         >
           <Icon name="storefront" className="text-[20px]" />
@@ -89,6 +96,44 @@ export function AdminSidebar() {
           </div>
         </ProfileMenu>
       </div>
-    </aside>
+    </>
+  );
+}
+
+/**
+ * Below `lg` (< 1024px) the fixed 256px sidebar has no room next to real content, so it's
+ * swapped for an overlay drawer (same pattern as the storefront's MobileNavDrawer) driven by
+ * `AdminLayout`'s hamburger button. At `lg` and above the original always-visible fixed
+ * sidebar is used.
+ */
+export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
+  return (
+    <>
+      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low py-6 lg:flex">
+        <SidebarContent />
+      </aside>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={onMobileClose}
+            className="absolute inset-0 bg-inverse-surface/50"
+          />
+          <div className="relative flex h-full w-72 max-w-[80%] flex-col border-r border-outline-variant bg-surface-container-low py-6 shadow-xl">
+            <button
+              type="button"
+              onClick={onMobileClose}
+              aria-label="Close"
+              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-high"
+            >
+              <Icon name="close" />
+            </button>
+            <SidebarContent onNavigate={onMobileClose} />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

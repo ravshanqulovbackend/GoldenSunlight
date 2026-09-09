@@ -112,6 +112,10 @@ export function ActivityLogTable() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["activity-log", page],
     queryFn: () => getActivityLog(page),
+    // New entries should show up on their own — nobody should have to hit refresh
+    // to see an action that was just performed.
+    staleTime: 0,
+    refetchInterval: 5000,
   });
   const totalPages = data ? Math.max(1, Math.ceil(data.count / PAGE_SIZE)) : 1;
 

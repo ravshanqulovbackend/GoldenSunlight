@@ -7,6 +7,7 @@ import { getConversations } from "@/lib/api/endpoints/support";
 import { useUser } from "@/lib/query/hooks/useUsers";
 import { ConversationList } from "@/components/admin/support/ConversationList";
 import { ConversationThread } from "@/components/admin/support/ConversationThread";
+import { cn } from "@/lib/utils/cn";
 import type { Conversation } from "@/types/support";
 
 /** Provides the initially selected conversation when arriving via `?customer=<id>`
@@ -41,6 +42,7 @@ export default function AdminSupportPage() {
           id: fallbackUser.id,
           username: fallbackUser.username,
           full_name: [fallbackUser.first_name, fallbackUser.last_name].filter(Boolean).join(" ") || fallbackUser.username,
+          avatar: fallbackUser.avatar ?? null,
           last_message: "",
           unread_count: 0,
           last_message_at: "",
@@ -48,7 +50,7 @@ export default function AdminSupportPage() {
       : null);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col gap-4">
+    <div className="flex h-[calc(100dvh-6.5rem)] flex-col gap-4 sm:h-[calc(100dvh-7.5rem)] lg:h-[calc(100dvh-4rem)]">
       <Suspense fallback={null}>
         <InitialCustomerId onResolved={setSelectedCustomerId} />
       </Suspense>
@@ -59,14 +61,25 @@ export default function AdminSupportPage() {
       </div>
 
       <div className="grid flex-1 grid-cols-1 overflow-hidden rounded-lg border border-outline-variant md:grid-cols-[320px_1fr]">
-        <div className="overflow-y-auto custom-scrollbar border-r border-outline-variant bg-surface-container-lowest">
+        <div
+          className={cn(
+            "overflow-y-auto custom-scrollbar border-outline-variant bg-surface-container-lowest md:block md:border-r",
+            selectedCustomerId !== null ? "hidden md:block" : "block"
+          )}
+        >
           <ConversationList selectedCustomerId={selectedCustomerId} onSelect={setSelectedCustomerId} />
         </div>
-        <div className="bg-surface-container-lowest">
+        <div
+          className={cn(
+            "bg-surface-container-lowest md:block",
+            selectedCustomerId === null ? "hidden md:block" : "block"
+          )}
+        >
           <ConversationThread
             customerId={selectedCustomerId}
             conversation={selectedConversation}
             onDeleted={() => setSelectedCustomerId(null)}
+            onBack={() => setSelectedCustomerId(null)}
           />
         </div>
       </div>

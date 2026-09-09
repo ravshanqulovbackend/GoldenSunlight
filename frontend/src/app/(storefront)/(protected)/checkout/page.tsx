@@ -22,8 +22,6 @@ import { formatPrice } from "@/lib/utils/money";
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/utils/validators";
 import type { CouponPreview } from "@/types/order";
 
-const DELIVERY_FEE = 15;
-
 export default function CheckoutPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -104,7 +102,7 @@ export default function CheckoutPage() {
       ? (cart.total_price * discountPercent) / 100
       : Number(couponPreview.discount_amount)
     : 0;
-  const total = cart.total_price + DELIVERY_FEE - discount;
+  const total = cart.total_price - discount;
 
   function onSubmit(values: CheckoutFormValues) {
     createOrder.mutate(
@@ -146,7 +144,7 @@ export default function CheckoutPage() {
           </Card>
 
           <Card className="flex flex-col gap-4 p-6">
-            <h2 className="title-lg text-on-surface">Delivery Address</h2>
+            <h2 className="title-lg text-on-surface">Address</h2>
             <AddressForm
               addresses={addresses}
               selectedAddressId={selectedAddressId}
@@ -169,8 +167,8 @@ export default function CheckoutPage() {
             <h2 className="title-lg text-on-surface">Order Summary</h2>
             <ul className="flex flex-col gap-2 text-on-surface-variant">
               {cart.items.map((item) => (
-                <li key={item.id} className="flex justify-between body-md">
-                  <span className="line-clamp-2-custom">
+                <li key={item.id} className="flex justify-between gap-3 body-md">
+                  <span className="line-clamp-2-custom min-w-0">
                     {item.product.name} × {item.quantity}
                   </span>
                   <span className="shrink-0">{formatPrice(item.subtotal)}</span>
@@ -184,10 +182,6 @@ export default function CheckoutPage() {
               <div className="flex justify-between">
                 <span>Products</span>
                 <span>{formatPrice(cart.total_price)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Delivery</span>
-                <span>{formatPrice(DELIVERY_FEE)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-primary">

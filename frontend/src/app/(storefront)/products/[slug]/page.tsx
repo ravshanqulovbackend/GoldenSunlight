@@ -104,8 +104,8 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
               Certified for quality
             </div>
             <div className="flex items-center gap-2 label-md text-on-surface-variant">
-              <Icon name="local_shipping" className="text-[18px] text-secondary" />
-              Fast delivery across Dubai
+              <Icon name="storefront" className="text-[18px] text-secondary" />
+              Ready for pickup within 1-2 days
             </div>
           </div>
         </div>

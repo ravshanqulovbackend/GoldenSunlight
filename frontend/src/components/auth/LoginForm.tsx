@@ -42,7 +42,7 @@ function LoginFormInner() {
   });
 
   return (
-    <Card className="p-8">
+    <Card className="p-6 sm:p-8">
       <h1 className="headline-md mb-6 text-center text-on-surface">Log In</h1>
       <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
         <Input

@@ -17,10 +17,20 @@ interface MobileNavDrawerProps {
   links: NavItem[];
   isAuthenticated: boolean;
   user: User | null;
+  onOpenSupport?: () => void;
+  supportUnreadCount?: number;
 }
 
 /** The mobile menu didn't exist at all in the frontend_html_reference mockups — built from scratch. */
-export function MobileNavDrawer({ open, onClose, links, isAuthenticated, user }: MobileNavDrawerProps) {
+export function MobileNavDrawer({
+  open,
+  onClose,
+  links,
+  isAuthenticated,
+  user,
+  onOpenSupport,
+  supportUnreadCount,
+}: MobileNavDrawerProps) {
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -77,6 +87,23 @@ export function MobileNavDrawer({ open, onClose, links, isAuthenticated, user }:
                   <Link href="/notifications" onClick={onClose} className="label-md text-on-surface-variant">
                     Notifications
                   </Link>
+                  {onOpenSupport && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenSupport();
+                      }}
+                      className="flex items-center gap-2 label-md text-on-surface-variant"
+                    >
+                      Report an issue
+                      {!!supportUnreadCount && (
+                        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+                          {supportUnreadCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
                 </>
               )}
               {user?.role === "admin" && (

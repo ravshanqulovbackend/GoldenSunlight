@@ -38,11 +38,8 @@ class DashboardView(APIView):
         month_revenue = Order.objects.filter(created_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
 
         pending_orders = Order.objects.filter(status='pending').count()
-        confirmed_orders = Order.objects.filter(status='confirmed').count()
-        processing_orders = Order.objects.filter(status='processing').count()
-        packaging_orders = Order.objects.filter(status='packaging').count()
-        delivering_orders = Order.objects.filter(status='delivering').count()
-        delivered_orders = Order.objects.filter(status='delivered').count()
+        preparing_orders = Order.objects.filter(status='preparing').count()
+        ready_orders = Order.objects.filter(status='ready').count()
         cancelled_orders = Order.objects.filter(status='cancelled').count()
         refunded_orders = Order.objects.filter(status='refunded').count()
 
@@ -75,7 +72,7 @@ class DashboardView(APIView):
             day = now - timedelta(days=6 - i)
             day_revenue = Order.objects.filter(
                 created_at__date=day.date(),
-                status__in=['confirmed', 'processing', 'packaging', 'delivering', 'delivered']
+                status__in=['preparing', 'ready']
             ).aggregate(total=Sum('total_amount'))['total'] or 0
             weekly_sales.append({
                 'day': day_names[i],
@@ -95,11 +92,8 @@ class DashboardView(APIView):
             'month_revenue': str(month_revenue),
             'order_stats': {
                 'pending': pending_orders,
-                'confirmed': confirmed_orders,
-                'processing': processing_orders,
-                'packaging': packaging_orders,
-                'delivering': delivering_orders,
-                'delivered': delivered_orders,
+                'preparing': preparing_orders,
+                'ready': ready_orders,
                 'cancelled': cancelled_orders,
                 'refunded': refunded_orders,
             },

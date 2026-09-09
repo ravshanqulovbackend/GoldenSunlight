@@ -33,67 +33,70 @@ function ItemRow({ order, item }: { order: Order; item: OrderItem }) {
   const [confirming, setConfirming] = useState(false);
   const updateQuantity = useUpdateOrderItemQuantity(order.id);
   const removeItem = useRemoveOrderItem(order.id);
-  const isTerminal = ["delivered", "cancelled", "refunded"].includes(order.status);
+  const isTerminal = ["ready", "cancelled", "refunded"].includes(order.status);
 
   return (
-    <li className="flex items-center gap-4">
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-outline-variant">
-        {item.product ? (
-          <AppImage src={getImageUrl(item.product.image)} alt={item.product.name} className="h-full w-full" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-surface-container-high text-on-surface-variant">
-            <Icon name="inventory_2" className="text-[24px]" />
-          </div>
+    <li className="flex flex-col gap-3 border-b border-outline-variant pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-outline-variant">
+          {item.product ? (
+            <AppImage src={getImageUrl(item.product.image)} alt={item.product.name} className="h-full w-full" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-surface-container-high text-on-surface-variant">
+              <Icon name="inventory_2" className="text-[24px]" />
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="label-md line-clamp-2-custom text-on-surface">{item.product?.name || item.product_name || "Product deleted"}</p>
+          <p className="label-sm text-on-surface-variant">{formatPrice(item.price)} / unit</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:shrink-0 sm:justify-end sm:gap-3">
+        {!isTerminal && (
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            className="h-10 w-20 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 body-md focus:border-secondary focus:outline-none"
+          />
         )}
-      </div>
-      <div className="flex-1">
-        <p className="label-md text-on-surface">{item.product?.name || item.product_name || "Product deleted"}</p>
-        <p className="label-sm text-on-surface-variant">{formatPrice(item.price)} / unit</p>
-      </div>
-
-      {!isTerminal && (
-        <input
-          type="number"
-          min={1}
-          value={quantity}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-          className="h-10 w-20 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 body-md focus:border-secondary focus:outline-none"
-        />
-      )}
-      {!isTerminal && quantity !== item.quantity && (
-        <Button
-          size="sm"
-          disabled={updateQuantity.isPending}
-          onClick={() => updateQuantity.mutate({ itemId: item.id, quantity })}
-        >
-          Save
-        </Button>
-      )}
-      {isTerminal && <span className="label-md text-on-surface-variant">{item.quantity} pcs</span>}
-
-      <span className="w-28 text-right title-lg text-primary">{formatPrice(item.subtotal)}</span>
-
-      {!isTerminal && (
-        confirming ? (
-          <div className="flex items-center gap-1">
-            <Button size="sm" variant="danger" disabled={removeItem.isPending} onClick={() => removeItem.mutate(item.id)}>
-              Yes
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setConfirming(false)}>
-              No
-            </Button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConfirming(true)}
-            aria-label="Delete"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+        {!isTerminal && quantity !== item.quantity && (
+          <Button
+            size="sm"
+            disabled={updateQuantity.isPending}
+            onClick={() => updateQuantity.mutate({ itemId: item.id, quantity })}
           >
-            <Icon name="delete" className="text-[18px]" />
-          </button>
-        )
-      )}
+            Save
+          </Button>
+        )}
+        {isTerminal && <span className="label-md text-on-surface-variant">{item.quantity} pcs</span>}
+
+        <span className="title-lg shrink-0 text-primary sm:w-24 sm:text-right">{formatPrice(item.subtotal)}</span>
+
+        {!isTerminal &&
+          (confirming ? (
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="danger" disabled={removeItem.isPending} onClick={() => removeItem.mutate(item.id)}>
+                Yes
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setConfirming(false)}>
+                No
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              aria-label="Delete"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+            >
+              <Icon name="delete" className="text-[18px]" />
+            </button>
+          ))}
+      </div>
     </li>
   );
 }
@@ -167,6 +170,8 @@ function StatusForm({ order }: { order: Order }) {
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number);
   const updateStatus = useUpdateOrderStatus(order.id);
   const notifyReady = useNotifyOrderReady(order.id);
+  const isReady = order.status === "ready";
+  const canNotify = !["cancelled", "refunded"].includes(order.status);
 
   return (
     <Card className="flex flex-col gap-4 p-6">
@@ -187,9 +192,14 @@ function StatusForm({ order }: { order: Order }) {
       </Button>
 
       <div className="border-t border-outline-variant pt-4">
-        <Button variant="outline" className="w-full" disabled={notifyReady.isPending} onClick={() => notifyReady.mutate()}>
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={notifyReady.isPending || !canNotify}
+          onClick={() => notifyReady.mutate()}
+        >
           <Icon name="notifications_active" className="text-[18px]" />
-          Notify as Ready
+          {isReady ? "Notify again" : "Mark as Ready & Notify"}
         </Button>
       </div>
     </Card>
@@ -233,7 +243,7 @@ export default function AdminOrderDetailPage() {
                 <ItemRow key={item.id} order={order} item={item} />
               ))}
             </ul>
-            {!["delivered", "cancelled", "refunded"].includes(order.status) && <AddItemForm order={order} />}
+            {!["ready", "cancelled", "refunded"].includes(order.status) && <AddItemForm order={order} />}
           </Card>
 
           <Card className="flex flex-col gap-2 p-6">
@@ -256,7 +266,7 @@ export default function AdminOrderDetailPage() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <StatusForm order={order} />
+          <StatusForm key={`${order.status}-${order.tracking_number}`} order={order} />
 
           <Card className="flex flex-col gap-3 p-6">
             <h2 className="title-lg text-on-surface">Payment</h2>
@@ -267,10 +277,6 @@ export default function AdminOrderDetailPage() {
             <div className="flex justify-between body-md text-on-surface-variant">
               <span>Products</span>
               <span>{formatPrice(order.subtotal)}</span>
-            </div>
-            <div className="flex justify-between body-md text-on-surface-variant">
-              <span>Delivery</span>
-              <span>{formatPrice(order.delivery_fee)}</span>
             </div>
             {Number(order.discount_amount) > 0 && (
               <div className="flex justify-between body-md text-primary">

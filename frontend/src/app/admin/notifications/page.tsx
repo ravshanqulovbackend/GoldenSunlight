@@ -49,11 +49,11 @@ export default function AdminNotificationsPage() {
             <Card
               key={notification.id}
               className={cn(
-                "flex items-start justify-between gap-4 p-5",
+                "flex flex-col items-start justify-between gap-4 p-5 sm:flex-row",
                 !notification.is_read && "border-l-4 border-l-primary"
               )}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
                 <span
                   className={cn(
                     "mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
@@ -64,7 +64,7 @@ export default function AdminNotificationsPage() {
                 >
                   <Icon name="notifications" className="text-[18px]" />
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="label-md font-semibold text-on-surface">{notification.title}</p>
                   <p className="body-md text-on-surface-variant">{notification.message}</p>
                   <p className="label-sm mt-1 text-on-surface-variant">{formatDate(notification.created_at)}</p>
@@ -76,6 +76,7 @@ export default function AdminNotificationsPage() {
                   variant="outline"
                   disabled={markRead.isPending}
                   onClick={() => markRead.mutate(notification.id)}
+                  className="shrink-0"
                 >
                   Mark as read
                 </Button>

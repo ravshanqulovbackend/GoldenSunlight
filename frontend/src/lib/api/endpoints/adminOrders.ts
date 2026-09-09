@@ -47,7 +47,7 @@ export async function addOrderItem(orderId: number, productId: number, quantity:
   return data;
 }
 
-export async function notifyOrderReady(orderId: number): Promise<{ detail: string }> {
-  const { data } = await http.post<{ detail: string }>(`/orders/admin/orders/${orderId}/notify-ready/`);
+export async function notifyOrderReady(orderId: number): Promise<Order> {
+  const { data } = await http.post<Order>(`/orders/admin/orders/${orderId}/notify-ready/`);
   return data;
 }

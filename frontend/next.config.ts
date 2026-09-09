@@ -12,6 +12,17 @@ const backendOrigin = (process.env.API_URL_INTERNAL || "http://localhost:8000/ap
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // `next dev` sukut bo'yicha faqat `localhost`dan kelgan so'rovlarni qabul qiladi (dev-only
+  // asset/HMR endpoint'larini himoya qilish uchun) — cloudflared/ngrok orqali tunnel ochilganda
+  // brauzer boshqa origin'dan (masalan *.trycloudflare.com) so'rov yuboradi va Next uni bloklab,
+  // sahifa JS'siz qoladi (tugmalar bosilmaydi, hydration ishlamaydi). Shu origin'larni oq
+  // ro'yxatga qo'shib qo'yamiz — faqat dev-rejimga ta'sir qiladi, production build'da bu
+  // tekshiruv umuman yo'q.
+  allowedDevOrigins: ["*.trycloudflare.com", "*.ngrok-free.app", "*.ngrok.io", "*.ngrok.app"],
+  // Next.js dev-rejim indikatori (chap-pastdagi "N" tugmasi) sidebar'ning "Back to Site"
+  // havolasi bilan bir joyga to'g'ri kelib, uni yopib qo'yardi. Faqat `next dev`ga tegishli —
+  // productionda bu indikator umuman chiqmaydi, shuning uchun bu sozlama u yerda ta'sir qilmaydi.
+  devIndicators: false,
   // Django REST Framework barcha /api/ yo'llarida OXIRIDA "/" talab qiladi (aks holda
   // 301 bilan qayta yo'naltiradi). Next.js'ning `:path*` catch-all'i esa destination'ni
   // qurishda oxirgi "/" ni har doim yo'qotadi — shuning uchun pastda uni qo'lda qaytarib

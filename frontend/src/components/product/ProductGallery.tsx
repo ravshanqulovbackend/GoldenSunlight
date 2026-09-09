@@ -23,7 +23,7 @@ export function ProductGallery({ images }: { images: GalleryImage[] }) {
               type="button"
               onClick={() => setActiveIndex(index)}
               className={cn(
-                "h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-opacity",
+                "h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-opacity sm:h-20 sm:w-20",
                 index === activeIndex ? "border-primary" : "border-outline-variant opacity-70 hover:opacity-100"
               )}
             >

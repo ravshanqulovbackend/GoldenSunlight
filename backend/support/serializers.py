@@ -37,10 +37,11 @@ class ConversationSerializer(serializers.ModelSerializer):
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.IntegerField(read_only=True)
     last_message_at = serializers.DateTimeField(read_only=True)
+    avatar = serializers.ImageField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'full_name', 'last_message', 'unread_count', 'last_message_at')
+        fields = ('id', 'username', 'full_name', 'avatar', 'last_message', 'unread_count', 'last_message_at')
 
     def get_full_name(self, obj):
         return obj.get_full_name() or obj.username

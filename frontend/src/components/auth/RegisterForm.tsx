@@ -37,7 +37,7 @@ export function RegisterForm() {
   });
 
   return (
-    <Card className="p-8">
+    <Card className="p-6 sm:p-8">
       <h1 className="headline-md mb-6 text-center text-on-surface">Sign Up</h1>
       <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
         <Input label="Username" autoComplete="username" autoFocus error={errors.username?.message} {...registerField("username")} />
@@ -48,7 +48,7 @@ export function RegisterForm() {
           error={errors.password?.message}
           {...registerField("password")}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input label="First name" autoComplete="given-name" error={errors.first_name?.message} {...registerField("first_name")} />
           <Input label="Last name" autoComplete="family-name" error={errors.last_name?.message} {...registerField("last_name")} />
         </div>

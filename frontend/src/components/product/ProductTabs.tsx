@@ -13,7 +13,7 @@ export function ProductTabs({ description, ingredients }: ProductTabsProps) {
   const tabs = [
     { id: "description", label: "Description" },
     { id: "ingredients", label: "Ingredients" },
-    { id: "delivery", label: "Delivery" },
+    { id: "pickup", label: "Pickup" },
   ];
   const [active, setActive] = useState(tabs[0].id);
 
@@ -42,11 +42,11 @@ export function ProductTabs({ description, ingredients }: ProductTabsProps) {
         {active === "ingredients" && (
           <p className="whitespace-pre-line">{ingredients || "No ingredient information has been added yet."}</p>
         )}
-        {active === "delivery" && (
+        {active === "pickup" && (
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
-              <Icon name="local_shipping" className="mt-0.5 text-[20px] text-secondary" />
-              <span>Delivered within 1-2 days across Dubai, and 3-5 days to other Emirates.</span>
+              <Icon name="storefront" className="mt-0.5 text-[20px] text-secondary" />
+              <span>No delivery — orders are prepared and ready for pickup at our store, usually within 1-2 days.</span>
             </div>
             <div className="flex items-start gap-3">
               <Icon name="thermostat" className="mt-0.5 text-[20px] text-secondary" />

@@ -244,7 +244,7 @@ export function ProductForm({ product }: ProductFormProps) {
         <Textarea label="Ingredients" {...register("ingredients")} />
       </div>
 
-      <div className="fixed bottom-0 left-64 right-0 flex justify-end gap-3 border-t border-outline-variant bg-surface-container-lowest px-8 py-4">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-3 border-t border-outline-variant bg-surface-container-lowest px-4 py-4 sm:px-6 lg:left-64 lg:px-8">
         <Button type="button" variant="outline" onClick={() => router.push("/admin/products")}>
           Cancel
         </Button>

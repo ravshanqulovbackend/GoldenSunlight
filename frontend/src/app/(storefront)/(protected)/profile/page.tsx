@@ -136,7 +136,7 @@ export default function ProfilePage() {
             onSubmit={handleProfileSubmit((values) => profileMutation.mutate(values))}
             className="flex flex-col gap-4"
           >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input label="First Name" {...registerProfile("first_name")} />
               <Input label="Last Name" {...registerProfile("last_name")} />
             </div>
@@ -163,8 +163,8 @@ export default function ProfilePage() {
           ) : (
             <div className="flex flex-col gap-3">
               {addressesData?.results.map((address) => (
-                <div key={address.id} className="flex items-center justify-between rounded-lg border border-outline-variant p-4">
-                  <div>
+                <div key={address.id} className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant p-4">
+                  <div className="min-w-0 flex-1">
                     <p className="label-md font-semibold text-on-surface">{address.title || "Address"}</p>
                     <p className="body-md text-on-surface-variant">
                       {[address.city, address.district, address.street, address.building].filter(Boolean).join(", ")}
@@ -174,7 +174,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => deleteAddress.mutate(address.id)}
                     aria-label="Delete"
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
                   >
                     <Icon name="delete" className="text-[18px]" />
                   </button>

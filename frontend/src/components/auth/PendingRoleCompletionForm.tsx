@@ -80,7 +80,7 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-surface-container-low px-margin-mobile py-10">
-      <Card className="w-full max-w-lg p-8">
+      <Card className="w-full max-w-lg p-6 sm:p-8">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-primary">
             <Icon name="verified_user" className="text-[28px]" />
@@ -111,7 +111,7 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
             {avatarError && <span className="label-sm text-error">{avatarError}</span>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="First Name" autoFocus error={errors.first_name?.message} {...register("first_name")} />
             <Input label="Last Name" error={errors.last_name?.message} {...register("last_name")} />
           </div>

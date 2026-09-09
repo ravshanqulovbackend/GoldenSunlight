@@ -4,11 +4,8 @@ type Tone = "primary" | "secondary" | "tertiary" | "error" | "neutral";
 
 const TONES: Record<OrderStatus, Tone> = {
   pending: "neutral",
-  confirmed: "secondary",
-  processing: "secondary",
-  packaging: "secondary",
-  delivering: "primary",
-  delivered: "primary",
+  preparing: "secondary",
+  ready: "primary",
   cancelled: "error",
   refunded: "error",
 };

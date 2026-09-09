@@ -13,7 +13,7 @@ from notifications.models import Notification
 from users.permissions import IsAdminRole
 from common.utils import log_activity, diff_instance
 
-TERMINAL_STATUSES = ('delivered', 'cancelled', 'refunded')
+TERMINAL_STATUSES = ('ready', 'cancelled', 'refunded')
 
 
 def _adjust_stock(product, delta):
@@ -63,7 +63,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         # eski stock qiymatini ko'rib, uni manfiyga tushirishi mumkin).
         cart_items = cart.items.select_related('product').select_for_update(of=('product',)).all()
         subtotal = sum(item.product.price * item.quantity for item in cart_items)
-        delivery_fee = 15
+        delivery_fee = 0  # Yetkazib berish yo'q — mahsulot faqat do'kondan olib ketiladi
         discount = 0
         coupon = None
 
@@ -142,7 +142,7 @@ class CancelOrderView(APIView):
             order = Order.objects.get(pk=pk, user=request.user)
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
-        if order.status not in ('pending', 'confirmed'):
+        if order.status not in ('pending', 'preparing'):
             return Response({'detail': 'This order cannot be cancelled'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'cancelled'
         order.save()
@@ -321,6 +321,7 @@ class AdminOrderItemDetailView(APIView):
 
 
 class AdminOrderNotifyReadyView(APIView):
+    """Buyurtmani 'ready' holatiga o'tkazadi va mijozga olib ketish mumkinligi haqida xabar yuboradi."""
     permission_classes = [IsAdminRole]
 
     def post(self, request, pk):
@@ -328,9 +329,14 @@ class AdminOrderNotifyReadyView(APIView):
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+        if order.status not in TERMINAL_STATUSES:
+            before = model_to_dict(order)
+            order.status = 'ready'
+            order.save(update_fields=['status', 'updated_at'])
+            log_activity(request.user, 'updated', order, 'Order', diff_instance(before, order))
         Notification.objects.create(
             user=order.user,
             title=f'Order #{order.id} is ready!',
-            message=f'Your order (#{order.id}) is ready and awaiting delivery/pickup.',
+            message=f'Your order (#{order.id}) is ready — you can come and pick it up now.',
         )
-        return Response({'detail': 'Notification sent'})
+        return Response(OrderSerializer(order).data)

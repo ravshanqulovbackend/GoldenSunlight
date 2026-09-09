@@ -50,13 +50,14 @@ class Address(models.Model):
 
 
 class Order(models.Model):
+    # Yetkazib berish yo'q — buyurtma faqat do'kondan olib ketiladi (pickup).
+    # pending: mijoz endigina buyurtma berdi ("jarayonda"). preparing: admin buyurtmani
+    # qabul qilib, tayyorlashni boshladi. ready: buyurtma tayyor, mijoz kelib olib
+    # ketishi mumkin — shu holatga o'tgach buyurtma tahrirlanmaydi (TERMINAL_STATUSES).
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('processing', 'Processing'),
-        ('packaging', 'Packaging'),
-        ('delivering', 'Out for Delivery'),
-        ('delivered', 'Delivered'),
+        ('pending', 'Processing'),
+        ('preparing', 'Preparing'),
+        ('ready', 'Ready for Pickup'),
         ('cancelled', 'Cancelled'),
         ('refunded', 'Refunded'),
     ]
@@ -75,7 +76,9 @@ class Order(models.Model):
     notes = models.TextField(blank=True, default='')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15)
+    # Yetkazib berish yo'q (faqat pickup) — bu maydon endi doim 0, faqat eski buyurtmalar
+    # tarixida saqlanib qolgan qiymatlarni ko'rsatish uchun saqlab qolingan.
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)

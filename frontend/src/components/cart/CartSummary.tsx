@@ -11,7 +11,7 @@ export function CartSummary({ totalPrice, totalItems }: { totalPrice: number; to
         <span>Products ({totalItems})</span>
         <span>{formatPrice(totalPrice)}</span>
       </div>
-      <p className="label-sm text-on-surface-variant">The delivery fee is calculated at checkout.</p>
+      <p className="label-sm text-on-surface-variant">No delivery fee — orders are ready for pickup at our store.</p>
       <div className="flex items-center justify-between border-t border-outline-variant pt-4 title-lg text-on-surface">
         <span>Total</span>
         <span className="text-primary">{formatPrice(totalPrice)}</span>

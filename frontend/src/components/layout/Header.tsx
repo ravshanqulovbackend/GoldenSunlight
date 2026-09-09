@@ -43,9 +43,9 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-20 border-b border-outline-variant bg-surface/80 backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-container-max-width items-center justify-between px-margin-mobile md:px-margin-desktop">
-          <Link href="/" className="headline-md uppercase tracking-wide text-primary">
+      <header className="sticky top-0 z-40 h-16 border-b border-outline-variant bg-surface/80 backdrop-blur-md sm:h-20">
+        <div className="mx-auto flex h-full max-w-container-max-width items-center justify-between gap-2 px-margin-mobile md:px-margin-desktop">
+          <Link href="/" className="title-lg min-w-0 shrink truncate uppercase tracking-wide text-primary lg:headline-md">
             GoldenSunlight
           </Link>
 
@@ -57,7 +57,7 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             {isAuthenticated && !isAdmin && (
               <Link
                 href="/notifications"
@@ -106,7 +106,7 @@ export function Header() {
             <Link
               href="/cart"
               aria-label="Cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10"
             >
               <Icon name="shopping_cart" />
               {isAuthenticated && !!cart?.total_items && (
@@ -119,10 +119,10 @@ export function Header() {
               <ProfileMenu placement="bottom">
                 <span
                   aria-label="Profile"
-                  className="ml-1 flex h-10 items-center gap-2 rounded-full border border-outline-variant px-3 hover:bg-surface-container-low"
+                  className="ml-0.5 flex h-9 items-center gap-2 rounded-full border border-outline-variant px-2.5 hover:bg-surface-container-low sm:ml-1 sm:h-10 sm:px-3"
                 >
                   <Icon name="person" className="text-[20px]" />
-                  <span className="label-md max-w-[120px] truncate text-on-surface">
+                  <span className="label-md hidden max-w-[120px] truncate text-on-surface sm:inline">
                     {user?.first_name || user?.username}
                   </span>
                 </span>
@@ -136,7 +136,7 @@ export function Header() {
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Menu"
-              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10 md:hidden"
             >
               <Icon name="menu" />
             </button>
@@ -150,6 +150,8 @@ export function Header() {
         links={NAV_LINKS}
         isAuthenticated={isAuthenticated}
         user={user}
+        onOpenSupport={isAdmin ? undefined : () => setSupportPanelOpen(true)}
+        supportUnreadCount={myUnreadCount}
       />
 
       {isAuthenticated && !isAdmin && (

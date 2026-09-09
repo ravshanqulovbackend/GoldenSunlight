@@ -1,14 +1,6 @@
 import type { ProductListItem } from "./product";
 
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "processing"
-  | "packaging"
-  | "delivering"
-  | "delivered"
-  | "cancelled"
-  | "refunded";
+export type OrderStatus = "pending" | "preparing" | "ready" | "cancelled" | "refunded";
 
 export type PaymentMethod = "cash" | "card";
 
@@ -67,12 +59,9 @@ export interface CouponPreview {
 }
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-  processing: "Processing",
-  packaging: "Packaging",
-  delivering: "Out for Delivery",
-  delivered: "Delivered",
+  pending: "Processing",
+  preparing: "Preparing",
+  ready: "Ready for Pickup",
   cancelled: "Cancelled",
   refunded: "Refunded",
 };
