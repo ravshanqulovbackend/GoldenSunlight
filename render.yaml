@@ -89,6 +89,13 @@ services:
           type: keyvalue
           name: goldensunlight-redis
           property: connectionString
+      # Frontend Server Component'lari backend'ga bitta IP'dan murojaat qiladi, shuning
+      # uchun standart "100/hour" anon limiti butun sayt uchun umumiy bo'lib qoladi va
+      # tezda tugaydi (health check ham shunga urilib 502 keltirib chiqargan edi).
+      - key: THROTTLE_ANON
+        value: 20000/hour
+      - key: THROTTLE_USER
+        value: 20000/hour
       # Frontend servisining haqiqiy domeni (pastda) bilan bir xil bo'lishi shart.
       - key: ALLOWED_HOSTS
         value: goldensunlight-backend.onrender.com

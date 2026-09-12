@@ -7,9 +7,10 @@ set -e
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
-# Bepul rejada shell yo'q, shuning uchun birinchi admin shu yerda yaratiladi.
-# Ikkinchi marta ishga tushganda user allaqachon mavjud — xato e'tiborsiz qoldiriladi.
-python manage.py createsuperuser --noinput || true
+# Bepul rejada shell yo'q, shuning uchun birinchi admin shu yerda yaratiladi va roli
+# darhol `superadmin` qilinadi (Django'ning createsuperuser buyrug'i `role` maydonini
+# bilmaydi). Skript takroran ishga tushirilsa hech narsani o'zgartirmaydi.
+python render_bootstrap_admin.py || true
 
 # Bepul rejada doimiy disk yo'q: konteyner qayta ko'tarilganda /app/media tozalanadi,
 # shuning uchun demo rasmlar har safar repodan qayta nusxalanadi.

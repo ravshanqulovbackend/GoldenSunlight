@@ -180,9 +180,12 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
+    # Next.js Server Component'lari backend'ga bitta IP'dan (frontend konteyneri) murojaat
+    # qiladi — ya'ni barcha tashrifchi bitta anon throttle chelagini bo'lishadi. Shuning
+    # uchun limit muhitga qarab sozlanadi.
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour' if not DEBUG else '10000/hour',
-        'user': '1000/hour' if not DEBUG else '100000/hour',
+        'anon': os.environ.get('THROTTLE_ANON') or ('100/hour' if not DEBUG else '10000/hour'),
+        'user': os.environ.get('THROTTLE_USER') or ('1000/hour' if not DEBUG else '100000/hour'),
     },
 }
 
