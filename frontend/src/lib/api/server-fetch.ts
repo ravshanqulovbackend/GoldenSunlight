@@ -29,10 +29,25 @@ export async function serverFetch<T>(
   options: ServerFetchOptions = {}
 ): Promise<T> {
   const { searchParams, revalidate = 60, tags } = options;
+  const url = buildUrl(path, searchParams);
 
-  const res = await fetch(buildUrl(path, searchParams), {
-    next: { revalidate, tags },
-  });
+  // Bepul hostingda backend harakatsizlikdan keyin uxlaydi va uyg'onish lahzasida
+  // qisqa muddat 502/503 qaytaradi. Bitta urinish bilan cheklansak, tashrifchi
+  // butun sahifa o'rniga xato ekranini ko'radi — shuning uchun qayta uriniladi.
+  let res: Response | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, attempt * 2000));
+    try {
+      res = await fetch(url, { next: { revalidate, tags } });
+    } catch {
+      continue;
+    }
+    if (res.ok || res.status < 500) break;
+  }
+
+  if (!res) {
+    throw new ApiError(503, null, "Backend javob bermadi");
+  }
 
   if (!res.ok) {
     let body: ApiErrorBody | null = null;
