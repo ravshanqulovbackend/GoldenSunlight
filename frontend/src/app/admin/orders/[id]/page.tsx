@@ -74,7 +74,7 @@ function ItemRow({ order, item }: { order: Order; item: OrderItem }) {
         )}
         {isTerminal && <span className="label-md text-on-surface-variant">{item.quantity} pcs</span>}
 
-        <span className="title-lg shrink-0 text-primary sm:w-24 sm:text-right">{formatPrice(item.subtotal)}</span>
+        <span className="title-lg shrink-0 text-primary sm:w-24 sm:text-end">{formatPrice(item.subtotal)}</span>
 
         {!isTerminal &&
           (confirming ? (
@@ -135,7 +135,7 @@ function AddItemForm({ order }: { order: Order }) {
                   setSelectedId(p.id);
                   setSearch(p.name);
                 }}
-                className="flex w-full items-center justify-between px-3 py-2 text-left label-md hover:bg-surface-container-high"
+                className="flex w-full items-center justify-between px-3 py-2 text-start label-md hover:bg-surface-container-high"
               >
                 <span>{p.name}</span>
                 <span className="text-on-surface-variant">{formatPrice(p.price)} • {p.stock} pcs</span>

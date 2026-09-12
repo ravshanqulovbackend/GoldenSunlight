@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { updateProfile, updateProfileMultipart } from "@/lib/api/endpoints/auth";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { useAddresses, useCreateAddress, useDeleteAddress } from "@/lib/query/hooks/useAddresses";
@@ -19,7 +20,8 @@ import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { addressSchema, type AddressFormValues } from "@/lib/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ROLE_LABELS, type User } from "@/types/auth";
+import { useRoleLabels } from "@/lib/utils/roles";
+import type { User } from "@/types/auth";
 
 interface ProfileFormValues {
   first_name: string;
@@ -29,6 +31,9 @@ interface ProfileFormValues {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
+  const roleLabels = useRoleLabels();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
@@ -51,18 +56,18 @@ export default function ProfilePage() {
     mutationFn: (values: ProfileFormValues) => updateProfile(values),
     onSuccess: (updated: User) => {
       setUser(updated);
-      toast("Profile updated", "success");
+      toast(t("profileUpdated"), "success");
     },
-    onError: (error) => toast(parseApiError(error).message || "An error occurred", "error"),
+    onError: (error) => toast(parseApiError(error).message || t("genericError"), "error"),
   });
 
   const avatarMutation = useMutation({
     mutationFn: (avatar: File) => updateProfileMultipart({ avatar }),
     onSuccess: (updated: User) => {
       setUser(updated);
-      toast("Photo updated", "success");
+      toast(t("photoUpdated"), "success");
     },
-    onError: (error) => toast(parseApiError(error).message || "Error uploading photo", "error"),
+    onError: (error) => toast(parseApiError(error).message || t("photoUploadError"), "error"),
   });
 
   const isStaff = user?.role === "staff";
@@ -87,21 +92,21 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
-      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Profile" }]} />
+      <Breadcrumb items={[{ label: tCommon("home"), href: "/" }, { label: t("title") }]} />
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="headline-md text-on-surface">Profile</h1>
+        <h1 className="headline-md text-on-surface">{t("title")}</h1>
         <Button variant="outline" onClick={() => logoutAndRedirect()}>
           <Icon name="logout" className="text-[18px]" />
-          Log Out
+          {tCommon("logOut")}
         </Button>
       </div>
 
       <div className="mt-8 flex flex-col gap-6">
         <Card className="flex flex-col gap-4 p-6">
-          <h2 className="title-lg text-on-surface">Personal Information</h2>
+          <h2 className="title-lg text-on-surface">{t("personalInformation")}</h2>
           <p className="label-sm text-on-surface-variant">
-            Username: <span className="text-on-surface">{user.username}</span> • Role:{" "}
-            <span className="text-on-surface">{ROLE_LABELS[user.role]}</span>
+            {t("usernamePrefix")} <span className="text-on-surface">{user.username}</span> • {t("rolePrefix")}{" "}
+            <span className="text-on-surface">{roleLabels[user.role]}</span>
           </p>
 
           <div className="flex items-center gap-4">
@@ -127,7 +132,7 @@ export default function ProfilePage() {
                 }}
               />
               <Button type="button" variant="outline" size="sm" disabled={avatarMutation.isPending} onClick={() => fileInputRef.current?.click()}>
-                {avatarMutation.isPending ? "Uploading..." : "Change Photo"}
+                {avatarMutation.isPending ? t("uploading") : t("changePhoto")}
               </Button>
             </div>
           </div>
@@ -137,26 +142,26 @@ export default function ProfilePage() {
             className="flex flex-col gap-4"
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input label="First Name" {...registerProfile("first_name")} />
-              <Input label="Last Name" {...registerProfile("last_name")} />
+              <Input label={t("firstName")} {...registerProfile("first_name")} />
+              <Input label={t("lastName")} {...registerProfile("last_name")} />
             </div>
-            <Input label="Email" type="email" {...registerProfile("email")} />
+            <Input label={t("email")} type="email" {...registerProfile("email")} />
             <Controller
               control={profileControl}
               name="phone"
               render={({ field }) => (
-                <PhoneInput label="Phone" value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
+                <PhoneInput label={t("phone")} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
               )}
             />
             <Button type="submit" disabled={profileMutation.isPending} className="w-fit">
-              {profileMutation.isPending ? "Saving..." : "Save"}
+              {profileMutation.isPending ? t("saving") : t("save")}
             </Button>
           </form>
         </Card>
 
         {isStaff && (
         <Card className="flex flex-col gap-4 p-6">
-          <h2 className="title-lg text-on-surface">My Addresses</h2>
+          <h2 className="title-lg text-on-surface">{t("myAddresses")}</h2>
 
           {addressesLoading ? (
             <Spinner />
@@ -165,7 +170,7 @@ export default function ProfilePage() {
               {addressesData?.results.map((address) => (
                 <div key={address.id} className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="label-md font-semibold text-on-surface">{address.title || "Address"}</p>
+                    <p className="label-md font-semibold text-on-surface">{address.title || t("addressFallback")}</p>
                     <p className="body-md text-on-surface-variant">
                       {[address.city, address.district, address.street, address.building].filter(Boolean).join(", ")}
                     </p>
@@ -173,7 +178,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => deleteAddress.mutate(address.id)}
-                    aria-label="Delete"
+                    aria-label={tCommon("delete")}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
                   >
                     <Icon name="delete" className="text-[18px]" />
@@ -181,7 +186,7 @@ export default function ProfilePage() {
                 </div>
               ))}
               {addressesData?.results.length === 0 && (
-                <p className="body-md text-on-surface-variant">No address added yet.</p>
+                <p className="body-md text-on-surface-variant">{t("noAddress")}</p>
               )}
             </div>
           )}
@@ -192,14 +197,14 @@ export default function ProfilePage() {
             })}
             className="mt-4 grid grid-cols-1 gap-4 border-t border-outline-variant pt-4 sm:grid-cols-2"
           >
-            <Input label="Name (e.g. Home)" {...registerAddress("title")} />
-            <Input label="Full Name" error={addressErrors.full_name?.message} {...registerAddress("full_name")} />
+            <Input label={t("addressName")} {...registerAddress("title")} />
+            <Input label={t("fullName")} error={addressErrors.full_name?.message} {...registerAddress("full_name")} />
             <Controller
               control={addressControl}
               name="phone"
               render={({ field }) => (
                 <PhoneInput
-                  label="Phone"
+                  label={t("phone")}
                   error={addressErrors.phone?.message}
                   value={field.value}
                   onChange={field.onChange}
@@ -207,13 +212,13 @@ export default function ProfilePage() {
                 />
               )}
             />
-            <Input label="City" error={addressErrors.city?.message} {...registerAddress("city")} />
-            <Input label="District" {...registerAddress("district")} />
-            <Input label="Street" error={addressErrors.street?.message} {...registerAddress("street")} />
-            <Input label="Building" {...registerAddress("building")} />
-            <Input label="Apartment" {...registerAddress("apartment")} />
+            <Input label={t("city")} error={addressErrors.city?.message} {...registerAddress("city")} />
+            <Input label={t("district")} {...registerAddress("district")} />
+            <Input label={t("street")} error={addressErrors.street?.message} {...registerAddress("street")} />
+            <Input label={t("building")} {...registerAddress("building")} />
+            <Input label={t("apartment")} {...registerAddress("apartment")} />
             <Button type="submit" disabled={createAddress.isPending} className="w-fit sm:col-span-2">
-              Add Address
+              {t("addAddress")}
             </Button>
           </form>
         </Card>

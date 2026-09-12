@@ -62,19 +62,27 @@ export function ProductForm({ product }: ProductFormProps) {
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: product?.name ?? "",
+      name_ar: product?.name_ar ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? "",
+      description_ar: product?.description_ar ?? "",
       price: product?.price ?? "",
       old_price: product?.old_price ?? "",
       category: product?.category,
       brand: product?.brand ?? null,
       ingredients: product?.ingredients ?? "",
+      ingredients_ar: product?.ingredients_ar ?? "",
       badge: product?.badge ?? "",
+      badge_ar: product?.badge_ar ?? "",
       sku: product?.sku ?? "",
       stock: product?.stock ?? 0,
       is_active: product?.is_active ?? true,
       is_popular: product?.is_popular ?? false,
       is_featured: product?.is_featured ?? false,
+      meta_title: product?.meta_title ?? "",
+      meta_title_ar: product?.meta_title_ar ?? "",
+      meta_description: product?.meta_description ?? "",
+      meta_description_ar: product?.meta_description_ar ?? "",
     },
   });
 
@@ -244,7 +252,33 @@ export function ProductForm({ product }: ProductFormProps) {
         <Textarea label="Ingredients" {...register("ingredients")} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-3 border-t border-outline-variant bg-surface-container-lowest px-4 py-4 sm:px-6 lg:left-64 lg:px-8">
+      <div className="flex flex-col gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4">
+        <div>
+          <h3 className="title-lg text-on-surface">Arabic content</h3>
+          <p className="label-sm text-on-surface-variant">
+            Shown to shoppers who switch the site to Arabic. Leave blank and the English
+            text is shown instead — nothing breaks either way.
+          </p>
+        </div>
+        <Input label="Name (Arabic)" dir="rtl" {...register("name_ar")} />
+        <Input label="Badge (Arabic)" dir="rtl" {...register("badge_ar")} />
+        <Textarea label="Description (Arabic)" dir="rtl" {...register("description_ar")} />
+        <Textarea label="Ingredients (Arabic)" dir="rtl" {...register("ingredients_ar")} />
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4">
+        <h3 className="title-lg text-on-surface">SEO (optional)</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Input label="Meta Title" {...register("meta_title")} />
+          <Input label="Meta Title (Arabic)" dir="rtl" {...register("meta_title_ar")} />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Textarea label="Meta Description" {...register("meta_description")} />
+          <Textarea label="Meta Description (Arabic)" dir="rtl" {...register("meta_description_ar")} />
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 start-0 end-0 flex justify-end gap-3 border-t border-outline-variant bg-surface-container-lowest px-4 py-4 sm:px-6 lg:ms-64 lg:px-8">
         <Button type="button" variant="outline" onClick={() => router.push("/admin/products")}>
           Cancel
         </Button>

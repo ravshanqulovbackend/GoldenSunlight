@@ -62,8 +62,8 @@ for cat_data in categories_data:
     categories[cat.slug] = cat
 print('Categories created')
 
-# ─── Create Products (full catalog — every source photo becomes a product or a
-#     gallery image of one, see backend/products_catalog_data.py) ─────────────
+# ─── Create Products (curated 20-product catalog spanning every category and
+#     brand, each with a full Arabic translation — see backend/products_catalog_data.py) ───
 products = []
 for p_data in PRODUCTS_DATA:
     p_data = dict(p_data)

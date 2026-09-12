@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getProducts } from "@/lib/api/endpoints/products";
 import { getCategories } from "@/lib/api/endpoints/categories";
 import { ProductGrid } from "@/components/product/ProductGrid";
@@ -9,7 +10,10 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Icon } from "@/components/ui/Icon";
 import { toProductFilters, type RawSearchParams } from "@/lib/utils/searchParams";
 
-export const metadata: Metadata = { title: "Product Catalog" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Products");
+  return { title: t("catalogTitle") };
+}
 
 const PAGE_SIZE = 12;
 
@@ -18,6 +22,8 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<RawSearchParams>;
 }) {
+  const t = await getTranslations("Products");
+  const tCommon = await getTranslations("Common");
   const raw = await searchParams;
   const filters = toProductFilters(raw);
   const currentPage = filters.page ?? 1;
@@ -31,8 +37,8 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
-      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Products" }]} />
-      <h1 className="headline-md mt-4 text-on-surface">Product Catalog</h1>
+      <Breadcrumb items={[{ label: tCommon("home"), href: "/" }, { label: tCommon("products") }]} />
+      <h1 className="headline-md mt-4 text-on-surface">{t("catalogTitle")}</h1>
 
       <div className="mt-8 flex flex-col gap-8 md:flex-row">
         <ProductFilters categories={categories} />
@@ -45,19 +51,19 @@ export default async function ProductsPage({
                 .map(([key, value]) => (
                   <input key={key} type="hidden" name={key} value={Array.isArray(value) ? value[0] : value} />
                 ))}
-              <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant" />
+              <Icon name="search" className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant" />
               <input
                 type="search"
                 name="search"
                 defaultValue={filters.search}
-                placeholder="Search products..."
-                className="h-11 w-full rounded-full border border-outline-variant bg-surface-container-lowest pl-11 pr-4 body-md focus:border-secondary focus:outline-none"
+                placeholder={t("searchPlaceholder")}
+                className="h-11 w-full rounded-full border border-outline-variant bg-surface-container-lowest ps-11 pe-4 body-md focus:border-secondary focus:outline-none"
               />
             </form>
             <ProductSort />
           </div>
 
-          <p className="label-md mb-4 text-on-surface-variant">{products.count} products found</p>
+          <p className="label-md mb-4 text-on-surface-variant">{t("countFound", { count: products.count })}</p>
 
           <ProductGrid products={products.results} />
 

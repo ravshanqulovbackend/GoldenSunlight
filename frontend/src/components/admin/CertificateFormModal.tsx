@@ -39,8 +39,11 @@ export function CertificateFormModal({ open, onClose, certificate }: Certificate
     resolver: zodResolver(certificateFormSchema),
     defaultValues: {
       title: certificate?.title ?? "",
+      title_ar: certificate?.title_ar ?? "",
       description: certificate?.description ?? "",
+      description_ar: certificate?.description_ar ?? "",
       issued_by: certificate?.issued_by ?? "",
+      issued_by_ar: certificate?.issued_by_ar ?? "",
       issued_date: certificate?.issued_date ?? "",
       expiry_date: certificate?.expiry_date ?? "",
       is_active: certificate?.is_active ?? true,
@@ -56,8 +59,11 @@ export function CertificateFormModal({ open, onClose, certificate }: Certificate
       setImagePreview(certificate?.image ? getImageUrl(certificate.image) : null);
       reset({
         title: certificate?.title ?? "",
+        title_ar: certificate?.title_ar ?? "",
         description: certificate?.description ?? "",
+        description_ar: certificate?.description_ar ?? "",
         issued_by: certificate?.issued_by ?? "",
+        issued_by_ar: certificate?.issued_by_ar ?? "",
         issued_date: certificate?.issued_date ?? "",
         expiry_date: certificate?.expiry_date ?? "",
         is_active: certificate?.is_active ?? true,
@@ -132,6 +138,15 @@ export function CertificateFormModal({ open, onClose, certificate }: Certificate
           <Input label="Name" error={errors.title?.message} {...register("title")} />
           <Input label="Issued By (optional)" {...register("issued_by")} />
           <Textarea label="Description (optional)" {...register("description")} />
+
+          <div className="flex flex-col gap-3 rounded-lg border border-outline-variant p-4">
+            <p className="label-sm text-on-surface-variant">
+              Arabic content — leave blank to fall back to English.
+            </p>
+            <Input label="Name (Arabic)" dir="rtl" {...register("title_ar")} />
+            <Input label="Issued By (Arabic)" dir="rtl" {...register("issued_by_ar")} />
+            <Textarea label="Description (Arabic)" dir="rtl" {...register("description_ar")} />
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input label="Issued Date" type="date" {...register("issued_date")} />

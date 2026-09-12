@@ -3,9 +3,12 @@ from django.db import models
 
 class News(models.Model):
     title = models.CharField(max_length=255)
+    title_ar = models.CharField(max_length=255, blank=True, default='')
     slug = models.SlugField(unique=True)
     summary = models.TextField(blank=True, default='')
+    summary_ar = models.TextField(blank=True, default='')
     content = models.TextField(blank=True, default='')
+    content_ar = models.TextField(blank=True, default='')
     image = models.ImageField(upload_to='news/', blank=True, null=True)
     is_published = models.BooleanField(default=False)
     views_count = models.PositiveIntegerField(default=0)

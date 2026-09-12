@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -11,6 +12,7 @@ import { useToggleFavorite } from "@/lib/query/hooks/useFavorites";
 import type { ProductDetail } from "@/types/product";
 
 export function ProductActions({ product }: { product: ProductDetail }) {
+  const t = useTranslations("Products");
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const access = useAuthStore((s) => s.access);
@@ -38,7 +40,7 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           onClick={() => requireAuth(() => addToCart.mutate({ product_id: product.id, quantity }))}
         >
           <Icon name="add_shopping_cart" className="text-[20px]" />
-          {product.is_in_stock ? "Add to Cart" : "Out of Stock"}
+          {product.is_in_stock ? t("addToCart") : t("outOfStock")}
         </Button>
       </div>
 
@@ -51,7 +53,7 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           onClick={() => requireAuth(() => toggleFavorite.mutate(product.id))}
         >
           <Icon name="favorite" className="text-[18px]" />
-          Wishlist
+          {t("wishlist")}
         </Button>
         <Button
           variant="outline"
@@ -66,7 +68,7 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           }}
         >
           <Icon name="share" className="text-[18px]" />
-          Share
+          {t("share")}
         </Button>
       </div>
     </div>

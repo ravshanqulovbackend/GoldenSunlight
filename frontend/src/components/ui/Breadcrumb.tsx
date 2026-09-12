@@ -13,7 +13,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         const isLast = index === items.length - 1;
         return (
           <span key={`${item.label}-${index}`} className="flex items-center gap-1">
-            {index > 0 && <Icon name="chevron_right" className="text-[18px] text-outline" />}
+            {index > 0 && <Icon name="chevron_right" className="text-[18px] text-outline" mirrorInRtl />}
             {item.href && !isLast ? (
               <Link href={item.href} className="hover:text-primary">
                 {item.label}

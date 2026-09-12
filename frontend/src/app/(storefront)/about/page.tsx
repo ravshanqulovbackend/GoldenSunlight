@@ -1,39 +1,58 @@
 import type { Metadata } from "next";
+import { getTranslations, getLocale } from "next-intl/server";
 import { getCompany } from "@/lib/api/endpoints/company";
 import { getCertificates } from "@/lib/api/endpoints/certificates";
 import { getGalleryImages } from "@/lib/api/endpoints/gallery";
 import { AppImage } from "@/components/ui/AppImage";
 import { Icon } from "@/components/ui/Icon";
 import { getImageUrl } from "@/lib/utils/image";
+import { pickLocalized } from "@/lib/utils/i18n";
 import { PartnershipForm } from "@/components/about/PartnershipForm";
-
-const PRODUCTION_HIGHLIGHTS = [
-  { icon: "precision_manufacturing", title: "Modern Equipment", description: "Production lines built to European standards." },
-  { icon: "verified_user", title: "Quality Control", description: "Every batch goes through laboratory testing." },
-  { icon: "eco", title: "Eco-Friendly", description: "Only natural, certified raw materials." },
-];
+import type { Locale } from "@/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const company = await getCompany().catch(() => null);
+  const [company, locale, tCommon] = await Promise.all([
+    getCompany().catch(() => null),
+    getLocale(),
+    getTranslations("Common"),
+  ]);
+  const name = company ? pickLocalized(company.name, company.name, locale as Locale) : undefined;
+  const tagline = company ? pickLocalized(company.tagline, company.tagline_ar, locale as Locale) : undefined;
+  const description = company ? pickLocalized(company.description, company.description_ar, locale as Locale) : undefined;
+  const aboutUs = tCommon("aboutUs");
   return {
-    title: company ? `About Us — ${company.name}` : "About Us",
-    description: company?.tagline || company?.description?.slice(0, 160),
+    title: name ? `${aboutUs} — ${name}` : aboutUs,
+    description: tagline || description?.slice(0, 160),
   };
 }
 
 export default async function AboutPage() {
-  const [company, certificates, galleryImages] = await Promise.all([
+  const [company, certificates, galleryImages, t, locale] = await Promise.all([
     getCompany().catch(() => null),
     getCertificates().catch(() => []),
     getGalleryImages().catch(() => []),
+    getTranslations("About"),
+    getLocale(),
   ]);
+  const loc = locale as Locale;
+
+  const tagline = company ? pickLocalized(company.tagline, company.tagline_ar, loc) : "";
+  const description = company ? pickLocalized(company.description, company.description_ar, loc) : "";
+  const mission = company ? pickLocalized(company.mission, company.mission_ar, loc) : "";
+  const vision = company ? pickLocalized(company.vision, company.vision_ar, loc) : "";
+
+  const PRODUCTION_HIGHLIGHTS = [
+    { icon: "precision_manufacturing", title: t("highlights.equipmentTitle"), description: t("highlights.equipmentDescription") },
+    { icon: "verified_user", title: t("highlights.qualityTitle"), description: t("highlights.qualityDescription") },
+    { icon: "eco", title: t("highlights.ecoTitle"), description: t("highlights.ecoDescription") },
+  ];
 
   const stats = company
     ? [
-        { value: company.experience_years, label: "Years of Experience" },
-        { value: company.product_types, label: "Product Types" },
-        { value: company.partner_stores, label: "Partner Stores" },
-        { value: company.export_countries, label: "Export Countries" },
+        { value: company.experience_years, label: t("stats.yearsOfExperience") },
+        { value: company.product_types, label: t("stats.productTypes") },
+        { value: company.partner_stores, label: t("stats.partnerStores") },
+        { value: company.export_countries, label: t("stats.exportCountries") },
       ].filter((stat) => stat.value)
     : [];
 
@@ -49,10 +68,10 @@ export default async function AboutPage() {
               {company?.name || "GoldenSunlight"}
             </p>
             <h1 className="headline-lg-mobile md:display-lg text-primary-fixed">
-              {company?.tagline || "Cleanliness and care by your side every day"}
+              {tagline || t("defaultTagline")}
             </h1>
-            {company?.description && (
-              <p className="body-lg mt-6 text-primary-fixed-dim">{company.description}</p>
+            {description && (
+              <p className="body-lg mt-6 text-primary-fixed-dim">{description}</p>
             )}
           </div>
         </div>
@@ -62,7 +81,7 @@ export default async function AboutPage() {
         <section className="mx-auto -mt-8 max-w-container-max-width px-margin-mobile md:px-margin-desktop">
           <div className="grid grid-cols-2 gap-4 rounded-lg bg-surface-container-lowest p-8 shadow-xl lg:grid-cols-4">
             {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center gap-1 border-outline-variant p-4 text-center first:border-0 lg:border-l">
+              <div key={stat.label} className="flex flex-col items-center gap-1 border-outline-variant p-4 text-center first:border-0 lg:border-s">
                 <span className="display-lg text-[2.5rem] text-primary">{stat.value}</span>
                 <span className="label-sm text-on-surface-variant">{stat.label}</span>
               </div>
@@ -71,36 +90,36 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {(company?.mission || company?.vision) && (
+      {(mission || vision) && (
         <section className="mx-auto max-w-container-max-width px-margin-mobile py-section-gap md:px-margin-desktop">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {company?.mission && (
+            {mission && (
               <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-8">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
                   <Icon name="flag" className="text-[24px]" />
                 </span>
-                <h2 className="title-lg mt-4 text-on-surface">Our Mission</h2>
-                <p className="body-md mt-2 text-on-surface-variant">{company.mission}</p>
+                <h2 className="title-lg mt-4 text-on-surface">{t("ourMission")}</h2>
+                <p className="body-md mt-2 text-on-surface-variant">{mission}</p>
               </div>
             )}
-            {company?.vision && (
+            {vision && (
               <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-8">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container">
                   <Icon name="visibility" className="text-[24px]" />
                 </span>
-                <h2 className="title-lg mt-4 text-on-surface">Our Vision</h2>
-                <p className="body-md mt-2 text-on-surface-variant">{company.vision}</p>
+                <h2 className="title-lg mt-4 text-on-surface">{t("ourVision")}</h2>
+                <p className="body-md mt-2 text-on-surface-variant">{vision}</p>
               </div>
             )}
           </div>
         </section>
       )}
 
-      {company?.description && (
+      {description && (
         <section className="bg-surface-container-low py-section-gap">
           <div className="mx-auto grid max-w-container-max-width grid-cols-1 items-center gap-10 px-margin-mobile md:grid-cols-2 md:px-margin-desktop">
             <div className="aspect-[4/3] overflow-hidden rounded-lg bg-surface-container-high">
-              {company.logo ? (
+              {company?.logo ? (
                 <AppImage src={getImageUrl(company.logo)} alt={company.name} className="h-full w-full" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center">
@@ -109,18 +128,18 @@ export default async function AboutPage() {
               )}
             </div>
             <div>
-              <h2 className="headline-md text-on-surface">Our History</h2>
-              <p className="body-md mt-4 text-on-surface-variant">{company.description}</p>
+              <h2 className="headline-md text-on-surface">{t("ourHistory")}</h2>
+              <p className="body-md mt-4 text-on-surface-variant">{description}</p>
               <dl className="mt-6 grid grid-cols-2 gap-4">
-                {company.founded_year && (
+                {company?.founded_year && (
                   <div>
-                    <dt className="label-sm text-on-surface-variant">Founded</dt>
+                    <dt className="label-sm text-on-surface-variant">{t("founded")}</dt>
                     <dd className="title-lg text-on-surface">{company.founded_year}</dd>
                   </div>
                 )}
-                {company.employee_count && (
+                {company?.employee_count && (
                   <div>
-                    <dt className="label-sm text-on-surface-variant">Employees</dt>
+                    <dt className="label-sm text-on-surface-variant">{t("employees")}</dt>
                     <dd className="title-lg text-on-surface">{company.employee_count}</dd>
                   </div>
                 )}
@@ -132,7 +151,7 @@ export default async function AboutPage() {
 
       <section className="bg-primary py-section-gap text-primary-fixed">
         <div className="mx-auto max-w-container-max-width px-margin-mobile md:px-margin-desktop">
-          <h2 className="headline-md text-center text-primary-fixed">Production Process</h2>
+          <h2 className="headline-md text-center text-primary-fixed">{t("productionProcess")}</h2>
           <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
             {PRODUCTION_HIGHLIGHTS.map((item) => (
               <div key={item.title} className="flex flex-col items-center gap-3 text-center">
@@ -149,17 +168,21 @@ export default async function AboutPage() {
 
       {certificates.length > 0 && (
         <section className="mx-auto max-w-container-max-width px-margin-mobile py-section-gap md:px-margin-desktop">
-          <h2 className="headline-md text-center text-on-surface">Our Certificates</h2>
+          <h2 className="headline-md text-center text-on-surface">{t("ourCertificates")}</h2>
           <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {certificates.map((cert) => (
-              <div key={cert.id} className="flex flex-col items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center">
-                <div className="h-24 w-24 overflow-hidden rounded-lg bg-surface-container-high">
-                  <AppImage src={getImageUrl(cert.image)} alt={cert.title} className="h-full w-full" />
+            {certificates.map((cert) => {
+              const certTitle = pickLocalized(cert.title, cert.title_ar, loc);
+              const certIssuedBy = pickLocalized(cert.issued_by, cert.issued_by_ar, loc);
+              return (
+                <div key={cert.id} className="flex flex-col items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center">
+                  <div className="h-24 w-24 overflow-hidden rounded-lg bg-surface-container-high">
+                    <AppImage src={getImageUrl(cert.image)} alt={certTitle} className="h-full w-full" />
+                  </div>
+                  <span className="label-md text-on-surface">{certTitle}</span>
+                  {certIssuedBy && <span className="label-sm text-on-surface-variant">{certIssuedBy}</span>}
                 </div>
-                <span className="label-md text-on-surface">{cert.title}</span>
-                {cert.issued_by && <span className="label-sm text-on-surface-variant">{cert.issued_by}</span>}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -167,7 +190,7 @@ export default async function AboutPage() {
       {galleryToShow.length > 0 && (
         <section className="bg-surface-container-low py-section-gap">
           <div className="mx-auto max-w-container-max-width px-margin-mobile md:px-margin-desktop">
-            <h2 className="headline-md text-center text-on-surface">Scenes from Production</h2>
+            <h2 className="headline-md text-center text-on-surface">{t("scenesFromProduction")}</h2>
             <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
               {galleryToShow.map((image) => (
                 <div key={image.id} className="aspect-square overflow-hidden rounded-lg bg-surface-container-high">
@@ -186,23 +209,20 @@ export default async function AboutPage() {
       <section className="mx-auto max-w-container-max-width px-margin-mobile py-section-gap md:px-margin-desktop">
         <div className="grid grid-cols-1 gap-10 rounded-lg border border-outline-variant bg-surface-container-lowest p-8 md:grid-cols-2 md:p-10">
           <div>
-            <h2 className="headline-md text-on-surface">Partner With Us</h2>
-            <p className="body-md mt-3 text-on-surface-variant">
-              If you&apos;re interested in partnership terms for your store or company, leave a
-              request via the form below — our specialists will get in touch soon.
-            </p>
+            <h2 className="headline-md text-on-surface">{t("partnerWithUs")}</h2>
+            <p className="body-md mt-3 text-on-surface-variant">{t("partnerIntro")}</p>
             {company && (company.phone || company.email || company.address) && (
               <div className="mt-6 flex flex-col gap-3">
                 {company.phone && (
                   <div className="flex items-center gap-3 text-on-surface-variant">
                     <Icon name="call" className="text-[20px] text-primary" />
-                    <span className="body-md">{company.phone}</span>
+                    <span className="body-md" dir="ltr">{company.phone}</span>
                   </div>
                 )}
                 {company.email && (
                   <div className="flex items-center gap-3 text-on-surface-variant">
                     <Icon name="mail" className="text-[20px] text-primary" />
-                    <span className="body-md">{company.email}</span>
+                    <span className="body-md" dir="ltr">{company.email}</span>
                   </div>
                 )}
                 {company.address && (

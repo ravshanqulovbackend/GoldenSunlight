@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { createReview } from "@/lib/api/endpoints/reviews";
 import { revalidateReviews } from "@/lib/actions/revalidateReviews";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils/cn";
 import { reviewSchema, type ReviewFormValues } from "@/lib/utils/validators";
 
 export function ReviewForm({ productId, productSlug }: { productId: number; productSlug: string }) {
+  const t = useTranslations("ReviewForm");
   const router = useRouter();
   const access = useAuthStore((s) => s.access);
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -41,13 +43,13 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
     mutationFn: (values: ReviewFormValues) =>
       createReview(productId, { rating: values.rating, comment: values.comment, image: imageFile }),
     onSuccess: async () => {
-      toast("Review added", "success");
+      toast(t("added"), "success");
       reset({ rating: 0, comment: "" });
       removeImage();
       await revalidateReviews(productId, productSlug);
       router.refresh();
     },
-    onError: (error) => toast(parseApiError(error).message || "Failed to add review", "error"),
+    onError: (error) => toast(parseApiError(error).message || t("addError"), "error"),
   });
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -68,13 +70,13 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
   if (!access) {
     return (
       <p className="body-md text-on-surface-variant">
-        To leave a review,{" "}
+        {t("loginPrompt")}{" "}
         <button
           type="button"
           onClick={() => router.push(`/auth/login?next=${encodeURIComponent(`/products/${productSlug}`)}`)}
           className="font-semibold text-primary hover:underline"
         >
-          log in
+          {t("logIn")}
         </button>
         .
       </p>
@@ -91,7 +93,7 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
             onMouseEnter={() => setHoverRating(star)}
             onMouseLeave={() => setHoverRating(0)}
             onClick={() => setValue("rating", star, { shouldValidate: true })}
-            aria-label={`${star} star`}
+            aria-label={t("starLabel", { star })}
           >
             <Icon
               name="star"
@@ -103,7 +105,7 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
       </div>
       {errors.rating && <span className="label-sm text-error">{errors.rating.message}</span>}
 
-      <Textarea placeholder="Share your thoughts (optional)" {...register("comment")} />
+      <Textarea placeholder={t("sharePlaceholder")} {...register("comment")} />
 
       {imagePreview ? (
         <div className="relative w-fit">
@@ -112,8 +114,8 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
           <button
             type="button"
             onClick={removeImage}
-            aria-label="Remove image"
-            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-inverse-surface text-inverse-on-surface"
+            aria-label={t("removeImage")}
+            className="absolute -end-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-inverse-surface text-inverse-on-surface"
           >
             <Icon name="close" className="text-[14px]" />
           </button>
@@ -121,13 +123,13 @@ export function ReviewForm({ productId, productSlug }: { productId: number; prod
       ) : (
         <label className="label-md flex w-fit cursor-pointer items-center gap-2 text-primary hover:underline">
           <Icon name="add_photo_alternate" className="text-[20px]" />
-          Add a photo
+          {t("addPhoto")}
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
       )}
 
       <Button type="submit" variant="outline" size="sm" disabled={mutation.isPending} className="w-fit">
-        {mutation.isPending ? "Submitting..." : "Leave a Review"}
+        {mutation.isPending ? t("submitting") : t("leaveReview")}
       </Button>
     </form>
   );

@@ -146,7 +146,7 @@ export default function AdminProductsPage() {
                 <Th>Price</Th>
                 <Th>Stock</Th>
                 <Th>Status</Th>
-                <Th className="text-right">Actions</Th>
+                <Th className="text-end">Actions</Th>
               </Tr>
             </Thead>
             <Tbody>

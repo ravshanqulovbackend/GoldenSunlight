@@ -83,7 +83,7 @@ export default function AdminCertificatesPage() {
               <Th>Name</Th>
               <Th>Issued By</Th>
               <Th>Status</Th>
-              <Th className="text-right">Actions</Th>
+              <Th className="text-end">Actions</Th>
             </Tr>
           </Thead>
           <Tbody>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils/cn";
 
@@ -10,10 +11,11 @@ interface ProductTabsProps {
 }
 
 export function ProductTabs({ description, ingredients }: ProductTabsProps) {
+  const t = useTranslations("Products");
   const tabs = [
-    { id: "description", label: "Description" },
-    { id: "ingredients", label: "Ingredients" },
-    { id: "pickup", label: "Pickup" },
+    { id: "description", label: t("tabDescription") },
+    { id: "ingredients", label: t("tabIngredients") },
+    { id: "pickup", label: t("tabPickup") },
   ];
   const [active, setActive] = useState(tabs[0].id);
 
@@ -37,20 +39,20 @@ export function ProductTabs({ description, ingredients }: ProductTabsProps) {
 
       <div className="body-md py-6 text-on-surface">
         {active === "description" && (
-          <p className="whitespace-pre-line">{description || "No product description has been added yet."}</p>
+          <p className="whitespace-pre-line">{description || t("noDescription")}</p>
         )}
         {active === "ingredients" && (
-          <p className="whitespace-pre-line">{ingredients || "No ingredient information has been added yet."}</p>
+          <p className="whitespace-pre-line">{ingredients || t("noIngredients")}</p>
         )}
         {active === "pickup" && (
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <Icon name="storefront" className="mt-0.5 text-[20px] text-secondary" />
-              <span>No delivery — orders are prepared and ready for pickup at our store, usually within 1-2 days.</span>
+              <span>{t("pickupInfo1")}</span>
             </div>
             <div className="flex items-start gap-3">
               <Icon name="thermostat" className="mt-0.5 text-[20px] text-secondary" />
-              <span>Store in a dry place away from sunlight and out of children&apos;s reach.</span>
+              <span>{t("pickupInfo2")}</span>
             </div>
           </div>
         )}

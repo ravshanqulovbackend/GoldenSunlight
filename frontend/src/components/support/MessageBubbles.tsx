@@ -70,7 +70,7 @@ export function MessageBubbles({ messages, currentUserId }: MessageBubblesProps)
           <button
             type="button"
             aria-label="Close"
-            className="absolute right-6 top-6 text-inverse-on-surface"
+            className="absolute end-6 top-6 text-inverse-on-surface"
             onClick={() => setEnlargedImage(null)}
           >
             <Icon name="close" className="text-[28px]" />

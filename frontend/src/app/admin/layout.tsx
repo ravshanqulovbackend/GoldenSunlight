@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { RequireAdmin } from "@/lib/guards/RequireAdmin";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Icon } from "@/components/ui/Icon";
+// import { LanguageToggle } from "@/components/layout/LanguageToggle"; // temporarily hidden — re-enable on request
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("AdminNav");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
@@ -17,15 +20,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button
             type="button"
             onClick={() => setMobileNavOpen(true)}
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-high"
           >
             <Icon name="menu" />
           </button>
-          <span className="title-lg text-primary">Admin Panel</span>
+          <span className="title-lg flex-1 text-primary">{t("adminPanel")}</span>
+          {/* <LanguageToggle /> temporarily hidden — re-enable on request */}
         </header>
 
-        <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:ml-64 lg:px-8">{children}</main>
+        <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:ms-64 lg:px-8">{children}</main>
       </div>
     </RequireAdmin>
   );

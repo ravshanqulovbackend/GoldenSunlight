@@ -25,9 +25,13 @@ function toDefaults(data: Company): CompanyFormValues {
   return {
     name: data.name,
     tagline: data.tagline,
+    tagline_ar: data.tagline_ar,
     description: data.description,
+    description_ar: data.description_ar,
     mission: data.mission,
+    mission_ar: data.mission_ar,
     vision: data.vision,
+    vision_ar: data.vision_ar,
     founded_year: data.founded_year,
     employee_count: data.employee_count,
     phone: data.phone,
@@ -62,9 +66,13 @@ export default function AdminSettingsPage() {
     defaultValues: {
       name: "",
       tagline: "",
+      tagline_ar: "",
       description: "",
+      description_ar: "",
       mission: "",
+      mission_ar: "",
       vision: "",
+      vision_ar: "",
       founded_year: null,
       employee_count: "",
       phone: "",
@@ -162,6 +170,24 @@ export default function AdminSettingsPage() {
                 <Textarea label="Mission" {...register("mission")} />
                 <Textarea label="Vision" {...register("vision")} />
               </div>
+
+              {isSuperAdmin && (
+                <div className="flex flex-col gap-3 rounded-lg border border-outline-variant p-4">
+                  <div>
+                    <p className="label-md text-on-surface">Arabic content</p>
+                    <p className="label-sm text-on-surface-variant">
+                      Shown on the About Us page when a shopper switches to Arabic. Leave
+                      blank to fall back to English.
+                    </p>
+                  </div>
+                  <Input label="Tagline (Arabic)" dir="rtl" {...register("tagline_ar")} />
+                  <Textarea label="Description / History (Arabic)" dir="rtl" {...register("description_ar")} />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Textarea label="Mission (Arabic)" dir="rtl" {...register("mission_ar")} />
+                    <Textarea label="Vision (Arabic)" dir="rtl" {...register("vision_ar")} />
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <Input

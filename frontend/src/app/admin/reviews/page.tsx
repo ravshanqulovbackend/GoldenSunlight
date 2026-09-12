@@ -144,7 +144,7 @@ export default function AdminReviewsPage() {
                 <Th>Review</Th>
                 <Th>Image</Th>
                 <Th>Date</Th>
-                <Th className="text-right">Actions</Th>
+                <Th className="text-end">Actions</Th>
               </Tr>
             </Thead>
             <Tbody>

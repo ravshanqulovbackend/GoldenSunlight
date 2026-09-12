@@ -8,13 +8,20 @@
  * client boshqa-boshqa matn render qiladi). Shu sabab qo'lda, determinstik formatlash
  * ishlatiladi — server va client har doim bir xil natija beradi.
  */
-export function formatPrice(value: string | number | null | undefined): string {
-  if (value === null || value === undefined) return "AED 0.00";
+/**
+ * `locale` only swaps the currency label ("AED" -> "د.إ") — digits/grouping stay
+ * Western numerals in both languages, matching everyday UAE retail/commercial
+ * convention (this is a plain string choice made once here, identical on server
+ * and client, so it introduces no hydration risk of its own).
+ */
+export function formatPrice(value: string | number | null | undefined, locale: "en" | "ar" = "en"): string {
+  const currency = locale === "ar" ? "د.إ" : "AED";
+  if (value === null || value === undefined) return `${currency} 0.00`;
   const numeric = typeof value === "string" ? parseFloat(value) : value;
-  if (Number.isNaN(numeric)) return "AED 0.00";
+  if (Number.isNaN(numeric)) return `${currency} 0.00`;
   const [whole, decimals] = numeric.toFixed(2).split(".");
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return `AED ${grouped}.${decimals}`;
+  return `${currency} ${grouped}.${decimals}`;
 }
 
 /**

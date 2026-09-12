@@ -98,7 +98,7 @@ export default function AdminGalleryPage() {
             {categoriesQuery.data.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest py-1.5 pl-4 pr-2 label-md text-on-surface"
+                className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest py-1.5 ps-4 pe-2 label-md text-on-surface"
               >
                 {category.name}
                 <span className="label-sm text-on-surface-variant">({category.image_count})</span>

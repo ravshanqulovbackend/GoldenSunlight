@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { validateCoupon } from "@/lib/api/endpoints/orders";
 import { parseApiError } from "@/lib/api/parseApiError";
 import { Input } from "@/components/ui/Input";
@@ -18,6 +19,7 @@ interface CouponInputProps {
  * recalculated server-side via coupon_code when the order is created.
  */
 export function CouponInput({ onApplied }: CouponInputProps) {
+  const t = useTranslations("Checkout");
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<CouponPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function CouponInput({ onApplied }: CouponInputProps) {
     onError: (err) => {
       setApplied(null);
       onApplied(null);
-      setError(parseApiError(err).message || "Coupon not found");
+      setError(parseApiError(err).message || t("couponNotFound"));
     },
   });
 
@@ -40,7 +42,7 @@ export function CouponInput({ onApplied }: CouponInputProps) {
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
         <Input
-          placeholder="Coupon code"
+          placeholder={t("couponPlaceholder")}
           value={code}
           onChange={(e) => {
             setCode(e.target.value);
@@ -52,13 +54,13 @@ export function CouponInput({ onApplied }: CouponInputProps) {
           className="flex-1"
         />
         <Button type="button" variant="outline" disabled={!code.trim() || mutation.isPending} onClick={() => mutation.mutate()}>
-          Apply
+          {t("apply")}
         </Button>
       </div>
       {applied && (
         <span className="label-md flex items-center gap-1 text-primary">
           <Icon name="check_circle" className="text-[18px]" />
-          {applied.discount_percent}% discount applied
+          {t("discountApplied", { percent: applied.discount_percent })}
         </span>
       )}
       {error && <span className="label-sm text-error">{error}</span>}

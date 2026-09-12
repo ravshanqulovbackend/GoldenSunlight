@@ -40,7 +40,7 @@ export function ConversationList({ selectedCustomerId, onSelect }: ConversationL
               type="button"
               onClick={() => onSelect(conversation.id)}
               className={cn(
-                "flex w-full items-stretch gap-3 border-l-[3px] border-transparent px-4 py-3 text-left transition-colors hover:bg-surface-container-low",
+                "flex w-full items-stretch gap-3 border-s-[3px] border-transparent px-4 py-3 text-start transition-colors hover:bg-surface-container-low",
                 isSelected && "border-primary bg-primary-container/30"
               )}
             >

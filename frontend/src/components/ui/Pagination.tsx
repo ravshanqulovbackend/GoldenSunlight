@@ -42,7 +42,7 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
         aria-disabled={currentPage === 1}
         className={cn(linkClasses(false), currentPage === 1 && "pointer-events-none opacity-40")}
       >
-        <Icon name="chevron_left" className="text-[20px]" />
+        <Icon name="chevron_left" className="text-[20px]" mirrorInRtl />
       </Link>
 
       {pageNumbers(currentPage, totalPages).map((page, index) =>
@@ -62,7 +62,7 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
         aria-disabled={currentPage === totalPages}
         className={cn(linkClasses(false), currentPage === totalPages && "pointer-events-none opacity-40")}
       >
-        <Icon name="chevron_right" className="text-[20px]" />
+        <Icon name="chevron_right" className="text-[20px]" mirrorInRtl />
       </Link>
     </nav>
   );

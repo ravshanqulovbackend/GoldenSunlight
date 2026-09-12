@@ -104,8 +104,9 @@ python3.12 -m venv .venv            # aynan 3.12 — Dockerfile ham shu versiyan
 source .venv/bin/activate           # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
-python seed.py                      # demo katalog ma'lumotlarini yuklaydi (166 mahsulot,
-                                     # brendlar, kategoriyalar, kupon, yangiliklar, kompaniya —
+python seed.py                      # demo katalog ma'lumotlarini yuklaydi (20 mahsulot —
+                                     # har biri to'liq arabcha tarjima bilan — brendlar,
+                                     # kategoriyalar, kupon, yangiliklar, kompaniya —
                                      # user/admin/buyurtma/sharh ENDI YARATILMAYDI)
 python manage.py runserver          # http://localhost:8000
 ```
@@ -212,8 +213,10 @@ docker-compose.yml   db, redis, backend, celery, celery-beat, frontend, nginx se
 ## Demo ma'lumotlar (seed.py orqali yaratiladi)
 
 ⚠️ `seed.py` endi **demo user/admin/buyurtma/sharh/sevimli/manzil yaratmaydi** — faqat
-brendlar, kategoriyalar, mahsulotlar (166 ta), kuponlar, yangiliklar va kompaniya ma'lumotini
-yuklaydi. Real admin/superadmin akkaunt kerak bo'lsa `python manage.py createsuperuser`
+brendlar, kategoriyalar, mahsulotlar (barcha 6 kategoriya va 5 brendni qamrab oluvchi 20 ta,
+har biri `name_ar`/`description_ar`/`ingredients_ar`/`badge_ar` orqali to'liq arabcha
+tarjima bilan — `backend/products_catalog_data.py`), kuponlar, yangiliklar va kompaniya
+ma'lumotini yuklaydi. Real admin/superadmin akkaunt kerak bo'lsa `python manage.py createsuperuser`
 ishlating (yoki Django admin orqali oddiy userga `pending_role='admin'` belgilang — yuqoridagi
 "Admin huquqi berish ikki bosqichli" bo'limiga qarang).
 

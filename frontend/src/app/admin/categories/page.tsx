@@ -95,7 +95,7 @@ export default function AdminCategoriesPage() {
               <Th>Slug</Th>
               <Th>Products</Th>
               <Th>Status</Th>
-              <Th className="text-right">Actions</Th>
+              <Th className="text-end">Actions</Th>
             </Tr>
           </Thead>
           <Tbody>

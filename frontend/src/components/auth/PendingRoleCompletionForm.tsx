@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { updateProfileMultipart } from "@/lib/api/endpoints/auth";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { toast } from "@/lib/stores/toastStore";
@@ -14,8 +15,9 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { getImageUrl } from "@/lib/utils/image";
+import { useRoleLabels } from "@/lib/utils/roles";
 import { pendingRoleCompletionSchema, type PendingRoleCompletionFormValues } from "@/lib/utils/validators";
-import { ROLE_LABELS, type User } from "@/types/auth";
+import type { User } from "@/types/auth";
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -25,6 +27,8 @@ const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
  * name, phone, photo) is fully filled in. Wired up via `lib/guards/PendingRoleGate.tsx`.
  */
 export function PendingRoleCompletionForm({ user }: { user: User }) {
+  const t = useTranslations("Auth.pending");
+  const roleLabels = useRoleLabels();
   const setUser = useAuthStore((s) => s.setUser);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar ? getImageUrl(user.avatar) : null);
@@ -46,23 +50,23 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
     onSuccess: (updated) => {
       setUser(updated);
       if (updated.pending_role) {
-        toast("Information saved", "success");
+        toast(t("infoSaved"), "success");
       } else {
-        toast(`Congratulations! You have been granted ${ROLE_LABELS[updated.role]} access.`, "success");
+        toast(t("congratulations", { role: roleLabels[updated.role] }), "success");
       }
     },
-    onError: (error) => toast(parseApiError(error).message || "An error occurred while saving", "error"),
+    onError: (error) => toast(parseApiError(error).message || t("saveError"), "error"),
   });
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setAvatarError("Please upload an image file only");
+      setAvatarError(t("imageOnly"));
       return;
     }
     if (file.size > MAX_AVATAR_SIZE) {
-      setAvatarError("Image size must not exceed 5MB");
+      setAvatarError(t("imageSize"));
       return;
     }
     setAvatarError(null);
@@ -72,7 +76,7 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
 
   function onSubmit(values: PendingRoleCompletionFormValues) {
     if (!avatarFile && !user.avatar) {
-      setAvatarError("A profile photo is required");
+      setAvatarError(t("photoRequired"));
       return;
     }
     mutation.mutate(values);
@@ -85,10 +89,12 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-primary">
             <Icon name="verified_user" className="text-[28px]" />
           </span>
-          <h1 className="headline-md text-on-surface">Administrator Access Granted</h1>
+          <h1 className="headline-md text-on-surface">{t("title")}</h1>
           <p className="body-md text-on-surface-variant">
-            You have been granted <strong className="text-on-surface">{ROLE_LABELS[user.pending_role as "admin"]}</strong> access.
-            To continue, please fill in the following information about yourself first.
+            {t.rich("description", {
+              role: roleLabels[user.pending_role as "admin"],
+              b: (chunks) => <strong className="text-on-surface">{chunks}</strong>,
+            })}
           </p>
         </div>
 
@@ -105,33 +111,33 @@ export function PendingRoleCompletionForm({ user }: { user: User }) {
               )}
             </div>
             <label className="label-md cursor-pointer text-primary hover:underline">
-              Choose Photo
+              {t("choosePhoto")}
               <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
             </label>
             {avatarError && <span className="label-sm text-error">{avatarError}</span>}
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input label="First Name" autoFocus error={errors.first_name?.message} {...register("first_name")} />
-            <Input label="Last Name" error={errors.last_name?.message} {...register("last_name")} />
+            <Input label={t("firstName")} autoFocus error={errors.first_name?.message} {...register("first_name")} />
+            <Input label={t("lastName")} error={errors.last_name?.message} {...register("last_name")} />
           </div>
           <Controller
             control={control}
             name="phone"
             render={({ field }) => (
-              <PhoneInput label="Phone" error={errors.phone?.message} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
+              <PhoneInput label={t("phone")} error={errors.phone?.message} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
             )}
           />
 
           <Button type="submit" size="lg" disabled={mutation.isPending} className="mt-2">
-            {mutation.isPending ? "Saving..." : "Save and Continue"}
+            {mutation.isPending ? t("saving") : t("save")}
           </Button>
           <button
             type="button"
             onClick={() => logoutAndRedirect()}
             className="label-md text-center text-on-surface-variant hover:text-error"
           >
-            Log out to sign in with a different account
+            {t("logout")}
           </button>
         </form>
       </Card>

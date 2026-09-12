@@ -79,9 +79,13 @@ export type PendingRoleCompletionFormValues = z.infer<typeof pendingRoleCompleti
 export const companyFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   tagline: z.string().optional(),
+  tagline_ar: z.string().optional(),
   description: z.string().optional(),
+  description_ar: z.string().optional(),
   mission: z.string().optional(),
+  mission_ar: z.string().optional(),
   vision: z.string().optional(),
+  vision_ar: z.string().optional(),
   founded_year: z.number().nullable().optional(),
   employee_count: z.string().optional(),
   phone: z.string().optional(),
@@ -97,8 +101,11 @@ export type CompanyFormValues = z.infer<typeof companyFormSchema>;
 
 export const certificateFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  title_ar: z.string().optional(),
   description: z.string().optional(),
+  description_ar: z.string().optional(),
   issued_by: z.string().optional(),
+  issued_by_ar: z.string().optional(),
   issued_date: z.string().optional(),
   expiry_date: z.string().optional(),
   is_active: z.boolean().optional(),
@@ -132,8 +139,10 @@ export type PartnershipFormValues = z.infer<typeof partnershipFormSchema>;
 
 export const categoryFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  name_ar: z.string().optional(),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
+  description_ar: z.string().optional(),
   parent: z.number().nullable().optional(),
   sort_order: z.number().optional(),
   is_active: z.boolean().optional(),
@@ -142,18 +151,26 @@ export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 export const productFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  name_ar: z.string().optional(),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
+  description_ar: z.string().optional(),
   price: z.string().min(1, "Price is required"),
   old_price: z.string().optional(),
   category: z.number({ message: "Category must be selected" }),
   brand: z.number().nullable().optional(),
   ingredients: z.string().optional(),
+  ingredients_ar: z.string().optional(),
   badge: z.string().optional(),
+  badge_ar: z.string().optional(),
   sku: z.string().optional(),
   stock: z.number({ message: "Stock quantity is required" }),
   is_active: z.boolean().optional(),
   is_popular: z.boolean().optional(),
   is_featured: z.boolean().optional(),
+  meta_title: z.string().optional(),
+  meta_title_ar: z.string().optional(),
+  meta_description: z.string().optional(),
+  meta_description_ar: z.string().optional(),
 });
 export type ProductFormValues = z.infer<typeof productFormSchema>;

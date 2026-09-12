@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { cn } from "@/lib/utils/cn";
@@ -14,19 +15,19 @@ interface MenuAction {
   danger?: boolean;
 }
 
-function getMenuActions(role: string | undefined): MenuAction[] {
-  const passwordItem: MenuAction = { label: "Change password", icon: "lock_reset", href: "/profile/password" };
+function getMenuActions(role: string | undefined, t: (key: string) => string): MenuAction[] {
+  const passwordItem: MenuAction = { label: t("changePassword"), icon: "lock_reset", href: "/profile/password" };
   const usersItem: MenuAction = {
-    label: "Admin Panel",
+    label: t("adminPanel"),
     icon: "group",
     href: role === "superadmin" ? "/admin/dashboard" : "/admin/orders",
   };
   const editInfoItem: MenuAction = {
-    label: role === "staff" ? "Edit information" : "Change profile information",
+    label: role === "staff" ? t("editInformation") : t("changeProfileInformation"),
     icon: "edit",
     href: "/profile",
   };
-  const logoutItem: MenuAction = { label: "Log Out", icon: "logout", onClick: () => logoutAndRedirect(), danger: true };
+  const logoutItem: MenuAction = { label: t("logOut"), icon: "logout", onClick: () => logoutAndRedirect(), danger: true };
 
   if (role === "superadmin") return [passwordItem, usersItem, logoutItem];
   if (role === "admin") return [passwordItem, usersItem, editInfoItem, logoutItem];
@@ -41,6 +42,7 @@ interface ProfileMenuProps {
 
 /** Opens a role-appropriate actions menu when the profile badge/card is clicked. */
 export function ProfileMenu({ children, placement = "bottom", panelClassName }: ProfileMenuProps) {
+  const t = useTranslations("ProfileMenu");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const user = useAuthStore((s) => s.user);
@@ -56,7 +58,7 @@ export function ProfileMenu({ children, placement = "bottom", panelClassName }: 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const actions = getMenuActions(user?.role);
+  const actions = getMenuActions(user?.role, t);
 
   return (
     <div ref={containerRef} className="relative">
@@ -68,7 +70,7 @@ export function ProfileMenu({ children, placement = "bottom", panelClassName }: 
         <div
           role="menu"
           className={cn(
-            "absolute right-0 z-50 w-64 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg",
+            "absolute end-0 z-50 w-64 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg",
             placement === "bottom" ? "top-full mt-2" : "bottom-full mb-2",
             panelClassName
           )}
@@ -81,7 +83,7 @@ export function ProfileMenu({ children, placement = "bottom", panelClassName }: 
               </>
             );
             const itemClassName = cn(
-              "flex w-full items-center gap-3 px-4 py-3 label-md text-left transition-colors hover:bg-surface-container-high",
+              "flex w-full items-center gap-3 px-4 py-3 label-md text-start transition-colors hover:bg-surface-container-high",
               action.danger ? "text-error" : "text-on-surface"
             );
 

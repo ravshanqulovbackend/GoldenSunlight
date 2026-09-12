@@ -2,18 +2,25 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { AppImage } from "@/components/ui/AppImage";
 import { Badge } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils/cn";
 import { getImageUrl } from "@/lib/utils/image";
 import { formatPrice } from "@/lib/utils/money";
+import { pickLocalized } from "@/lib/utils/i18n";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useAddToCart } from "@/lib/query/hooks/useCart";
 import { useFavorites, useToggleFavorite } from "@/lib/query/hooks/useFavorites";
 import type { ProductListItem } from "@/types/product";
+import type { Locale } from "@/i18n/config";
 
 export function ProductCard({ product }: { product: ProductListItem }) {
+  const t = useTranslations("Products");
+  const locale = useLocale() as Locale;
+  const name = pickLocalized(product.name, product.name_ar, locale);
+  const badge = pickLocalized(product.badge, product.badge_ar, locale);
   const router = useRouter();
   const access = useAuthStore((s) => s.access);
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -37,15 +44,15 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         <Link href={`/products/${product.slug}`}>
           <AppImage
             src={getImageUrl(product.image)}
-            alt={product.name}
+            alt={name}
             className="h-full w-full transition-transform duration-300 group-hover:scale-110"
           />
         </Link>
 
-        {(product.badge || product.discount_percent > 0) && (
-          <div className="absolute left-2 top-2 sm:left-3 sm:top-3">
+        {(badge || product.discount_percent > 0) && (
+          <div className="absolute start-2 top-2 sm:start-3 sm:top-3">
             <Badge tone={product.badge === "Yangi" ? "tertiary" : "secondary"}>
-              {product.badge || `-${product.discount_percent}%`}
+              {badge || `-${product.discount_percent}%`}
             </Badge>
           </div>
         )}
@@ -53,10 +60,10 @@ export function ProductCard({ product }: { product: ProductListItem }) {
         <button
           type="button"
           onClick={() => requireAuth(() => toggleFavorite.mutate(product.id))}
-          aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isFavorite ? t("removeFromWishlist") : t("addToWishlist")}
           disabled={toggleFavorite.isPending}
           className={cn(
-            "absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 transition-opacity hover:bg-surface sm:right-3 sm:top-3 sm:h-9 sm:w-9",
+            "absolute end-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 transition-opacity hover:bg-surface sm:end-3 sm:top-3 sm:h-9 sm:w-9",
             isFavorite ? "opacity-100" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
           )}
         >
@@ -69,18 +76,20 @@ export function ProductCard({ product }: { product: ProductListItem }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
-        <span className="label-sm truncate text-on-surface-variant">{product.category_name}</span>
+        <span className="label-sm truncate text-on-surface-variant">
+          {pickLocalized(product.category_name, product.category_name_ar, locale)}
+        </span>
         <Link
           href={`/products/${product.slug}`}
           className="title-lg line-clamp-2-custom text-on-surface hover:text-primary"
         >
-          {product.name}
+          {name}
         </Link>
 
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 label-sm normal-case text-on-surface-variant">
           <span className="flex items-center gap-1">
             <Icon name="inventory_2" className="text-[16px]" />
-            {product.is_in_stock ? "In Stock" : "Out of Stock"}
+            {product.is_in_stock ? t("inStock") : t("outOfStock")}
           </span>
           {product.review_count > 0 && (
             <span className="flex items-center gap-1">
@@ -94,16 +103,16 @@ export function ProductCard({ product }: { product: ProductListItem }) {
           <div className="flex min-w-0 flex-col">
             {product.old_price && (
               <span className="label-sm truncate text-on-surface-variant line-through">
-                {formatPrice(product.old_price)}
+                {formatPrice(product.old_price, locale)}
               </span>
             )}
-            <span className="title-lg truncate text-primary">{formatPrice(product.price)}</span>
+            <span className="title-lg truncate text-primary">{formatPrice(product.price, locale)}</span>
           </div>
           <button
             type="button"
             onClick={() => requireAuth(() => addToCart.mutate({ product_id: product.id }))}
             disabled={!product.is_in_stock || addToCart.isPending}
-            aria-label="Add to cart"
+            aria-label={t("addToCart")}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary transition-transform hover:brightness-110 active:scale-95 disabled:opacity-40 sm:h-10 sm:w-10"
           >
             <Icon name="add_shopping_cart" className="text-[18px] sm:text-[20px]" />

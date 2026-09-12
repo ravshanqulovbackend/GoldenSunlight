@@ -137,7 +137,7 @@ export default function AdminUsersPage() {
                 <Th>Login</Th>
                 <Th>Phone</Th>
                 <Th>Role</Th>
-                <Th className="text-right">Actions</Th>
+                <Th className="text-end">Actions</Th>
               </Tr>
             </Thead>
             <Tbody>

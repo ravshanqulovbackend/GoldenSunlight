@@ -2,9 +2,13 @@ export interface Company {
   id: number;
   name: string;
   tagline: string;
+  tagline_ar: string;
   description: string;
+  description_ar: string;
   mission: string;
+  mission_ar: string;
   vision: string;
+  vision_ar: string;
   founded_year: number | null;
   employee_count: string;
   phone: string;
@@ -22,9 +26,13 @@ export interface Company {
 export interface CompanyPayload {
   name?: string;
   tagline?: string;
+  tagline_ar?: string;
   description?: string;
+  description_ar?: string;
   mission?: string;
+  mission_ar?: string;
   vision?: string;
+  vision_ar?: string;
   founded_year?: number | null;
   employee_count?: string;
   phone?: string;

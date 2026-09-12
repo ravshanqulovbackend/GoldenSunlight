@@ -48,7 +48,7 @@ export default function NotificationsPage() {
               key={notification.id}
               className={cn(
                 "flex flex-col items-start justify-between gap-4 p-5 sm:flex-row",
-                !notification.is_read && "border-l-4 border-l-primary"
+                !notification.is_read && "border-s-4 border-s-primary"
               )}
             >
               <div className="flex min-w-0 flex-1 items-start gap-3">

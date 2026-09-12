@@ -3,9 +3,12 @@ from django.db import models
 
 class Certificate(models.Model):
     title = models.CharField(max_length=255)
+    title_ar = models.CharField(max_length=255, blank=True, default='')
     description = models.TextField(blank=True, default='')
+    description_ar = models.TextField(blank=True, default='')
     image = models.ImageField(upload_to='certificates/')
     issued_by = models.CharField(max_length=255, blank=True, default='')
+    issued_by_ar = models.CharField(max_length=255, blank=True, default='')
     issued_date = models.DateField(null=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)

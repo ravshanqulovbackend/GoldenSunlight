@@ -97,6 +97,23 @@ body {
 }
 
 /*
+ * RTL (arabcha) rejim — <html dir="rtl"> qo'yilganda ishga tushadi (frontend/src/i18n).
+ * Shrift: lotin harflari uchun mo'ljallangan Inter/Poppins arab harflarini chizmaydi —
+ * Cairo (--font-arabic, layout.tsx'da next/font orqali yuklangan) ustiga almashtiriladi.
+ * tracking-wide/-widest harflar orasini kengaytiradi — bog'langan arab yozuvida bu
+ * harflarni bir-biridan uzib, matnni buzib ko'rsatadi, shuning uchun RTL'da o'chiriladi.
+ */
+[dir="rtl"] {
+  --font-display: var(--font-arabic), "Segoe UI", Tahoma, sans-serif;
+  --font-body: var(--font-arabic), "Segoe UI", Tahoma, sans-serif;
+}
+
+[dir="rtl"] .tracking-wide,
+[dir="rtl"] .tracking-widest {
+  letter-spacing: normal;
+}
+
+/*
  * Tipografiya shkalasi — DESIGN.md'dagi nomlangan tokenlar. Har bir token
  * font-size+line-height+letter-spacing+weight birikmasini bitta joyda ushlab turadi,
  * shunda har bir ishlatilgan joyda takrorlanib, bir-biridan farqlanib ketmaydi.

@@ -3,14 +3,18 @@ from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    name_ar = models.CharField(max_length=100, blank=True, default='')
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True, default='')
+    description_ar = models.TextField(blank=True, default='')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     image = models.ImageField(upload_to='categories/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     sort_order = models.IntegerField(default=0)
     meta_title = models.CharField(max_length=255, blank=True, default='')
+    meta_title_ar = models.CharField(max_length=255, blank=True, default='')
     meta_description = models.TextField(blank=True, default='')
+    meta_description_ar = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

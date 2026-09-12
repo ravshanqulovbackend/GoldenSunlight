@@ -4,8 +4,10 @@ from categories.models import Category
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)
+    name_ar = models.CharField(max_length=100, blank=True, default='')
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True, default='')
+    description_ar = models.TextField(blank=True, default='')
     image = models.ImageField(upload_to='brands/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,15 +21,19 @@ class Brand(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
+    name_ar = models.CharField(max_length=255, blank=True, default='')
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True, default='')
+    description_ar = models.TextField(blank=True, default='')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     old_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     image = models.ImageField(upload_to='products/')
     ingredients = models.TextField(blank=True, default='')
+    ingredients_ar = models.TextField(blank=True, default='')
     badge = models.CharField(max_length=50, blank=True, default='')
+    badge_ar = models.CharField(max_length=50, blank=True, default='')
     sku = models.CharField(max_length=100, blank=True, default='')
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -36,7 +42,9 @@ class Product(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     review_count = models.PositiveIntegerField(default=0)
     meta_title = models.CharField(max_length=255, blank=True, default='')
+    meta_title_ar = models.CharField(max_length=255, blank=True, default='')
     meta_description = models.TextField(blank=True, default='')
+    meta_description_ar = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

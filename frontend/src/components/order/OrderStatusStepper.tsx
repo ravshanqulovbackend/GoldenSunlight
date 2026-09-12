@@ -1,25 +1,21 @@
+"use client";
+
 import { Fragment } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils/cn";
-import { ORDER_TRACKING_STEPS, getTrackingStepIndex } from "@/lib/utils/orderLabels";
+import { useOrderTrackingSteps, getTrackingStepIndex } from "@/lib/utils/orderLabels";
 import type { OrderStatus } from "@/types/order";
 
-const CANCELLED_COPY: Record<"cancelled" | "refunded", { icon: string; title: string; description: string }> = {
-  cancelled: {
-    icon: "cancel",
-    title: "Buyurtma bekor qilingan",
-    description: "Ushbu buyurtma bekor qilingan, uni endi kuzatib bo'lmaydi.",
-  },
-  refunded: {
-    icon: "currency_exchange",
-    title: "Pul qaytarilgan",
-    description: "Ushbu buyurtma uchun to'langan summa qaytarilgan.",
-  },
-};
-
 export function OrderStatusStepper({ status }: { status: OrderStatus }) {
+  const t = useTranslations("OrderTracking");
+  const steps = useOrderTrackingSteps();
+
   if (status === "cancelled" || status === "refunded") {
-    const copy = CANCELLED_COPY[status];
+    const copy =
+      status === "cancelled"
+        ? { icon: "cancel", title: t("cancelledTitle"), description: t("cancelledDescription") }
+        : { icon: "currency_exchange", title: t("refundedTitle"), description: t("refundedDescription") };
     return (
       <div className="flex items-center gap-4 rounded-lg bg-error-container/40 p-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-error-container text-on-error-container">
@@ -33,11 +29,11 @@ export function OrderStatusStepper({ status }: { status: OrderStatus }) {
     );
   }
 
-  const currentIndex = getTrackingStepIndex(status);
+  const currentIndex = getTrackingStepIndex(steps, status);
 
   return (
     <div className="flex items-start">
-      {ORDER_TRACKING_STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const isCompleted = index < currentIndex;
         const isCurrent = index === currentIndex;
         const isUpcoming = index > currentIndex;
@@ -63,7 +59,7 @@ export function OrderStatusStepper({ status }: { status: OrderStatus }) {
                 {step.label}
               </span>
             </div>
-            {index < ORDER_TRACKING_STEPS.length - 1 && (
+            {index < steps.length - 1 && (
               <div className={cn("mt-[18px] h-0.5 flex-1", index < currentIndex ? "bg-primary" : "bg-outline-variant")} />
             )}
           </Fragment>

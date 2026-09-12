@@ -45,8 +45,10 @@ export function CategoryFormModal({ open, onClose, category, categories }: Categ
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: category?.name ?? "",
+      name_ar: category?.name_ar ?? "",
       slug: category?.slug ?? "",
       description: category?.description ?? "",
+      description_ar: category?.description_ar ?? "",
       parent: category?.parent ?? null,
       sort_order: category?.sort_order ?? 0,
       is_active: category?.is_active ?? true,
@@ -60,8 +62,10 @@ export function CategoryFormModal({ open, onClose, category, categories }: Categ
       setImagePreview(category?.image ? getImageUrl(category.image) : null);
       reset({
         name: category?.name ?? "",
+        name_ar: category?.name_ar ?? "",
         slug: category?.slug ?? "",
         description: category?.description ?? "",
+        description_ar: category?.description_ar ?? "",
         parent: category?.parent ?? null,
         sort_order: category?.sort_order ?? 0,
         is_active: category?.is_active ?? true,
@@ -139,6 +143,14 @@ export function CategoryFormModal({ open, onClose, category, categories }: Categ
             })}
           />
           <Textarea label="Description" {...register("description")} />
+
+          <div className="flex flex-col gap-3 rounded-lg border border-outline-variant p-4">
+            <p className="label-sm text-on-surface-variant">
+              Arabic content — leave blank to fall back to English.
+            </p>
+            <Input label="Name (Arabic)" dir="rtl" {...register("name_ar")} />
+            <Textarea label="Description (Arabic)" dir="rtl" {...register("description_ar")} />
+          </div>
 
           <Select
             label="Parent Category (optional)"

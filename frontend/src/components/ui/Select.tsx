@@ -162,7 +162,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
               className
             )}
           >
-            <span className="truncate text-left">{selected?.label ?? " "}</span>
+            <span className="truncate text-start">{selected?.label ?? " "}</span>
             <Icon
               name="expand_more"
               className={cn("shrink-0 text-[20px] text-on-surface-variant transition-transform", open && "rotate-180")}

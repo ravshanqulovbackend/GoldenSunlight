@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { logoutAndRedirect } from "@/lib/stores/authStore";
+import { LanguageToggle } from "./LanguageToggle";
 import type { User } from "@/types/auth";
 
 interface NavItem {
@@ -31,6 +33,7 @@ export function MobileNavDrawer({
   onOpenSupport,
   supportUnreadCount,
 }: MobileNavDrawerProps) {
+  const t = useTranslations("MobileNav");
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -44,13 +47,13 @@ export function MobileNavDrawer({
     <div className="fixed inset-0 z-50 md:hidden">
       <button
         type="button"
-        aria-label="Close menu"
+        aria-label={t("menu")}
         onClick={onClose}
         className="absolute inset-0 bg-inverse-surface/50"
       />
-      <div className="absolute right-0 top-0 flex h-full w-4/5 max-w-xs flex-col gap-6 bg-surface p-6 shadow-xl">
+      <div className="absolute end-0 top-0 flex h-full w-4/5 max-w-xs flex-col gap-6 bg-surface p-6 shadow-xl">
         <div className="flex items-center justify-between">
-          <span className="headline-md text-primary">Menu</span>
+          <span className="headline-md text-primary">{t("menu")}</span>
           <button type="button" onClick={onClose} aria-label="Close" className="flex h-10 w-10 items-center justify-center">
             <Icon name="close" />
           </button>
@@ -63,29 +66,25 @@ export function MobileNavDrawer({
             </Link>
           ))}
           <Link href="/wishlist" onClick={onClose} className="title-lg text-on-surface hover:text-primary">
-            Wishlist
+            {t("wishlist")}
           </Link>
         </nav>
+
+        <LanguageToggle className="w-fit" />
 
         <div className="mt-auto border-t border-outline-variant pt-6">
           {isAuthenticated ? (
             <div className="flex flex-col gap-3">
               <p className="label-sm uppercase text-on-surface-variant">
-                {user?.first_name || user?.username || "Profile"}
+                {user?.first_name || user?.username || t("profileFallback")}
               </p>
               {user?.role === "staff" && (
                 <>
                   <Link href="/profile" onClick={onClose} className="label-md text-on-surface-variant">
-                    Edit information
+                    {t("editInformation")}
                   </Link>
                   <Link href="/profile/password" onClick={onClose} className="label-md text-on-surface-variant">
-                    Change password
-                  </Link>
-                  <Link href="/orders" onClick={onClose} className="label-md text-on-surface-variant">
-                    My Orders
-                  </Link>
-                  <Link href="/notifications" onClick={onClose} className="label-md text-on-surface-variant">
-                    Notifications
+                    {t("changePassword")}
                   </Link>
                   {onOpenSupport && (
                     <button
@@ -96,7 +95,7 @@ export function MobileNavDrawer({
                       }}
                       className="flex items-center gap-2 label-md text-on-surface-variant"
                     >
-                      Report an issue
+                      {t("reportIssue")}
                       {!!supportUnreadCount && (
                         <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
                           {supportUnreadCount}
@@ -109,37 +108,37 @@ export function MobileNavDrawer({
               {user?.role === "admin" && (
                 <>
                   <Link href="/profile" onClick={onClose} className="label-md text-on-surface-variant">
-                    Change profile information
+                    {t("changeProfileInformation")}
                   </Link>
                   <Link href="/profile/password" onClick={onClose} className="label-md text-on-surface-variant">
-                    Change password
+                    {t("changePassword")}
                   </Link>
                   <Link href="/admin/users" onClick={onClose} className="label-md text-on-surface-variant">
-                    Users
+                    {t("users")}
                   </Link>
                 </>
               )}
               {user?.role === "superadmin" && (
                 <>
                   <Link href="/profile/password" onClick={onClose} className="label-md text-on-surface-variant">
-                    Change password
+                    {t("changePassword")}
                   </Link>
                   <Link href="/admin/users" onClick={onClose} className="label-md text-on-surface-variant">
-                    Users
+                    {t("users")}
                   </Link>
                 </>
               )}
               <button
                 type="button"
                 onClick={() => logoutAndRedirect()}
-                className="label-md text-left text-error"
+                className="label-md text-start text-error"
               >
-                Log Out
+                {t("logOut")}
               </button>
             </div>
           ) : (
             <Link href="/auth/login" onClick={onClose} className="title-lg text-primary">
-              Log In
+              {t("logIn")}
             </Link>
           )}
         </div>

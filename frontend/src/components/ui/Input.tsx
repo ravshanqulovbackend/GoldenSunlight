@@ -31,7 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               "h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 body-md text-on-surface",
               "focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary-fixed-dim",
               error && "border-error focus:border-error focus:ring-error-container",
-              isPassword && "pr-11",
+              isPassword && "pe-11",
               className
             )}
             aria-invalid={!!error}
@@ -43,7 +43,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={() => setRevealed((v) => !v)}
               tabIndex={-1}
               aria-label={revealed ? "Hide password" : "Show password"}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
             >
               <Icon name={revealed ? "visibility_off" : "visibility"} className="text-[20px]" />
             </button>

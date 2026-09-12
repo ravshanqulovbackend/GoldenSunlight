@@ -2,32 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { NavLink } from "./NavLink";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import { ProfileMenu } from "./ProfileMenu";
+import { LanguageToggle } from "./LanguageToggle";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useCart } from "@/lib/query/hooks/useCart";
 import { useConversationsUnreadCount, useMyUnreadCount } from "@/lib/query/hooks/useSupport";
-import { useNotifications } from "@/lib/query/hooks/useNotifications";
 import { SupportChatPanel } from "@/components/support/SupportChatPanel";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "Products" },
-  { href: "/about", label: "About Us" },
-];
 
 function HeaderBadge({ count }: { count: number | undefined }) {
   if (!count) return null;
   return (
-    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+    <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
       {count}
     </span>
   );
 }
 
 export function Header() {
+  const t = useTranslations("Common");
+  const tHeader = useTranslations("Header");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportPanelOpen, setSupportPanelOpen] = useState(false);
   const user = useAuthStore((s) => s.user);
@@ -38,8 +35,13 @@ export function Header() {
   const { data: cart } = useCart();
   const { data: myUnreadCount } = useMyUnreadCount();
   const { data: conversationsUnreadCount } = useConversationsUnreadCount();
-  const { data: notifications } = useNotifications();
-  const unreadNotifications = isAdmin ? 0 : notifications?.results.filter((n) => !n.is_read).length ?? 0;
+
+  const NAV_LINKS = [
+    { href: "/", label: t("home") },
+    { href: "/products", label: t("products") },
+    { href: "/about", label: t("aboutUs") },
+    ...(isAuthenticated && !isAdmin ? [{ href: "/orders", label: t("myOrders") }] : []),
+  ];
 
   return (
     <>
@@ -59,20 +61,10 @@ export function Header() {
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             {isAuthenticated && !isAdmin && (
-              <Link
-                href="/notifications"
-                aria-label="Notifications"
-                className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
-              >
-                <Icon name="notifications" />
-                <HeaderBadge count={unreadNotifications} />
-              </Link>
-            )}
-            {isAuthenticated && !isAdmin && (
               <button
                 type="button"
                 onClick={() => setSupportPanelOpen(true)}
-                aria-label="Report an issue"
+                aria-label={tHeader("reportIssue")}
                 className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
               >
                 <Icon name="support_agent" />
@@ -82,7 +74,7 @@ export function Header() {
             {isAdmin && (
               <Link
                 href="/admin/support"
-                aria-label="Inquiries"
+                aria-label={tHeader("inquiries")}
                 className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
               >
                 <Icon name="notifications" />
@@ -91,35 +83,36 @@ export function Header() {
             )}
             <Link
               href="/products"
-              aria-label="Search"
+              aria-label={tHeader("search")}
               className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
             >
               <Icon name="search" />
             </Link>
             <Link
               href="/wishlist"
-              aria-label="Wishlist"
+              aria-label={tHeader("wishlist")}
               className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
             >
               <Icon name="favorite" />
             </Link>
             <Link
               href="/cart"
-              aria-label="Cart"
+              aria-label={tHeader("cart")}
               className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10"
             >
               <Icon name="shopping_cart" />
               {isAuthenticated && !!cart?.total_items && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+                <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
                   {cart.total_items}
                 </span>
               )}
             </Link>
+            <LanguageToggle className="hidden md:flex" />
             {isAuthenticated ? (
               <ProfileMenu placement="bottom">
                 <span
-                  aria-label="Profile"
-                  className="ml-0.5 flex h-9 items-center gap-2 rounded-full border border-outline-variant px-2.5 hover:bg-surface-container-low sm:ml-1 sm:h-10 sm:px-3"
+                  aria-label={tHeader("profile")}
+                  className="ms-0.5 flex h-9 items-center gap-2 rounded-full border border-outline-variant px-2.5 hover:bg-surface-container-low sm:ms-1 sm:h-10 sm:px-3"
                 >
                   <Icon name="person" className="text-[20px]" />
                   <span className="label-md hidden max-w-[120px] truncate text-on-surface sm:inline">
@@ -128,14 +121,14 @@ export function Header() {
                 </span>
               </ProfileMenu>
             ) : (
-              <Link href="/auth/login" className="ml-2 hidden label-md text-primary hover:underline md:block">
-                Log In
+              <Link href="/auth/login" className="ms-2 hidden label-md text-primary hover:underline md:block">
+                {t("logIn")}
               </Link>
             )}
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              aria-label="Menu"
+              aria-label={t("menu")}
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10 md:hidden"
             >
               <Icon name="menu" />

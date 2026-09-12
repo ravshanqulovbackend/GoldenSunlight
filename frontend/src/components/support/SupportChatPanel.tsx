@@ -31,7 +31,7 @@ export function SupportChatPanel({ open, onClose }: SupportChatPanelProps) {
   return (
     <div className="fixed inset-0 z-50">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-inverse-surface/50" />
-      <div className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-xl">
+      <div className="absolute end-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-xl">
         <div className="flex items-center justify-between border-b border-outline-variant p-4">
           <div>
             <h2 className="title-lg text-on-surface">Need help?</h2>

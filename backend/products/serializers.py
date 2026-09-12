@@ -8,7 +8,7 @@ class BrandSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brand
-        fields = ('id', 'name', 'slug', 'description', 'image', 'is_active')
+        fields = ('id', 'name', 'name_ar', 'slug', 'description', 'description_ar', 'image', 'is_active')
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -29,7 +29,9 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name_ar = serializers.CharField(source='category.name_ar', read_only=True, default='')
     brand_name = serializers.CharField(source='brand.name', read_only=True, default='')
+    brand_name_ar = serializers.CharField(source='brand.name_ar', read_only=True, default='')
     discount_percent = serializers.IntegerField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
     average_rating = serializers.FloatField(read_only=True)
@@ -38,16 +40,18 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'id', 'name', 'slug', 'price', 'old_price', 'discount_percent',
-            'image', 'badge', 'is_popular', 'is_featured', 'rating', 'review_count',
-            'category', 'category_name', 'brand', 'brand_name', 'stock', 'is_in_stock',
+            'id', 'name', 'name_ar', 'slug', 'price', 'old_price', 'discount_percent',
+            'image', 'badge', 'badge_ar', 'is_popular', 'is_featured', 'rating', 'review_count',
+            'category', 'category_name', 'category_name_ar', 'brand', 'brand_name', 'brand_name_ar', 'stock', 'is_in_stock',
             'average_rating', 'sku',
         )
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name_ar = serializers.CharField(source='category.name_ar', read_only=True, default='')
     brand_name = serializers.CharField(source='brand.name', read_only=True, default='')
+    brand_name_ar = serializers.CharField(source='brand.name_ar', read_only=True, default='')
     discount_percent = serializers.IntegerField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
     average_rating = serializers.FloatField(read_only=True)
@@ -58,12 +62,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'id', 'name', 'slug', 'description', 'price', 'old_price',
-            'discount_percent', 'image', 'ingredients', 'badge', 'sku', 'stock',
+            'id', 'name', 'name_ar', 'slug', 'description', 'description_ar', 'price', 'old_price',
+            'discount_percent', 'image', 'ingredients', 'ingredients_ar', 'badge', 'badge_ar', 'sku', 'stock',
             'is_active', 'is_popular', 'is_featured', 'rating', 'review_count',
-            'category', 'category_name', 'brand', 'brand_name',
+            'category', 'category_name', 'category_name_ar', 'brand', 'brand_name', 'brand_name_ar',
             'images', 'variants', 'is_in_stock', 'average_rating',
-            'meta_title', 'meta_description', 'created_at',
+            'meta_title', 'meta_title_ar', 'meta_description', 'meta_description_ar', 'created_at',
         )
 
 
@@ -76,17 +80,20 @@ class ProductAdminSerializer(serializers.ModelSerializer):
     """
     image = FlexibleImageField()
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name_ar = serializers.CharField(source='category.name_ar', read_only=True, default='')
     brand_name = serializers.CharField(source='brand.name', read_only=True, default='')
+    brand_name_ar = serializers.CharField(source='brand.name_ar', read_only=True, default='')
     discount_percent = serializers.IntegerField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Product
         fields = (
-            'id', 'name', 'slug', 'description', 'price', 'old_price',
-            'discount_percent', 'image', 'ingredients', 'badge', 'sku', 'stock',
+            'id', 'name', 'name_ar', 'slug', 'description', 'description_ar', 'price', 'old_price',
+            'discount_percent', 'image', 'ingredients', 'ingredients_ar', 'badge', 'badge_ar', 'sku', 'stock',
             'is_active', 'is_popular', 'is_featured', 'rating', 'review_count',
-            'category', 'category_name', 'brand', 'brand_name', 'is_in_stock',
+            'category', 'category_name', 'category_name_ar', 'brand', 'brand_name', 'brand_name_ar', 'is_in_stock',
+            'meta_title', 'meta_title_ar', 'meta_description', 'meta_description_ar',
             'created_at', 'updated_at',
         )
         read_only_fields = ('id', 'rating', 'review_count', 'created_at', 'updated_at')
@@ -94,9 +101,13 @@ class ProductAdminSerializer(serializers.ModelSerializer):
 
 class ProductRelatedSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name_ar = serializers.CharField(source='category.name_ar', read_only=True, default='')
     average_rating = serializers.FloatField(read_only=True)
     image = FlexibleImageField(read_only=True)
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'slug', 'price', 'old_price', 'image', 'category_name', 'rating', 'average_rating')
+        fields = (
+            'id', 'name', 'name_ar', 'slug', 'price', 'old_price', 'image',
+            'category_name', 'category_name_ar', 'rating', 'average_rating',
+        )

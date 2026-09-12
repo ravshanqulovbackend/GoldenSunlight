@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { changePassword } from "@/lib/api/endpoints/auth";
 import { parseApiError, apiErrorFieldEntries } from "@/lib/api/parseApiError";
 import { toast } from "@/lib/stores/toastStore";
@@ -14,7 +15,7 @@ import { changePasswordSchema, type ChangePasswordFormValues } from "@/lib/utils
 
 type Strength = { label: string; percent: number; tone: string };
 
-function getStrength(value: string): Strength {
+function getStrength(value: string, t: (key: string) => string): Strength {
   if (!value) return { label: "", percent: 0, tone: "bg-outline-variant" };
   let score = 0;
   if (value.length >= 6) score++;
@@ -23,13 +24,14 @@ function getStrength(value: string): Strength {
   if (/[0-9]/.test(value)) score++;
   if (/[^A-Za-z0-9]/.test(value)) score++;
 
-  if (value.length < 6) return { label: "Too short", percent: 15, tone: "bg-error" };
-  if (score <= 2) return { label: "Weak", percent: 40, tone: "bg-error" };
-  if (score <= 3) return { label: "Medium", percent: 65, tone: "bg-secondary" };
-  return { label: "Strong", percent: 100, tone: "bg-primary" };
+  if (value.length < 6) return { label: t("strengthTooShort"), percent: 15, tone: "bg-error" };
+  if (score <= 2) return { label: t("strengthWeak"), percent: 40, tone: "bg-error" };
+  if (score <= 3) return { label: t("strengthMedium"), percent: 65, tone: "bg-secondary" };
+  return { label: t("strengthStrong"), percent: 100, tone: "bg-primary" };
 }
 
 export function ChangePasswordForm() {
+  const t = useTranslations("ChangePassword");
   const {
     register,
     handleSubmit,
@@ -43,13 +45,13 @@ export function ChangePasswordForm() {
   });
 
   const newPassword = watch("new_password") || "";
-  const strength = getStrength(newPassword);
+  const strength = getStrength(newPassword, t);
 
   const mutation = useMutation({
     mutationFn: (values: ChangePasswordFormValues) =>
       changePassword({ old_password: values.old_password, new_password: values.new_password }),
     onSuccess: () => {
-      toast("Password successfully updated", "success");
+      toast(t("updated"), "success");
       reset({ old_password: "", new_password: "", confirm_password: "" });
     },
     onError: (error) => {
@@ -63,19 +65,17 @@ export function ChangePasswordForm() {
           setError(field as "old_password" | "new_password", { message });
         }
       } else {
-        toast(apiError.message || "Failed to update password", "error");
+        toast(apiError.message || t("updateError"), "error");
       }
     },
   });
 
   return (
     <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
-      <p className="body-md text-on-surface-variant">
-        For security, choose a password of at least 6 characters with a mix of letters and numbers.
-      </p>
+      <p className="body-md text-on-surface-variant">{t("hint")}</p>
 
       <Input
-        label="Current Password"
+        label={t("currentPassword")}
         type="password"
         autoComplete="current-password"
         error={errors.old_password?.message}
@@ -84,7 +84,7 @@ export function ChangePasswordForm() {
 
       <div className="flex flex-col gap-1.5">
         <Input
-          label="New Password"
+          label={t("newPassword")}
           type="password"
           autoComplete="new-password"
           error={errors.new_password?.message}
@@ -104,7 +104,7 @@ export function ChangePasswordForm() {
       </div>
 
       <Input
-        label="Confirm New Password"
+        label={t("confirmNewPassword")}
         type="password"
         autoComplete="new-password"
         error={errors.confirm_password?.message}
@@ -113,7 +113,7 @@ export function ChangePasswordForm() {
 
       <Button type="submit" disabled={mutation.isPending} className="w-fit">
         <Icon name="lock_reset" className="text-[18px]" />
-        {mutation.isPending ? "Updating..." : "Update Password"}
+        {mutation.isPending ? t("updating") : t("updatePassword")}
       </Button>
     </form>
   );

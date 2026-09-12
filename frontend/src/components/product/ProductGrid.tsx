@@ -1,10 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import { ProductCard } from "./ProductCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { ProductListItem } from "@/types/product";
 
-export function ProductGrid({ products }: { products: ProductListItem[] }) {
+export async function ProductGrid({ products }: { products: ProductListItem[] }) {
   if (products.length === 0) {
-    return <EmptyState icon="search_off" title="No products found" description="Try adjusting your filters and search again." />;
+    const t = await getTranslations("Products");
+    return <EmptyState icon="search_off" title={t("noProductsFound")} description={t("adjustFilters")} />;
   }
 
   return (

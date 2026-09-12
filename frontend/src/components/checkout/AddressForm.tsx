@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Textarea } from "@/components/ui/Textarea";
 import { cn } from "@/lib/utils/cn";
 import type { Address } from "@/types/address";
@@ -19,6 +20,7 @@ export function AddressForm({
   onAddressTextChange,
   error,
 }: AddressFormProps) {
+  const t = useTranslations("Checkout");
   return (
     <div className="flex flex-col gap-3">
       {addresses.map((address) => (
@@ -37,7 +39,7 @@ export function AddressForm({
             className="mt-1 accent-primary"
           />
           <div>
-            <p className="label-md font-semibold text-on-surface">{address.title || "Address"}</p>
+            <p className="label-md font-semibold text-on-surface">{address.title || t("addressFallback")}</p>
             <p className="body-md text-on-surface-variant">
               {[address.city, address.district, address.street, address.building].filter(Boolean).join(", ")}
             </p>
@@ -59,12 +61,12 @@ export function AddressForm({
           className="mt-1 accent-primary"
         />
         <div className="flex-1">
-          <p className="label-md font-semibold text-on-surface">Enter a different address</p>
+          <p className="label-md font-semibold text-on-surface">{t("differentAddress")}</p>
           {selectedAddressId === null && (
             <Textarea
               value={addressText}
               onChange={(e) => onAddressTextChange(e.target.value)}
-              placeholder="Enter the full address"
+              placeholder={t("fullAddressPlaceholder")}
               className="mt-2"
               error={error}
             />
