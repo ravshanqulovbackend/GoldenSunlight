@@ -51,7 +51,9 @@ services:
     region: frankfurt
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    healthCheckPath: /api/schema/
+    # healthCheckPath ATAYLAB qo'yilmagan: /api/schema/ har chaqirilganda butun OpenAPI
+    # sxemasini qayta quradi — 0.1 CPU / 512 MB bepul instansiyada bu xotirani tugatib,
+    # konteynerni qayta-qayta o'ldiradi (502). Render port ochilganini tekshirishi yetarli.
     # Render bu qatorni shell orqali emas, bo'laklarga ajratib bajaradi — shuning uchun
     # migrate/collectstatic/seed ketma-ketligi backend/render-start.sh ichida.
     dockerCommand: sh render-start.sh

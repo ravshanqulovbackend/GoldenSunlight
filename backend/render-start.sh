@@ -15,8 +15,12 @@ python manage.py createsuperuser --noinput || true
 # shuning uchun demo rasmlar har safar repodan qayta nusxalanadi.
 python seed.py || true
 
+# Bepul instansiyada atigi 512 MB RAM bor — bitta worker (ko'p thread bilan) xavfsiz,
+# ikkitasi Pillow/DRF bilan birga xotirani tugatib konteynerni o'ldiradi.
 exec gunicorn config.wsgi:application \
     --bind 0.0.0.0:${PORT:-8000} \
-    --workers 2 \
-    --threads 4 \
-    --timeout 120
+    --workers 1 \
+    --threads 8 \
+    --timeout 120 \
+    --max-requests 300 \
+    --max-requests-jitter 50
