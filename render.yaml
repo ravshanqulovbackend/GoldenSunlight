@@ -40,6 +40,9 @@ services:
     name: goldensunlight-redis
     plan: free
     region: frankfurt
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere (faqat backend/celery bog'lanishi uchun, parol bilan himoyalangan)
 
   - type: web
     name: goldensunlight-backend
