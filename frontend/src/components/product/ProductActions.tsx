@@ -2,23 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useAddToCart } from "@/lib/query/hooks/useCart";
 import { useToggleFavorite } from "@/lib/query/hooks/useFavorites";
+import { formatPrice } from "@/lib/utils/money";
 import type { ProductDetail } from "@/types/product";
+import type { Locale } from "@/i18n/config";
 
 export function ProductActions({ product }: { product: ProductDetail }) {
   const t = useTranslations("Products");
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const access = useAuthStore((s) => s.access);
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const addToCart = useAddToCart();
   const toggleFavorite = useToggleFavorite();
+  const unitPrice = parseFloat(product.price) || 0;
 
   function requireAuth(action: () => void) {
     if (!isHydrated) return;
@@ -31,6 +35,18 @@ export function ProductActions({ product }: { product: ProductDetail }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Miqdor o'zgarganda jami summa shu yerda qayta hisoblanadi — sarlavhadagi narx
+          bir dona uchun bo'lib qoladi. Balandlik ikki holatda ham bir xil (breakdown
+          faqat qty > 1 da qo'shiladi) — shuning uchun + bosilganda layout siljimaydi. */}
+      <div className="flex items-baseline gap-2">
+        <span className="title-lg text-on-surface">{t("lineTotal", { total: formatPrice(unitPrice * quantity, locale) })}</span>
+        {quantity > 1 && (
+          <span className="label-md text-on-surface-variant">
+            {t("lineTotalBreakdown", { quantity: String(quantity), unit: formatPrice(unitPrice, locale) })}
+          </span>
+        )}
+      </div>
+
       <div className="flex items-center gap-4">
         <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={product.stock} />
         <Button

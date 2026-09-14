@@ -244,6 +244,8 @@
     "addToWishlist": "إضافة إلى المفضلة",
     "removeFromWishlist": "إزالة من المفضلة",
     "addToCart": "أضف إلى السلة",
+    "lineTotal": "الإجمالي: {total}",
+    "lineTotalBreakdown": "({quantity} × {unit})",
     "reviewsSuffix": "تقييم",
     "skuLabel": "رمز المنتج: {sku}",
     "wishlist": "المفضلة",
@@ -352,10 +354,7 @@
     "notProvided": "غير محدد",
     "editInformationDescription": "حدّث اسمك وصورتك وبيانات التواصل",
     "changePasswordDescription": "عيّن كلمة مرور جديدة لحسابك",
-    "myOrdersDescription": "عرض سجل الطلبات",
-    "logOutDescription": "إنهاء الجلسة",
-    "backToProfile": "العودة إلى الملف الشخصي",
-    "adminPanelDescription": "إدارة الطلبات والمنتجات والمستخدمين"
+    "backToProfile": "العودة إلى الملف الشخصي"
   },
   "Wishlist": {
     "title": "المفضلة",

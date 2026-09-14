@@ -26,14 +26,12 @@ function DetailRow({ icon, label, value }: { icon: string; label: string; value:
 function ActionCard({
   icon,
   title,
-  description,
   href,
   onClick,
   danger,
 }: {
   icon: string;
   title: string;
-  description: string;
   href?: string;
   onClick?: () => void;
   danger?: boolean;
@@ -41,10 +39,7 @@ function ActionCard({
   const content = (
     <>
       <Icon name={icon} className={cn("text-[24px]", danger ? "text-error" : "text-primary")} />
-      <span className="min-w-0">
-        <span className={cn("block title-md", danger ? "text-error" : "text-on-surface")}>{title}</span>
-        <span className="block label-sm text-on-surface-variant">{description}</span>
-      </span>
+      <span className={cn("min-w-0 title-md", danger ? "text-error" : "text-on-surface")}>{title}</span>
     </>
   );
   const className =
@@ -119,37 +114,15 @@ export default function ProfilePage() {
             <ActionCard
               icon="dashboard"
               title={tMenu("adminPanel")}
-              description={t("adminPanelDescription")}
               href={user.role === "superadmin" ? "/admin/dashboard" : "/admin/orders"}
             />
           )}
-          <ActionCard
-            icon="edit"
-            title={tMenu("editInformation")}
-            description={t("editInformationDescription")}
-            href="/profile/edit"
-          />
-          <ActionCard
-            icon="lock_reset"
-            title={tMenu("changePassword")}
-            description={t("changePasswordDescription")}
-            href="/profile/password"
-          />
+          <ActionCard icon="edit" title={tMenu("editInformation")} href="/profile/edit" />
+          <ActionCard icon="lock_reset" title={tMenu("changePassword")} href="/profile/password" />
           {user.role === "staff" && (
-            <ActionCard
-              icon="package_2"
-              title={tCommon("myOrders")}
-              description={t("myOrdersDescription")}
-              href="/orders"
-            />
+            <ActionCard icon="package_2" title={tCommon("myOrders")} href="/orders" />
           )}
-          <ActionCard
-            icon="logout"
-            title={tCommon("logOut")}
-            description={t("logOutDescription")}
-            onClick={() => logoutAndRedirect()}
-            danger
-          />
+          <ActionCard icon="logout" title={tCommon("logOut")} onClick={() => logoutAndRedirect()} danger />
         </div>
       </div>
     </div>

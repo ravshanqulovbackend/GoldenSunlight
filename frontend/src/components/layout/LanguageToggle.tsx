@@ -50,7 +50,8 @@ export function LanguageToggle({ className }: { className?: string }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Change language"
-        className="gs-press flex h-9 items-center justify-center gap-1 rounded-xl border border-outline-variant bg-surface-container-lowest px-3 label-md text-on-surface hover:border-primary hover:bg-surface-container-low sm:h-10"
+        // Header'dagi qo'shni havola/tugmalar kabi ramkasiz — faqat hover fonli dumaloq tugma.
+        className="gs-press flex h-9 items-center justify-center gap-1 rounded-full px-3 label-md text-on-surface hover:bg-surface-container-low hover:text-primary sm:h-10"
       >
         {LOCALE_LABELS[locale]}
         <Icon name="expand_more" className={cn("text-[18px] transition-transform duration-300 ease-spring", open && "rotate-180")} />

@@ -119,7 +119,7 @@ export function MobileNavDrawer({
           </Link>
         </nav>
 
-        <LanguageToggle className="w-fit" />
+        <LanguageToggle className="-ms-3 w-fit" />
 
         <div className="mt-auto border-t border-outline-variant pt-6">
           {isAuthenticated ? (

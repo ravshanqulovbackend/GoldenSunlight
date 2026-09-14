@@ -244,6 +244,8 @@
     "addToWishlist": "Add to wishlist",
     "removeFromWishlist": "Remove from wishlist",
     "addToCart": "Add to Cart",
+    "lineTotal": "Total: {total}",
+    "lineTotalBreakdown": "({quantity} × {unit})",
     "reviewsSuffix": "reviews",
     "skuLabel": "SKU: {sku}",
     "wishlist": "Wishlist",
@@ -352,10 +354,7 @@
     "notProvided": "Not provided",
     "editInformationDescription": "Update your name, photo and contact details",
     "changePasswordDescription": "Set a new password for your account",
-    "myOrdersDescription": "View order history",
-    "logOutDescription": "End your session",
-    "backToProfile": "Back to profile",
-    "adminPanelDescription": "Manage orders, products and users"
+    "backToProfile": "Back to profile"
   },
   "Wishlist": {
     "title": "Wishlist",
