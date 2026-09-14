@@ -39,14 +39,14 @@ export default function AdminDashboardPage() {
       {isError && <ErrorState onRetry={() => refetch()} />}
 
       {data && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="gs-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STAT_CARDS.map((card) => (
             <Link
               key={card.key}
               href={card.href}
-              className="flex items-center gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-5 transition-colors hover:border-primary hover:bg-surface-container-low"
+              className="gs-lift group/stat flex items-center gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-5 hover:border-primary hover:bg-surface-container-low hover:shadow-lg"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-transform duration-400 ease-spring group-hover/stat:scale-110 group-hover/stat:rotate-6">
                 <Icon name={card.icon} className="text-[24px]" />
               </span>
               <div>

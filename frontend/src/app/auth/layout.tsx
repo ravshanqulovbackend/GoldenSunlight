@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 function RedirectIfAuthenticated() {
   const router = useRouter();
@@ -27,10 +28,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <RedirectIfAuthenticated />
       </Suspense>
       <div className="w-full max-w-md">
-        <Link href="/" className="mb-8 block text-center headline-md uppercase tracking-wide text-primary">
+        <Link
+          href="/"
+          className="gs-press mb-8 block text-center headline-md uppercase tracking-wide text-primary animate-fade-down hover:brightness-110"
+        >
           GoldenSunlight
         </Link>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </div>
     </main>
   );

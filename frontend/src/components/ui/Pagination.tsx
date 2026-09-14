@@ -29,10 +29,10 @@ export function Pagination({ currentPage, totalPages, buildHref }: PaginationPro
 
   const linkClasses = (active: boolean) =>
     cn(
-      "flex h-10 w-10 items-center justify-center rounded-lg label-md transition-colors",
+      "gs-press flex h-10 w-10 items-center justify-center rounded-lg label-md",
       active
-        ? "bg-primary text-on-primary"
-        : "border border-outline-variant text-on-surface hover:bg-surface-container-low"
+        ? "scale-105 bg-primary text-on-primary shadow-md shadow-primary/30"
+        : "border border-outline-variant text-on-surface hover:-translate-y-0.5 hover:border-primary hover:bg-surface-container-low hover:text-primary"
     );
 
   return (

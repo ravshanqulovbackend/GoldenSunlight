@@ -106,11 +106,11 @@ export function CertificateFormModal({ open, onClose, certificate }: Certificate
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-inverse-surface/40 px-4 py-8">
-      <div className="w-full max-w-lg rounded-lg bg-surface-container-lowest p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center overflow-y-auto bg-inverse-surface/40 px-4 py-8 backdrop-blur-[2px]">
+      <div className="w-full max-w-lg animate-scale-in rounded-lg bg-surface-container-lowest p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="title-lg text-on-surface">{isEdit ? "Edit Certificate" : "New Certificate"}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-on-surface-variant hover:text-on-surface">
+          <button type="button" onClick={onClose} aria-label="Close" className="gs-icon-btn rounded-full text-on-surface-variant hover:rotate-90 hover:text-error">
             <Icon name="close" />
           </button>
         </div>

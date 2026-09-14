@@ -62,16 +62,25 @@ export function ProfileMenu({ children, placement = "bottom", panelClassName }: 
 
   return (
     <div ref={containerRef} className="relative">
-      <button type="button" onClick={() => setOpen((v) => !v)} aria-haspopup="menu" aria-expanded={open}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="gs-press"
+      >
         {children}
       </button>
 
       {open && (
         <div
           role="menu"
+          // Panel o'zi tugma tomondan "ochiladi" (scale + fade), ichidagi
+          // elementlar esa `.gs-stagger` orqali ketma-ket paydo bo'ladi.
           className={cn(
-            "absolute end-0 z-50 w-64 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg",
-            placement === "bottom" ? "top-full mt-2" : "bottom-full mb-2",
+            "absolute end-0 z-50 w-64 origin-top overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-xl",
+            "gs-stagger animate-scale-in",
+            placement === "bottom" ? "top-full mt-2" : "bottom-full mb-2 origin-bottom",
             panelClassName
           )}
         >
@@ -83,7 +92,8 @@ export function ProfileMenu({ children, placement = "bottom", panelClassName }: 
               </>
             );
             const itemClassName = cn(
-              "flex w-full items-center gap-3 px-4 py-3 label-md text-start transition-colors hover:bg-surface-container-high",
+              "flex w-full items-center gap-3 px-4 py-3 label-md text-start",
+              "transition-[background-color,color,padding] duration-200 ease-soft hover:ps-5 hover:bg-surface-container-high",
               action.danger ? "text-error" : "text-on-surface"
             );
 

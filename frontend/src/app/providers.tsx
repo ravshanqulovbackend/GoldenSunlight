@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { ToastContainer } from "@/components/ui/Toast";
+import { RouteProgress } from "@/components/ui/RouteProgress";
 import { PendingRoleGate } from "@/lib/guards/PendingRoleGate";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RouteProgress />
       <PendingRoleGate>{children}</PendingRoleGate>
       <ToastContainer />
     </QueryClientProvider>

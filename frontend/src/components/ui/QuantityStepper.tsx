@@ -13,12 +13,12 @@ export function QuantityStepper({ value, onChange, min = 1, max }: QuantityStepp
   const clamp = (n: number) => Math.max(min, max ? Math.min(max, n) : n);
 
   return (
-    <div className="inline-flex items-center rounded-lg border border-outline-variant">
+    <div className="inline-flex items-center rounded-lg border border-outline-variant transition-colors duration-250 focus-within:border-secondary">
       <button
         type="button"
         onClick={() => onChange(clamp(value - 1))}
         disabled={value <= min}
-        className="flex h-11 w-11 items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40"
+        className="gs-press flex h-11 w-11 items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-primary disabled:opacity-40"
         aria-label="Decrease"
       >
         <Icon name="remove" className="text-[18px]" />
@@ -36,7 +36,7 @@ export function QuantityStepper({ value, onChange, min = 1, max }: QuantityStepp
         type="button"
         onClick={() => onChange(clamp(value + 1))}
         disabled={max !== undefined && value >= max}
-        className="flex h-11 w-11 items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-40"
+        className="gs-press flex h-11 w-11 items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-primary disabled:opacity-40"
         aria-label="Increase"
       >
         <Icon name="add" className="text-[18px]" />

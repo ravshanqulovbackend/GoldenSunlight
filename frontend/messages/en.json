@@ -51,7 +51,8 @@
     "users": "Users",
     "logOut": "Log Out",
     "logIn": "Log In",
-    "profileFallback": "Profile"
+    "profileFallback": "Profile",
+    "myProfile": "My Profile"
   },
   "ProfileMenu": {
     "changePassword": "Change password",

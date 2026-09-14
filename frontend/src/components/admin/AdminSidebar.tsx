@@ -63,17 +63,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
+              data-active={isActive}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3 label-md transition-colors",
+                "group/nav relative flex items-center gap-3 overflow-hidden rounded-lg px-4 py-3 label-md",
+                "transition-[background-color,color,translate] duration-250 ease-soft",
                 isActive
                   ? "bg-primary-container text-on-primary-container"
-                  : "text-on-surface-variant hover:bg-surface-container-high"
+                  : "text-on-surface-variant hover:translate-x-1 hover:bg-surface-container-high hover:text-primary rtl:hover:-translate-x-1"
               )}
             >
-              <Icon name={item.icon} className="text-[20px]" />
+              {/* Faol bo'limning yon chizig'i — yuqoridan pastga ochiladi */}
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute inset-y-1 start-0 w-1 rounded-full bg-primary origin-center",
+                  "transition-transform duration-300 ease-spring",
+                  isActive ? "scale-y-100" : "scale-y-0"
+                )}
+              />
+              <Icon
+                name={item.icon}
+                className="text-[20px] transition-transform duration-300 ease-spring group-hover/nav:scale-115"
+              />
               <span className="flex-1">{item.label}</span>
               {item.href === "/admin/notifications" && unreadCount > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1.5 label-sm text-on-error">
+                <span className="flex h-5 min-w-5 animate-pop-in items-center justify-center rounded-full bg-error px-1.5 label-sm text-on-error">
                   {unreadCount}
                 </span>
               )}
@@ -86,13 +100,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Link
           href="/"
           onClick={onNavigate}
-          className="flex items-center gap-3 rounded-lg px-4 py-3 label-md text-on-surface-variant hover:bg-surface-container-high"
+          className="group/back flex items-center gap-3 rounded-lg px-4 py-3 label-md text-on-surface-variant transition-[background-color,color,translate] duration-250 ease-soft hover:translate-x-1 hover:bg-surface-container-high hover:text-primary rtl:hover:-translate-x-1"
         >
-          <Icon name="storefront" className="text-[20px]" />
+          <Icon name="storefront" className="text-[20px] transition-transform duration-300 ease-spring group-hover/back:scale-115" />
           {t("backToSite")}
         </Link>
         <ProfileMenu placement="top" panelClassName="start-0 end-0 w-auto">
-          <div className="mt-2 flex w-full items-center gap-3 rounded-xl bg-surface-container-high p-3 hover:bg-surface-container-highest">
+          <div className="mt-2 flex w-full items-center gap-3 rounded-xl bg-surface-container-high p-3 transition-colors duration-250 hover:bg-surface-container-highest">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary label-md">
               {(user?.first_name?.[0] || user?.username?.[0] || "A").toUpperCase()}
             </span>
@@ -130,14 +144,14 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
             type="button"
             aria-label={t("closeMenu")}
             onClick={onMobileClose}
-            className="absolute inset-0 bg-inverse-surface/50"
+            className="absolute inset-0 animate-fade-in bg-inverse-surface/50"
           />
-          <div className="relative flex h-full w-72 max-w-[80%] flex-col border-e border-outline-variant bg-surface-container-low py-6 shadow-xl">
+          <div className="relative flex h-full w-72 max-w-[80%] animate-drawer-in-start flex-col border-e border-outline-variant bg-surface-container-low py-6 shadow-2xl">
             <button
               type="button"
               onClick={onMobileClose}
               aria-label={t("close")}
-              className="absolute end-3 top-3 flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-high"
+              className="gs-icon-btn absolute end-3 top-3 flex h-9 w-9 items-center justify-center rounded-full hover:rotate-90 hover:bg-surface-container-high"
             >
               <Icon name="close" />
             </button>

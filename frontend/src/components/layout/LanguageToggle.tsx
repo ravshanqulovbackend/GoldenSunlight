@@ -50,17 +50,17 @@ export function LanguageToggle({ className }: { className?: string }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Change language"
-        className="flex h-9 items-center justify-center gap-1 rounded-xl border border-outline-variant bg-surface-container-lowest px-3 label-md text-on-surface hover:bg-surface-container-low sm:h-10"
+        className="gs-press flex h-9 items-center justify-center gap-1 rounded-xl border border-outline-variant bg-surface-container-lowest px-3 label-md text-on-surface hover:border-primary hover:bg-surface-container-low sm:h-10"
       >
         {LOCALE_LABELS[locale]}
-        <Icon name="expand_more" className={cn("text-[18px] transition-transform", open && "rotate-180")} />
+        <Icon name="expand_more" className={cn("text-[18px] transition-transform duration-300 ease-spring", open && "rotate-180")} />
       </button>
 
       {open && (
         <ul
           role="listbox"
           aria-label="Language"
-          className="absolute top-full start-0 z-50 mt-2 min-w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-1.5 shadow-lg"
+          className="absolute top-full start-0 z-50 mt-2 min-w-full origin-top animate-scale-in rounded-xl border border-outline-variant bg-surface-container-lowest p-1.5 shadow-xl"
         >
           {locales.map((option) => {
             const active = option === locale;
@@ -72,7 +72,7 @@ export function LanguageToggle({ className }: { className?: string }) {
                   aria-selected={active}
                   onClick={() => select(option)}
                   className={cn(
-                    "w-full rounded-lg px-4 py-2 text-center label-md transition-colors",
+                    "gs-press w-full rounded-lg px-4 py-2 text-center label-md",
                     active
                       ? "bg-secondary-container text-on-secondary-container"
                       : "text-on-surface-variant hover:bg-surface-container-low"

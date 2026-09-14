@@ -24,7 +24,7 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
     <div className="flex w-full flex-col gap-4 md:w-64">
       <Card className="p-5">
         <h3 className="label-sm mb-4 uppercase text-on-surface-variant">{t("categories")}</h3>
-        <div className="flex flex-col gap-2">
+        <div className="gs-stagger flex flex-col gap-2">
           <Chip selected={!activeCategory} onClick={() => go({ category: null })} className="justify-start">
             {t("all")}
           </Chip>

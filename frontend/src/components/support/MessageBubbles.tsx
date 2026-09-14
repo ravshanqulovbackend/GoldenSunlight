@@ -64,19 +64,19 @@ export function MessageBubbles({ messages, currentUserId }: MessageBubblesProps)
 
       {enlargedImage && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-inverse-surface/80 p-6"
+          className="fixed inset-0 z-[200] flex animate-fade-in items-center justify-center bg-inverse-surface/80 p-6 backdrop-blur-sm"
           onClick={() => setEnlargedImage(null)}
         >
           <button
             type="button"
             aria-label="Close"
-            className="absolute end-6 top-6 text-inverse-on-surface"
+            className="gs-icon-btn absolute end-6 top-6 rounded-full text-inverse-on-surface hover:rotate-90"
             onClick={() => setEnlargedImage(null)}
           >
             <Icon name="close" className="text-[28px]" />
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={enlargedImage} alt="" className="max-h-full max-w-full rounded-lg object-contain" />
+          <img src={enlargedImage} alt="" className="max-h-full max-w-full animate-scale-in rounded-lg object-contain shadow-2xl" />
         </div>
       )}
     </div>

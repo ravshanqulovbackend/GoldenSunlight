@@ -83,11 +83,12 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
       />
 
       <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-12">
-        <div className="lg:col-span-7">
+        <div className="animate-fade-side lg:col-span-7">
           <ProductGallery images={galleryImages} />
         </div>
 
-        <div className="flex flex-col gap-4 lg:col-span-5">
+        {/* O'ng ustundagi ma'lumotlar ketma-ket ko'tariladi */}
+        <div className="gs-stagger flex flex-col gap-4 lg:col-span-5">
           <span className="label-md text-on-surface-variant">
             {pickLocalized(product.category_name, product.category_name_ar, loc)}
           </span>

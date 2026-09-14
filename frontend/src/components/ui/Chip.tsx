@@ -11,10 +11,10 @@ export function Chip({ className, selected, ...props }: ChipProps) {
     <button
       type="button"
       className={cn(
-        "label-md rounded-lg border px-4 py-2 transition-colors",
+        "gs-press label-md rounded-lg border px-4 py-2",
         selected
-          ? "border-primary bg-primary-container text-on-primary-container"
-          : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low",
+          ? "border-primary bg-primary-container text-on-primary-container shadow-sm"
+          : "border-outline-variant text-on-surface-variant hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-container-low hover:text-primary",
         className
       )}
       aria-pressed={selected}

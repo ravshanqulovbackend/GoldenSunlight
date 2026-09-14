@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { RequireAdmin } from "@/lib/guards/RequireAdmin";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Icon } from "@/components/ui/Icon";
+import { PageTransition } from "@/components/ui/PageTransition";
 // import { LanguageToggle } from "@/components/layout/LanguageToggle"; // temporarily hidden — re-enable on request
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +30,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* <LanguageToggle /> temporarily hidden — re-enable on request */}
         </header>
 
-        <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:ms-64 lg:px-8">{children}</main>
+        <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:ms-64 lg:px-8">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </RequireAdmin>
   );

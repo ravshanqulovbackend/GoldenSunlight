@@ -6,9 +6,8 @@ import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { NavLink } from "./NavLink";
 import { MobileNavDrawer } from "./MobileNavDrawer";
-import { ProfileMenu } from "./ProfileMenu";
 import { LanguageToggle } from "./LanguageToggle";
-import { useAuthStore } from "@/lib/stores/authStore";
+import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { useCart } from "@/lib/query/hooks/useCart";
 import { useConversationsUnreadCount, useMyUnreadCount } from "@/lib/query/hooks/useSupport";
 import { SupportChatPanel } from "@/components/support/SupportChatPanel";
@@ -16,7 +15,7 @@ import { SupportChatPanel } from "@/components/support/SupportChatPanel";
 function HeaderBadge({ count }: { count: number | undefined }) {
   if (!count) return null;
   return (
-    <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+    <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 animate-pop-in items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
       {count}
     </span>
   );
@@ -25,6 +24,7 @@ function HeaderBadge({ count }: { count: number | undefined }) {
 export function Header() {
   const t = useTranslations("Common");
   const tHeader = useTranslations("Header");
+  const tMenu = useTranslations("ProfileMenu");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportPanelOpen, setSupportPanelOpen] = useState(false);
   const user = useAuthStore((s) => s.user);
@@ -48,9 +48,12 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 border-b border-outline-variant bg-surface/80 backdrop-blur-md sm:h-20">
+      <header className="sticky top-0 z-40 h-16 animate-fade-down border-b border-outline-variant bg-surface/80 backdrop-blur-md transition-shadow duration-300 sm:h-20">
         <div className="mx-auto flex h-full max-w-container-max-width items-center justify-between gap-2 px-margin-mobile md:px-margin-desktop">
-          <Link href="/" className="title-lg min-w-0 shrink truncate uppercase tracking-wide text-primary lg:headline-md">
+          <Link
+            href="/"
+            className="gs-press title-lg min-w-0 shrink truncate uppercase tracking-wide text-primary hover:brightness-125 lg:headline-md"
+          >
             GoldenSunlight
           </Link>
 
@@ -68,7 +71,7 @@ export function Header() {
                 type="button"
                 onClick={() => setSupportPanelOpen(true)}
                 aria-label={tHeader("reportIssue")}
-                className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
+                className="gs-icon-btn relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
               >
                 <Icon name="support_agent" />
                 <HeaderBadge count={myUnreadCount} />
@@ -78,7 +81,7 @@ export function Header() {
               <Link
                 href="/admin/support"
                 aria-label={tHeader("inquiries")}
-                className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
+                className="gs-icon-btn relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
               >
                 <Icon name="notifications" />
                 <HeaderBadge count={conversationsUnreadCount} />
@@ -87,25 +90,25 @@ export function Header() {
             <Link
               href="/products"
               aria-label={tHeader("search")}
-              className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
+              className="gs-icon-btn hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
             >
               <Icon name="search" />
             </Link>
             <Link
               href="/wishlist"
               aria-label={tHeader("wishlist")}
-              className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low md:flex"
+              className="gs-icon-btn hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
             >
               <Icon name="favorite" />
             </Link>
             <Link
               href="/cart"
               aria-label={tHeader("cart")}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10"
+              className="gs-icon-btn relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary sm:h-10 sm:w-10"
             >
               <Icon name="shopping_bag" />
               {isAuthenticated && !!cart?.total_items && (
-                <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+                <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 animate-pop-in items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
                   {cart.total_items}
                 </span>
               )}
@@ -117,19 +120,32 @@ export function Header() {
             )}
             <LanguageToggle className="hidden md:flex" />
             {isAuthenticated ? (
-              <ProfileMenu placement="bottom">
-                <span
-                  aria-label={tHeader("profile")}
-                  className="ms-0.5 flex h-9 items-center gap-2 rounded-full border border-outline-variant px-2.5 hover:bg-surface-container-low sm:ms-1 sm:h-10 sm:px-3"
+              <>
+                {isAdmin && (
+                  <NavLink
+                    href={user?.role === "superadmin" ? "/admin/dashboard" : "/admin/orders"}
+                    className="hidden md:inline-flex"
+                  >
+                    {tMenu("adminPanel")}
+                  </NavLink>
+                )}
+                {user?.role !== "superadmin" && (
+                  <NavLink href="/profile" className="hidden md:inline-flex">
+                    {tHeader("profile")}
+                  </NavLink>
+                )}
+                <button
+                  type="button"
+                  onClick={() => logoutAndRedirect()}
+                  aria-label={t("logOut")}
+                  title={t("logOut")}
+                  className="gs-icon-btn hidden h-10 w-10 items-center justify-center rounded-full hover:bg-error-container hover:text-on-error-container md:flex"
                 >
-                  <Icon name="person" className="text-[20px]" />
-                  <span className="label-md hidden max-w-[120px] truncate text-on-surface sm:inline">
-                    {user?.first_name || user?.username}
-                  </span>
-                </span>
-              </ProfileMenu>
+                  <Icon name="logout" mirrorInRtl />
+                </button>
+              </>
             ) : (
-              <Link href="/auth/login" className="ms-2 hidden label-md text-primary hover:underline md:block">
+              <Link href="/auth/login" className="gs-underline gs-press ms-2 hidden label-md text-primary md:block">
                 {t("logIn")}
               </Link>
             )}
@@ -137,7 +153,7 @@ export function Header() {
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label={t("menu")}
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10 md:hidden"
+              className="gs-icon-btn flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary sm:h-10 sm:w-10 md:hidden"
             >
               <Icon name="menu" />
             </button>

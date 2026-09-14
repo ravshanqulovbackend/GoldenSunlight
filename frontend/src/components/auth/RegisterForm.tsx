@@ -41,7 +41,7 @@ export function RegisterForm() {
   return (
     <Card className="p-6 sm:p-8">
       <h1 className="headline-md mb-6 text-center text-on-surface">{t("title")}</h1>
-      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="gs-stagger flex flex-col gap-4">
         <Input label={t("username")} autoComplete="username" autoFocus error={errors.username?.message} {...registerField("username")} />
         <Input
           label={t("password")}
@@ -68,7 +68,7 @@ export function RegisterForm() {
       </form>
       <p className="body-md mt-6 text-center text-on-surface-variant">
         {t("haveAccount")}{" "}
-        <Link href="/auth/login" className="font-semibold text-primary hover:underline">
+        <Link href="/auth/login" className="gs-underline font-semibold text-primary">
           {t("logIn")}
         </Link>
       </p>

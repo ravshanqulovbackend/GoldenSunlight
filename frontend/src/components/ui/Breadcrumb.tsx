@@ -8,14 +8,14 @@ export interface BreadcrumbItem {
 
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 label-md text-on-surface-variant">
+    <nav aria-label="Breadcrumb" className="gs-stagger flex flex-wrap items-center gap-1 label-md text-on-surface-variant">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
           <span key={`${item.label}-${index}`} className="flex items-center gap-1">
             {index > 0 && <Icon name="chevron_right" className="text-[18px] text-outline" mirrorInRtl />}
             {item.href && !isLast ? (
-              <Link href={item.href} className="hover:text-primary">
+              <Link href={item.href} className="rounded-sm transition-colors duration-200 hover:text-primary">
                 {item.label}
               </Link>
             ) : (

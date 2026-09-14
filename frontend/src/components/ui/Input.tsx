@@ -29,6 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             type={isPassword ? (revealed ? "text" : "password") : type}
             className={cn(
               "h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 body-md text-on-surface",
+              "transition-[border-color,box-shadow,background-color] duration-250 ease-soft hover:border-outline",
               "focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary-fixed-dim",
               error && "border-error focus:border-error focus:ring-error-container",
               isPassword && "pe-11",
@@ -43,13 +44,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={() => setRevealed((v) => !v)}
               tabIndex={-1}
               aria-label={revealed ? "Hide password" : "Show password"}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+              className="gs-icon-btn absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary"
             >
               <Icon name={revealed ? "visibility_off" : "visibility"} className="text-[20px]" />
             </button>
           )}
         </div>
-        {error && <span className="label-sm normal-case text-error">{error}</span>}
+        {error && <span className="label-sm animate-fade-down normal-case text-error">{error}</span>}
       </div>
     );
   }

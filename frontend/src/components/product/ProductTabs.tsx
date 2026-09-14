@@ -28,16 +28,26 @@ export function ProductTabs({ description, ingredients }: ProductTabsProps) {
             type="button"
             onClick={() => setActive(tab.id)}
             className={cn(
-              "label-md whitespace-nowrap border-b-2 border-transparent py-3 text-on-surface-variant transition-colors",
-              active === tab.id && "border-primary font-semibold text-primary"
+              "label-md relative whitespace-nowrap py-3 text-on-surface-variant",
+              "transition-colors duration-250 ease-soft hover:text-primary",
+              active === tab.id && "font-semibold text-primary"
             )}
           >
             {tab.label}
+            {/* Faol tabning ostidagi chiziq markazdan kengayadi */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-primary origin-center transition-transform duration-300 ease-soft",
+                active === tab.id ? "scale-x-100" : "scale-x-0"
+              )}
+            />
           </button>
         ))}
       </div>
 
-      <div className="body-md py-6 text-on-surface">
+      {/* `key={active}` — tab almashganda kontent qayta mount bo'ladi va fade-up animatsiyasi ishlaydi */}
+      <div key={active} className="body-md animate-fade-up py-6 text-on-surface">
         {active === "description" && (
           <p className="whitespace-pre-line">{description || t("noDescription")}</p>
         )}

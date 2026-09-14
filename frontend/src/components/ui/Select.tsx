@@ -155,7 +155,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
             onClick={() => !disabled && setOpen((v) => !v)}
             onKeyDown={handleKeyDown}
             className={cn(
-              "flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 body-md text-on-surface transition-colors",
+              "flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 body-md text-on-surface",
+              "transition-[border-color,box-shadow,background-color] duration-250 ease-soft",
               "hover:border-outline focus:outline-none focus:ring-2 focus:ring-secondary-fixed-dim",
               open ? "border-secondary ring-2 ring-secondary-fixed-dim" : "focus:border-secondary",
               disabled && "cursor-not-allowed opacity-60",
@@ -165,7 +166,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
             <span className="truncate text-start">{selected?.label ?? " "}</span>
             <Icon
               name="expand_more"
-              className={cn("shrink-0 text-[20px] text-on-surface-variant transition-transform", open && "rotate-180")}
+              className={cn("shrink-0 text-[20px] text-on-surface-variant transition-transform duration-300 ease-spring", open && "rotate-180")}
             />
           </button>
 
@@ -174,7 +175,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
               ref={listRef}
               role="listbox"
               aria-activedescendant={options.length ? `${inputId}-option-${highlighted}` : undefined}
-              className="absolute z-50 mt-1 max-h-64 w-full min-w-max overflow-auto rounded-lg border border-outline-variant bg-surface-container-lowest py-1 shadow-lg"
+              className="absolute z-50 mt-1 max-h-64 w-full min-w-max origin-top animate-scale-in overflow-auto rounded-lg border border-outline-variant bg-surface-container-lowest py-1 shadow-xl"
             >
               {options.map((option, index) => (
                 <li
@@ -187,6 +188,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                   onClick={() => commit(index)}
                   className={cn(
                     "flex cursor-pointer items-center gap-2 px-4 py-2.5 body-md text-on-surface",
+                    "transition-[background-color,padding] duration-150 ease-soft hover:ps-5",
                     index === highlighted && "bg-surface-container-high",
                     option.disabled && "cursor-not-allowed opacity-50"
                   )}

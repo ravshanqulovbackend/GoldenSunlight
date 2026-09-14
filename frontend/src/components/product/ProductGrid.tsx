@@ -10,7 +10,8 @@ export async function ProductGrid({ products }: { products: ProductListItem[] })
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+    // `gs-stagger` — kartalar bir vaqtda emas, ketma-ket ko'tarilib chiqadi
+    <div className="gs-stagger grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

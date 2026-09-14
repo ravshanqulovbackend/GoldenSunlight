@@ -18,7 +18,7 @@ export function Tbody({ className, ...props }: HTMLAttributes<HTMLTableSectionEl
 }
 
 export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("hover:bg-surface-container-low/60 transition-colors", className)} {...props} />;
+  return <tr className={cn("transition-colors duration-200 hover:bg-surface-container-low/60", className)} {...props} />;
 }
 
 export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {

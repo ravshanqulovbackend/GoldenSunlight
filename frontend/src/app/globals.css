@@ -219,3 +219,583 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ==========================================================================
+ * MOTION — butun sayt bo'ylab yagona animatsiya tizimi
+ *
+ * Uch qatlam:
+ *   1) tokenlar (@theme) — easing + tayyor `animate-*` Tailwind utilitalari;
+ *   2) @keyframes — top-level, shuning uchun ular doim CSS chiqishiga tushadi
+ *      va oddiy `.gs-*` klasslaridan ham ishlatilishi mumkin;
+ *   3) `.gs-*` yordamchi klasslari — sahifa kirishi, stagger, scroll reveal,
+ *      hover mikro-interaktsiyalari.
+ *
+ * MUHIM qoida: har bir keyframe'ning YAKUNIY holati `transform: none`
+ * (`translateY(0)` EMAS). `animation-fill-mode: both` yakuniy qiymatni
+ * elementda qoldiradi — `translateY(0)` ham "transform mavjud" hisoblanadi va
+ * ichidagi `position: fixed` modal/drawer'lar uchun containing block yaratib,
+ * ularni buzadi. `none` bunday qilmaydi.
+ *
+ * RTL: `--gs-dir` yo'nalish ko'paytiruvchisi (LTR = 1, RTL = -1) — gorizontal
+ * siljish animatsiyalari arabcha rejimda avtomatik teskari tomonga ishlaydi.
+ * ========================================================================== */
+
+@theme {
+  /* Easing egri chiziqlari */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Tayyor animatsiyalar — Tailwind'da `animate-fade-up` kabi ishlatiladi */
+  --animate-fade-in: gs-fade-in 0.5s var(--ease-soft) both;
+  --animate-fade-up: gs-fade-up 0.6s var(--ease-soft) both;
+  --animate-fade-down: gs-fade-down 0.45s var(--ease-soft) both;
+  --animate-fade-side: gs-fade-side 0.5s var(--ease-soft) both;
+  --animate-scale-in: gs-scale-in 0.26s var(--ease-soft) both;
+  --animate-pop-in: gs-pop-in 0.42s var(--ease-spring) both;
+  --animate-drawer-in: gs-drawer-in 0.34s var(--ease-soft) both;
+  --animate-drawer-in-start: gs-drawer-in-start 0.34s var(--ease-soft) both;
+  --animate-toast-in: gs-toast-in 0.38s var(--ease-spring) both;
+  --animate-float: gs-float 7s ease-in-out infinite;
+  --animate-float-slow: gs-float 11s ease-in-out infinite;
+  --animate-sweep: gs-sweep 1.5s var(--ease-smooth) infinite;
+  --animate-ring: gs-ring 2.4s var(--ease-smooth) infinite;
+}
+
+:root {
+  --gs-dir: 1;
+}
+
+[dir="rtl"] {
+  --gs-dir: -1;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Sticky header (h-16 / sm:h-20) ostiga tushib qolmasligi uchun */
+  scroll-padding-top: 6rem;
+}
+
+/* --- Keyframes ------------------------------------------------------------ */
+
+@keyframes gs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes gs-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.75rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Sahifa darajasidagi kirish — `gs-fade-up`dan kichikroq siljish bilan.
+ * Butun sahifa bloki katta masofadan ko'tarilsa harakat og'ir ko'rinadi,
+ * shuning uchun bu yerda atigi 0.85rem.
+ */
+@keyframes gs-page-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.85rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gs-fade-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -1rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gs-fade-side {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--gs-dir) * -1.5rem), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gs-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translate3d(0, -0.25rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gs-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sahifa almashganda har bir so'z alohida ko'tarilib, fokusga keladi */
+@keyframes gs-word-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.65em, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes gs-drawer-in {
+  from {
+    transform: translate3d(calc(var(--gs-dir) * 100%), 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes gs-drawer-out {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate3d(calc(var(--gs-dir) * 100%), 0, 0);
+  }
+}
+
+@keyframes gs-drawer-in-start {
+  from {
+    transform: translate3d(calc(var(--gs-dir) * -100%), 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes gs-drawer-out-start {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate3d(calc(var(--gs-dir) * -100%), 0, 0);
+  }
+}
+
+@keyframes gs-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gs-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -1.25rem, 0);
+  }
+}
+
+@keyframes gs-sweep {
+  from {
+    transform: translate3d(calc(var(--gs-dir) * -100%), 0, 0);
+  }
+  to {
+    transform: translate3d(calc(var(--gs-dir) * 100%), 0, 0);
+  }
+}
+
+@keyframes gs-ring {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* Marshrut yuklanayotganda yuqoridagi ingichka progress chizig'i */
+@keyframes gs-progress {
+  0% {
+    transform: translate3d(calc(var(--gs-dir) * -100%), 0, 0);
+  }
+  40% {
+    transform: translate3d(calc(var(--gs-dir) * -42%), 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(var(--gs-dir) * -8%), 0, 0);
+  }
+}
+
+@keyframes gs-progress-done {
+  from {
+    transform: translate3d(calc(var(--gs-dir) * -8%), 0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+}
+
+/* --- Sahifa kirishi (PageTransition) -------------------------------------- */
+
+/*
+ * `PageTransition` har bir marshrut o'zgarishida `key={pathname}` orqali qayta
+ * mount bo'ladi — shuning uchun bu animatsiya har safar qaytadan ijro etiladi.
+ * Konteyner o'zi yumshoq fade qiladi, uning BEVOSITA bolalari (odatda
+ * `<section>`lar yoki sahifaning asosiy `<div>`i) esa ketma-ket ko'tariladi.
+ */
+.gs-page {
+  animation: gs-fade-in 0.32s var(--ease-soft) both;
+}
+
+.gs-page > * {
+  animation: gs-page-in 0.5s var(--ease-soft) both;
+}
+
+.gs-page > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.gs-page > *:nth-child(2) {
+  animation-delay: 0.09s;
+}
+.gs-page > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.gs-page > *:nth-child(4) {
+  animation-delay: 0.23s;
+}
+.gs-page > *:nth-child(5) {
+  animation-delay: 0.3s;
+}
+.gs-page > *:nth-child(n + 6) {
+  animation-delay: 0.35s;
+}
+
+/* --- Stagger: bolalarni ketma-ket chiqarish -------------------------------- */
+
+.gs-stagger > * {
+  animation: gs-fade-up 0.55s var(--ease-soft) both;
+}
+
+.gs-stagger > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.gs-stagger > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.gs-stagger > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.gs-stagger > *:nth-child(4) {
+  animation-delay: 0.22s;
+}
+.gs-stagger > *:nth-child(5) {
+  animation-delay: 0.28s;
+}
+.gs-stagger > *:nth-child(6) {
+  animation-delay: 0.34s;
+}
+.gs-stagger > *:nth-child(7) {
+  animation-delay: 0.4s;
+}
+.gs-stagger > *:nth-child(8) {
+  animation-delay: 0.46s;
+}
+.gs-stagger > *:nth-child(9) {
+  animation-delay: 0.52s;
+}
+.gs-stagger > *:nth-child(10) {
+  animation-delay: 0.58s;
+}
+.gs-stagger > *:nth-child(11) {
+  animation-delay: 0.64s;
+}
+.gs-stagger > *:nth-child(n + 12) {
+  animation-delay: 0.7s;
+}
+
+/* --- So'zma-so'z matn animatsiyasi (AnimatedText) -------------------------- */
+
+.gs-word {
+  display: inline-block;
+  animation: gs-word-up 0.75s var(--ease-soft) both;
+}
+
+/* --- Scroll reveal (Reveal) ----------------------------------------------- */
+
+/*
+ * Bu yerda `animation` emas, `transition` ishlatiladi: IntersectionObserver
+ * `.gs-in` klassini qo'shganda element yakuniy holatga `transform: none` bilan
+ * keladi, ya'ni animatsiya tugagach hech qanday transform qolmaydi.
+ */
+.gs-reveal {
+  opacity: 0;
+  translate: 0 2rem;
+  transition:
+    opacity 0.7s var(--ease-soft),
+    translate 0.7s var(--ease-soft),
+    scale 0.7s var(--ease-soft);
+  transition-delay: var(--gs-delay, 0s);
+}
+
+.gs-reveal-side {
+  translate: calc(var(--gs-dir) * -2rem) 0;
+}
+
+.gs-reveal-zoom {
+  translate: none;
+  scale: 0.94;
+}
+
+.gs-reveal.gs-in {
+  opacity: 1;
+  translate: none;
+  scale: 1;
+}
+
+/* --- Hover mikro-interaktsiyalari ----------------------------------------- */
+
+/*
+ * DIQQAT — quyidagi hover/active holatlari `transform:` EMAS, alohida
+ * `translate:` va `scale:` CSS xossalarini o'zgartiradi. Ikki sabab bor:
+ *
+ * 1) Kaskad. `.gs-stagger > *` / `.gs-page > *` kirish animatsiyalari
+ *    `animation-fill-mode: both` bilan ishlaydi, ya'ni animatsiya tugagach ham
+ *    element `transform`ini o'zi ushlab turadi. CSS animatsiyalari oddiy
+ *    deklaratsiyalardan ustun, shuning uchun bunday elementda
+ *    `:hover { transform: ... }` UMUMAN ishlamas edi — `translate`/`scale` esa
+ *    animatsiya tegmaydigan mustaqil xossalar bo'lgani uchun bemalol ishlaydi.
+ *
+ * 2) Tailwind v4'da `translate-y-*` / `scale-*` / `rotate-*` utilitalari ham
+ *    aynan shu alohida xossalarni yozadi — demak ular bir-biri bilan emas,
+ *    balki birga qo'shilib ishlaydi.
+ *
+ * Shu sababli `transition` ro'yxatlarida `transform` bilan birga
+ * `translate`, `scale` va `rotate` ham sanab o'tilgan.
+ */
+
+/* Karta/plitka ko'tarilishi — ProductCard, kategoriya plitkalari, admin kartalari */
+.gs-lift {
+  transition:
+    transform 0.35s var(--ease-soft),
+    translate 0.35s var(--ease-soft),
+    scale 0.35s var(--ease-soft),
+    box-shadow 0.35s var(--ease-soft),
+    border-color 0.35s var(--ease-soft);
+}
+
+.gs-lift:hover {
+  translate: 0 -0.375rem;
+}
+
+.gs-lift:active {
+  translate: 0 -0.125rem;
+  transition-duration: 0.1s;
+}
+
+/* Bosilganda "cho'kish" — barcha tugma va tugmasimon havolalar */
+.gs-press {
+  transition:
+    transform 0.2s var(--ease-soft),
+    translate 0.25s var(--ease-soft),
+    scale 0.25s var(--ease-soft),
+    rotate 0.25s var(--ease-soft),
+    filter 0.2s var(--ease-smooth),
+    background-color 0.2s var(--ease-smooth),
+    border-color 0.2s var(--ease-smooth),
+    color 0.2s var(--ease-smooth),
+    box-shadow 0.25s var(--ease-soft),
+    opacity 0.2s var(--ease-smooth);
+}
+
+.gs-press:active:not(:disabled) {
+  scale: 0.965;
+  transition-duration: 0.08s;
+}
+
+/*
+ * Havola ostidagi chiziqning markazdan ochilishi — NavLink, "Log in", auth
+ * sahifalaridagi havolalar.
+ *
+ * `--gs-underline-inset` — chiziqning yon chetlaridan qancha ichkariga
+ * kirishi. Default 0 (padding'siz oddiy matn havolalari uchun), gorizontal
+ * padding'i bor havolalar (masalan NavLink'ning `px-3`i) buni
+ * `[--gs-underline-inset:0.75rem]` orqali o'z padding'iga tenglashtiradi,
+ * aks holda chiziq matndan kengroq bo'lib ketardi.
+ */
+.gs-underline {
+  position: relative;
+}
+
+.gs-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--gs-underline-inset, 0);
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.32s var(--ease-soft);
+}
+
+.gs-underline:hover::after,
+.gs-underline[data-active="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Ikonka sal kattalashishi — header ikonkalari, ijtimoiy tarmoq havolalari */
+.gs-icon-btn {
+  transition:
+    background-color 0.22s var(--ease-smooth),
+    color 0.22s var(--ease-smooth),
+    opacity 0.22s var(--ease-smooth),
+    rotate 0.32s var(--ease-soft),
+    translate 0.28s var(--ease-spring),
+    scale 0.28s var(--ease-spring),
+    transform 0.28s var(--ease-spring);
+}
+
+.gs-icon-btn:hover {
+  scale: 1.12;
+}
+
+.gs-icon-btn:active {
+  scale: 0.92;
+  transition-duration: 0.08s;
+}
+
+/* --- Skeleton shimmer ----------------------------------------------------- */
+
+/*
+ * `animate-pulse` o'rniga chapdan o'ngga o'tuvchi yorug'lik to'lqini — RTL'da
+ * `--gs-dir` tufayli teskari yo'nalishda harakatlanadi.
+ */
+.gs-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-container-high);
+}
+
+.gs-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-surface-container-lowest) 85%, transparent),
+    transparent
+  );
+  animation: gs-sweep 1.5s var(--ease-smooth) infinite;
+}
+
+/* --- Rasm yuklanishi (AppImage) ------------------------------------------- */
+
+/*
+ * Rasm yuklangunicha shaffof, yuklangach yumshoq paydo bo'ladi.
+ *
+ * Ataylab `transition` EMAS, `animation` ishlatilgan: chaqiruvchi komponentlar
+ * ko'pincha rasmga o'z `transition-transform`ini beradi (hover'da kattalashish),
+ * `.gs-img` esa qatlamsiz (unlayered) CSS bo'lgani uchun o'z `transition`i bilan
+ * ularnikini bekor qilib qo'yardi. `animation` esa `transition`ga umuman
+ * tegmaydi — ikkalasi yonma-yon ishlaydi.
+ */
+.gs-img {
+  opacity: 0;
+}
+
+.gs-img[data-loaded="true"] {
+  animation: gs-fade-in 0.5s var(--ease-soft) forwards;
+}
+
+/* --- Dekorativ fon (hero) ------------------------------------------------- */
+
+/* Hero gradienti ustida sekin suzuvchi yumshoq yorug'lik dog'lari */
+.gs-aurora {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.32;
+}
+
+/* --- Fokus halqasi -------------------------------------------------------- */
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+  transition: outline-offset 0.15s var(--ease-soft);
+}
+
+/* --- prefers-reduced-motion ----------------------------------------------- */
+
+/*
+ * Tizimda "harakatni kamaytirish" yoqilgan bo'lsa hamma narsa darhol yakuniy
+ * holatda ko'rinadi — kontent hech qachon ko'rinmay qolmasligi uchun
+ * `.gs-reveal` ham majburan ochiladi.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  .gs-reveal {
+    opacity: 1;
+    translate: none;
+    scale: 1;
+  }
+}

@@ -46,7 +46,7 @@ function LoginFormInner() {
   return (
     <Card className="p-6 sm:p-8">
       <h1 className="headline-md mb-6 text-center text-on-surface">{t("title")}</h1>
-      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="gs-stagger flex flex-col gap-4">
         <Input
           label={t("username")}
           autoComplete="username"
@@ -67,7 +67,7 @@ function LoginFormInner() {
       </form>
       <p className="body-md mt-6 text-center text-on-surface-variant">
         {t("noAccount")}{" "}
-        <Link href="/auth/register" className="font-semibold text-primary hover:underline">
+        <Link href="/auth/register" className="gs-underline font-semibold text-primary">
           {t("signUp")}
         </Link>
       </p>

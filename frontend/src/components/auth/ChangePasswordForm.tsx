@@ -71,7 +71,7 @@ export function ChangePasswordForm() {
   });
 
   return (
-    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="gs-stagger flex flex-col gap-4">
       <p className="body-md text-on-surface-variant">{t("hint")}</p>
 
       <Input

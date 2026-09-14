@@ -51,7 +51,8 @@
     "users": "المستخدمون",
     "logOut": "تسجيل الخروج",
     "logIn": "تسجيل الدخول",
-    "profileFallback": "الملف الشخصي"
+    "profileFallback": "الملف الشخصي",
+    "myProfile": "ملفي الشخصي"
   },
   "ProfileMenu": {
     "changePassword": "تغيير كلمة المرور",

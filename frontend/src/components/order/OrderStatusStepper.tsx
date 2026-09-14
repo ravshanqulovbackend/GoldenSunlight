@@ -17,8 +17,8 @@ export function OrderStatusStepper({ status }: { status: OrderStatus }) {
         ? { icon: "cancel", title: t("cancelledTitle"), description: t("cancelledDescription") }
         : { icon: "currency_exchange", title: t("refundedTitle"), description: t("refundedDescription") };
     return (
-      <div className="flex items-center gap-4 rounded-lg bg-error-container/40 p-4">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-error-container text-on-error-container">
+      <div className="flex animate-fade-up items-center gap-4 rounded-lg bg-error-container/40 p-4">
+        <span className="flex h-11 w-11 shrink-0 animate-pop-in items-center justify-center rounded-full bg-error-container text-on-error-container">
           <Icon name={copy.icon} className="text-[22px]" />
         </span>
         <div>
@@ -43,11 +43,17 @@ export function OrderStatusStepper({ status }: { status: OrderStatus }) {
             <div className="flex w-20 shrink-0 flex-col items-center gap-2 text-center sm:w-28">
               <span
                 className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                  "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                  "transition-[background-color,color,border-color,scale] duration-400 ease-spring",
                   (isCompleted || isCurrent) && "bg-primary text-on-primary",
+                  // Joriy bosqich pulsatsiya halqasi bilan ajratiladi
+                  isCurrent && "scale-110 shadow-md shadow-primary/30",
                   isUpcoming && "border border-outline-variant bg-surface-container-lowest text-on-surface-variant"
                 )}
               >
+                {isCurrent && (
+                  <span aria-hidden className="absolute inset-0 animate-ring rounded-full border-2 border-primary" />
+                )}
                 <Icon name={isCompleted ? "check" : step.icon} className="text-[18px]" />
               </span>
               <span
@@ -60,7 +66,15 @@ export function OrderStatusStepper({ status }: { status: OrderStatus }) {
               </span>
             </div>
             {index < steps.length - 1 && (
-              <div className={cn("mt-[18px] h-0.5 flex-1", index < currentIndex ? "bg-primary" : "bg-outline-variant")} />
+              <div className="mt-[18px] h-0.5 flex-1 overflow-hidden bg-outline-variant">
+                {/* Bosib o'tilgan qism chapdan o'ngga to'lib boradi */}
+                <span
+                  className={cn(
+                    "block h-full w-full origin-left bg-primary transition-transform duration-700 ease-soft rtl:origin-right",
+                    index < currentIndex ? "scale-x-100" : "scale-x-0"
+                  )}
+                />
+              </div>
             )}
           </Fragment>
         );

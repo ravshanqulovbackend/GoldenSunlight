@@ -21,17 +21,17 @@ export function CartItemRow({ item }: { item: CartItem }) {
   const name = pickLocalized(item.product.name, item.product.name_ar, locale);
 
   return (
-    <div className="flex flex-col gap-3 border-b border-outline-variant py-4 sm:flex-row sm:items-center sm:gap-4">
+    <div className="group/row flex flex-col gap-3 border-b border-outline-variant py-4 transition-opacity duration-300 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
         <Link
           href={`/products/${item.product.slug}`}
-          className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-outline-variant sm:h-20 sm:w-20"
+          className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-outline-variant transition-[border-color,scale] duration-300 ease-spring hover:scale-105 hover:border-primary sm:h-20 sm:w-20"
         >
           <AppImage src={getImageUrl(item.product.image)} alt={name} className="h-full w-full" />
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <Link href={`/products/${item.product.slug}`} className="label-md line-clamp-2-custom text-on-surface hover:text-primary">
+          <Link href={`/products/${item.product.slug}`} className="label-md line-clamp-2-custom text-on-surface transition-colors duration-200 hover:text-primary">
             {name}
           </Link>
           <span className="title-lg text-primary">{formatPrice(item.product.price, locale)}</span>
@@ -53,7 +53,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
           onClick={() => removeItem.mutate(item.id)}
           disabled={removeItem.isPending}
           aria-label={tCommon("delete")}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+          className="gs-icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-on-error-container disabled:opacity-40"
         >
           <Icon name="delete" className="text-[20px]" />
         </button>

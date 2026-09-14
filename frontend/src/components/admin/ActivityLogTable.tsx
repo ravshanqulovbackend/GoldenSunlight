@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils/cn";
 import { getActivityLog } from "@/lib/api/endpoints/activityLog";
 import { formatDateTime } from "@/lib/utils/money";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
@@ -13,6 +14,11 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import type { ActivityAction } from "@/types/activityLog";
 
 const PAGE_SIZE = 12;
+
+/** How many changed fields a row shows before it collapses the rest behind a toggle. */
+const COLLAPSED_CHANGES = 2;
+/** Rough width (in characters) of one collapsed line — longer values get a toggle too. */
+const COLLAPSED_LINE_CHARS = 56;
 
 const ACTION_TONE: Record<ActivityAction, "primary" | "secondary" | "error"> = {
   created: "primary",
@@ -98,12 +104,55 @@ function formatValue(value: string): string {
   return value;
 }
 
-function formatChanges(changes: Record<string, [string, string]>): string {
+function formatChange(field: string, before: string, after: string): string {
+  return `${formatFieldLabel(field)}: ${formatValue(before)} → ${formatValue(after)}`;
+}
+
+/** A single long value (an Arabic description, say) would otherwise stretch one row
+ * to the height of a whole screen, so every change is kept to one truncated line and
+ * only the first few are shown until the admin asks for the rest. */
+function ChangesCell({ changes }: { changes: Record<string, [string, string]> }) {
+  const [expanded, setExpanded] = useState(false);
   const entries = Object.entries(changes);
-  if (entries.length === 0) return "—";
-  return entries
-    .map(([field, [before, after]]) => `${formatFieldLabel(field)}: ${formatValue(before)} → ${formatValue(after)}`)
-    .join("; ");
+
+  if (entries.length === 0) {
+    return <span className="label-sm normal-case text-on-surface-variant">—</span>;
+  }
+
+  const lines = entries.map(([field, [before, after]]) => ({
+    field,
+    text: formatChange(field, before, after),
+  }));
+  const visible = expanded ? lines : lines.slice(0, COLLAPSED_CHANGES);
+  const hiddenCount = lines.length - visible.length;
+  const hasLongLine = lines.some((line) => line.text.length > COLLAPSED_LINE_CHARS);
+  const showToggle = hiddenCount > 0 || hasLongLine;
+
+  return (
+    <div className="w-72 max-w-72 space-y-1">
+      {visible.map((line) => (
+        <p
+          key={line.field}
+          title={line.text}
+          className={cn(
+            "label-sm normal-case text-on-surface-variant",
+            expanded ? "break-words" : "truncate",
+          )}
+        >
+          {line.text}
+        </p>
+      ))}
+      {showToggle && (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          className="label-sm normal-case text-primary hover:underline"
+        >
+          {expanded ? "Show less" : hiddenCount > 0 ? `+${hiddenCount} more` : "Show full"}
+        </button>
+      )}
+    </div>
+  );
 }
 
 /** Only visible to superadmins (also restricted server-side via `IsSuperAdminRole`). */
@@ -147,16 +196,21 @@ export function ActivityLogTable() {
             </Thead>
             <Tbody>
               {data.results.map((entry) => (
-                <Tr key={entry.id}>
-                  <Td>{entry.actor_display}</Td>
+                <Tr key={entry.id} className="align-top">
+                  <Td className="whitespace-nowrap">{entry.actor_display}</Td>
                   <Td>
                     <Badge tone={ACTION_TONE[entry.action]}>{entry.action_display}</Badge>
                   </Td>
                   <Td>
-                    {MODEL_LABELS[entry.model_name] ?? entry.model_name}: {entry.object_repr}
+                    <span
+                      className="line-clamp-2-custom w-64 max-w-64"
+                      title={`${MODEL_LABELS[entry.model_name] ?? entry.model_name}: ${entry.object_repr}`}
+                    >
+                      {MODEL_LABELS[entry.model_name] ?? entry.model_name}: {entry.object_repr}
+                    </span>
                   </Td>
-                  <Td className="max-w-xs">
-                    <span className="label-sm normal-case text-on-surface-variant">{formatChanges(entry.changes)}</span>
+                  <Td>
+                    <ChangesCell changes={entry.changes} />
                   </Td>
                   <Td className="whitespace-nowrap">{formatDateTime(entry.created_at)}</Td>
                 </Tr>
