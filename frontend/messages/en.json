@@ -316,7 +316,7 @@
     "refundedDescription": "The amount paid for this order has been refunded."
   },
   "Profile": {
-    "title": "Profile",
+    "title": "My Profile",
     "usernamePrefix": "Username:",
     "rolePrefix": "Role:",
     "personalInformation": "Personal Information",
@@ -342,7 +342,18 @@
     "street": "Street",
     "building": "Building",
     "apartment": "Apartment",
-    "addAddress": "Add Address"
+    "addAddress": "Add Address",
+    "subtitle": "Your account details and personal information.",
+    "username": "Username",
+    "phoneNumber": "Phone Number",
+    "memberSince": "Member Since",
+    "role": "Role",
+    "notProvided": "Not provided",
+    "editInformationDescription": "Update your name, photo and contact details",
+    "changePasswordDescription": "Set a new password for your account",
+    "myOrdersDescription": "View order history",
+    "logOutDescription": "End your session",
+    "backToProfile": "Back to profile"
   },
   "Wishlist": {
     "title": "Wishlist",

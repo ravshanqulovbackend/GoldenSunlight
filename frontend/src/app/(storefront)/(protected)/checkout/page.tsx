@@ -88,7 +88,7 @@ export default function CheckoutPage() {
     return (
       <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
         <EmptyState
-          icon="shopping_cart"
+          icon="shopping_bag"
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           actionHref="/products"

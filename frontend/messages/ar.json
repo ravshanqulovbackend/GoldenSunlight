@@ -316,7 +316,7 @@
     "refundedDescription": "تم استرداد المبلغ المدفوع مقابل هذا الطلب."
   },
   "Profile": {
-    "title": "الملف الشخصي",
+    "title": "ملفي الشخصي",
     "usernamePrefix": "اسم المستخدم:",
     "rolePrefix": "الدور:",
     "personalInformation": "المعلومات الشخصية",
@@ -342,7 +342,18 @@
     "street": "الشارع",
     "building": "المبنى",
     "apartment": "الشقة",
-    "addAddress": "إضافة عنوان"
+    "addAddress": "إضافة عنوان",
+    "subtitle": "تفاصيل حسابك ومعلوماتك الشخصية.",
+    "username": "اسم المستخدم",
+    "phoneNumber": "رقم الهاتف",
+    "memberSince": "عضو منذ",
+    "role": "الدور",
+    "notProvided": "غير محدد",
+    "editInformationDescription": "حدّث اسمك وصورتك وبيانات التواصل",
+    "changePasswordDescription": "عيّن كلمة مرور جديدة لحسابك",
+    "myOrdersDescription": "عرض سجل الطلبات",
+    "logOutDescription": "إنهاء الجلسة",
+    "backToProfile": "العودة إلى الملف الشخصي"
   },
   "Wishlist": {
     "title": "المفضلة",

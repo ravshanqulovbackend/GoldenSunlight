@@ -29,7 +29,7 @@ export default function CartPage() {
 
       {cart && cart.items.length === 0 && (
         <EmptyState
-          icon="shopping_cart"
+          icon="shopping_bag"
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           actionHref="/products"

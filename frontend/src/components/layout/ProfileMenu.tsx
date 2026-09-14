@@ -25,7 +25,7 @@ function getMenuActions(role: string | undefined, t: (key: string) => string): M
   const editInfoItem: MenuAction = {
     label: role === "staff" ? t("editInformation") : t("changeProfileInformation"),
     icon: "edit",
-    href: "/profile",
+    href: "/profile/edit",
   };
   const logoutItem: MenuAction = { label: t("logOut"), icon: "logout", onClick: () => logoutAndRedirect(), danger: true };
 

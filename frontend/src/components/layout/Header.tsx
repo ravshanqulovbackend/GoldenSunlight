@@ -40,8 +40,11 @@ export function Header() {
     { href: "/", label: t("home") },
     { href: "/products", label: t("products") },
     { href: "/about", label: t("aboutUs") },
-    ...(isAuthenticated && !isAdmin ? [{ href: "/orders", label: t("myOrders") }] : []),
   ];
+  const showOrdersLink = isAuthenticated && !isAdmin;
+  // Desktopda "My Orders" o'ng tarafdagi hisob amallari yonida turadi, lekin mobil
+  // menyuda oddiy navigatsiya havolasi sifatida qoladi.
+  const drawerLinks = showOrdersLink ? [...NAV_LINKS, { href: "/orders", label: t("myOrders") }] : NAV_LINKS;
 
   return (
     <>
@@ -100,13 +103,18 @@ export function Header() {
               aria-label={tHeader("cart")}
               className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low sm:h-10 sm:w-10"
             >
-              <Icon name="shopping_cart" />
+              <Icon name="shopping_bag" />
               {isAuthenticated && !!cart?.total_items && (
                 <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
                   {cart.total_items}
                 </span>
               )}
             </Link>
+            {showOrdersLink && (
+              <NavLink href="/orders" className="hidden md:inline-flex">
+                {t("myOrders")}
+              </NavLink>
+            )}
             <LanguageToggle className="hidden md:flex" />
             {isAuthenticated ? (
               <ProfileMenu placement="bottom">
@@ -140,7 +148,7 @@ export function Header() {
       <MobileNavDrawer
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        links={NAV_LINKS}
+        links={drawerLinks}
         isAuthenticated={isAuthenticated}
         user={user}
         onOpenSupport={isAdmin ? undefined : () => setSupportPanelOpen(true)}
