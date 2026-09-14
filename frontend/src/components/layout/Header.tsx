@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
 import { NavLink } from "./NavLink";
@@ -25,6 +26,7 @@ export function Header() {
   const t = useTranslations("Common");
   const tHeader = useTranslations("Header");
   const tMenu = useTranslations("ProfileMenu");
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportPanelOpen, setSupportPanelOpen] = useState(false);
   const user = useAuthStore((s) => s.user);
@@ -52,6 +54,9 @@ export function Header() {
         <div className="mx-auto flex h-full max-w-container-max-width items-center justify-between gap-2 px-margin-mobile md:px-margin-desktop">
           <Link
             href="/"
+            onClick={() => {
+              if (pathname === "/") window.scrollTo({ top: 0 });
+            }}
             className="gs-press title-lg min-w-0 shrink truncate uppercase tracking-wide text-primary hover:brightness-125 lg:headline-md"
           >
             GoldenSunlight

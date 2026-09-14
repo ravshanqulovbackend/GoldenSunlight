@@ -19,6 +19,12 @@ export function NavLink({
   return (
     <Link
       href={href}
+      onClick={() => {
+        // Ayni turgan sahifaning havolasi bosilganda Next navigatsiyani o'tkazib
+        // yuboradi — ya'ni scroll yuqoriga o'zi qaytmaydi va foydalanuvchi sahifa
+        // o'rtasida qolib ketadi. Shu holatda tepaga qaytarish o'zimizning ishimiz.
+        if (pathname === href) window.scrollTo({ top: 0 });
+      }}
       // `data-active` — `.gs-underline::after` chizig'i faol havolada doim ochiq
       // turishi uchun (hover'da esa markazdan kengayadi).
       data-active={isActive}
