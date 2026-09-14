@@ -175,6 +175,9 @@ export function MobileNavDrawer({
               )}
               {user?.role === "superadmin" && (
                 <>
+                  <Link href="/profile" onClick={onClose} className="label-md text-on-surface-variant">
+                    {t("myProfile")}
+                  </Link>
                   <Link href="/profile/password" onClick={onClose} className="label-md text-on-surface-variant">
                     {t("changePassword")}
                   </Link>

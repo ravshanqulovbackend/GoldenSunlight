@@ -354,7 +354,8 @@
     "changePasswordDescription": "عيّن كلمة مرور جديدة لحسابك",
     "myOrdersDescription": "عرض سجل الطلبات",
     "logOutDescription": "إنهاء الجلسة",
-    "backToProfile": "العودة إلى الملف الشخصي"
+    "backToProfile": "العودة إلى الملف الشخصي",
+    "adminPanelDescription": "إدارة الطلبات والمنتجات والمستخدمين"
   },
   "Wishlist": {
     "title": "المفضلة",

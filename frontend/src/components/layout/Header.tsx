@@ -25,7 +25,6 @@ function HeaderBadge({ count }: { count: number | undefined }) {
 export function Header() {
   const t = useTranslations("Common");
   const tHeader = useTranslations("Header");
-  const tMenu = useTranslations("ProfileMenu");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportPanelOpen, setSupportPanelOpen] = useState(false);
@@ -126,19 +125,10 @@ export function Header() {
             <LanguageToggle className="hidden md:flex" />
             {isAuthenticated ? (
               <>
-                {isAdmin && (
-                  <NavLink
-                    href={user?.role === "superadmin" ? "/admin/dashboard" : "/admin/orders"}
-                    className="hidden md:inline-flex"
-                  >
-                    {tMenu("adminPanel")}
-                  </NavLink>
-                )}
-                {user?.role !== "superadmin" && (
-                  <NavLink href="/profile" className="hidden md:inline-flex">
-                    {tHeader("profile")}
-                  </NavLink>
-                )}
+                {/* Admin paneliga o'tish profil sahifasidagi amallar ro'yxatida. */}
+                <NavLink href="/profile" className="hidden md:inline-flex">
+                  {tHeader("profile")}
+                </NavLink>
                 <button
                   type="button"
                   onClick={() => logoutAndRedirect()}

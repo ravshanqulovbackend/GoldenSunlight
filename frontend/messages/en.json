@@ -354,7 +354,8 @@
     "changePasswordDescription": "Set a new password for your account",
     "myOrdersDescription": "View order history",
     "logOutDescription": "End your session",
-    "backToProfile": "Back to profile"
+    "backToProfile": "Back to profile",
+    "adminPanelDescription": "Manage orders, products and users"
   },
   "Wishlist": {
     "title": "Wishlist",

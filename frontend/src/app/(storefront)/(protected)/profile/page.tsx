@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { getImageUrl } from "@/lib/utils/image";
@@ -71,23 +69,17 @@ export default function ProfilePage() {
   const tCommon = useTranslations("Common");
   const tMenu = useTranslations("ProfileMenu");
   const roleLabels = useRoleLabels();
-  const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
-  // Nothing on this page is editable for superadmin (no first name/last name/address needed).
-  useEffect(() => {
-    if (user && user.role === "superadmin") {
-      router.replace("/");
-    }
-  }, [user, router]);
-
-  if (!user || user.role === "superadmin") {
+  if (!user) {
     return (
       <div className="flex justify-center py-24">
         <Spinner />
       </div>
     );
   }
+
+  const isAdminRole = user.role === "admin" || user.role === "superadmin";
 
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username;
 
@@ -123,12 +115,23 @@ export default function ProfilePage() {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <ActionCard
-            icon="edit"
-            title={tMenu("editInformation")}
-            description={t("editInformationDescription")}
-            href="/profile/edit"
-          />
+          {isAdminRole && (
+            <ActionCard
+              icon="dashboard"
+              title={tMenu("adminPanel")}
+              description={t("adminPanelDescription")}
+              href={user.role === "superadmin" ? "/admin/dashboard" : "/admin/orders"}
+            />
+          )}
+          {/* Superadmin profilida ism/familiya/manzil tahrirlanmaydi. */}
+          {user.role !== "superadmin" && (
+            <ActionCard
+              icon="edit"
+              title={tMenu("editInformation")}
+              description={t("editInformationDescription")}
+              href="/profile/edit"
+            />
+          )}
           <ActionCard
             icon="lock_reset"
             title={tMenu("changePassword")}
