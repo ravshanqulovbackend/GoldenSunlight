@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -33,16 +32,9 @@ export default function ProfileEditPage() {
   const t = useTranslations("Profile");
   const tCommon = useTranslations("Common");
   const tMenu = useTranslations("ProfileMenu");
-  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (user && user.role === "superadmin") {
-      router.replace("/");
-    }
-  }, [user, router]);
 
   const { register: registerProfile, handleSubmit: handleProfileSubmit, control: profileControl } = useForm<ProfileFormValues>({
     values: user
@@ -80,7 +72,7 @@ export default function ProfileEditPage() {
     formState: { errors: addressErrors },
   } = useForm<AddressFormValues>({ resolver: zodResolver(addressSchema) });
 
-  if (!user || user.role === "superadmin") {
+  if (!user) {
     return (
       <div className="flex justify-center py-24">
         <Spinner />

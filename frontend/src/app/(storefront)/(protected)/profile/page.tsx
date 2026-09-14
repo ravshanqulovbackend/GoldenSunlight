@@ -123,15 +123,12 @@ export default function ProfilePage() {
               href={user.role === "superadmin" ? "/admin/dashboard" : "/admin/orders"}
             />
           )}
-          {/* Superadmin profilida ism/familiya/manzil tahrirlanmaydi. */}
-          {user.role !== "superadmin" && (
-            <ActionCard
-              icon="edit"
-              title={tMenu("editInformation")}
-              description={t("editInformationDescription")}
-              href="/profile/edit"
-            />
-          )}
+          <ActionCard
+            icon="edit"
+            title={tMenu("editInformation")}
+            description={t("editInformationDescription")}
+            href="/profile/edit"
+          />
           <ActionCard
             icon="lock_reset"
             title={tMenu("changePassword")}
