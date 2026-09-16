@@ -283,7 +283,7 @@
     "emptyTitle": "لا توجد طلبات بعد",
     "emptyDescription": "لم تقم بإجراء أي طلب حتى الآن.",
     "startShopping": "ابدأ التسوق",
-    "orderNumber": "طلب #{id}",
+    "order": "طلب",
     "details": "التفاصيل",
     "orderNotFound": "الطلب غير موجود",
     "products": "المنتجات",

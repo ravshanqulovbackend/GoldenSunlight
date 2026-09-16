@@ -97,7 +97,7 @@ export default function OrdersPage() {
               <Card className="flex flex-col gap-4 p-5 transition-colors hover:border-primary hover:bg-surface-container-low">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <p className="label-md font-semibold text-on-surface">{t("orderNumber", { id: order.id })}</p>
+                    <p className="label-md font-semibold text-on-surface">{t("order")}</p>
                     <Badge tone={orderStatusTone(order.status)}>{statusLabels[order.status]}</Badge>
                   </div>
                   <span className="label-sm text-on-surface-variant">{formatDate(order.created_at)}</span>

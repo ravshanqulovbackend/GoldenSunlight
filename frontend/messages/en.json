@@ -283,7 +283,7 @@
     "emptyTitle": "No orders yet",
     "emptyDescription": "You haven't placed any orders yet.",
     "startShopping": "Start Shopping",
-    "orderNumber": "Order #{id}",
+    "order": "Order",
     "details": "Details",
     "orderNotFound": "Order not found",
     "products": "Products",

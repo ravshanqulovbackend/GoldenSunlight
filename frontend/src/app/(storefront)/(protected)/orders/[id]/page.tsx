@@ -55,12 +55,12 @@ export default function OrderDetailPage() {
         items={[
           { label: tCommon("home"), href: "/" },
           { label: t("title"), href: "/orders" },
-          { label: `#${order.id}` },
+          { label: formatDate(order.created_at) },
         ]}
       />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="headline-md text-on-surface">{t("orderNumber", { id: order.id })}</h1>
+        <h1 className="headline-md text-on-surface">{t("order")}</h1>
         <Badge tone={orderStatusTone(order.status)}>{statusLabels[order.status]}</Badge>
       </div>
       <p className="label-md mt-1 text-on-surface-variant">{formatDate(order.created_at)}</p>
