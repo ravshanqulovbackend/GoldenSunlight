@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuthStore } from "@/lib/stores/authStore";
-import { useConversationThread, useDeleteConversation, useSendSupportMessage } from "@/lib/query/hooks/useSupport";
+import { useConversationThread, useDeleteConversation, useSendSupportMessage, useSuggestReply } from "@/lib/query/hooks/useSupport";
 import { MessageBubbles } from "@/components/support/MessageBubbles";
 import { MessageComposer } from "@/components/support/MessageComposer";
 import { Spinner } from "@/components/ui/Spinner";
@@ -28,6 +28,7 @@ export function ConversationThread({ customerId, conversation, onDeleted, onBack
 
   const { data: messages, isLoading, isError, refetch } = useConversationThread(customerId);
   const sendMessage = useSendSupportMessage(customerId ?? undefined);
+  const suggestReply = useSuggestReply(customerId);
   const deleteConversation = useDeleteConversation();
 
   if (customerId === null) {
@@ -95,7 +96,13 @@ export function ConversationThread({ customerId, conversation, onDeleted, onBack
         {messages && <MessageBubbles messages={messages} currentUserId={user?.id} />}
       </div>
 
-      <MessageComposer onSend={(payload) => sendMessage.mutate(payload)} isSending={sendMessage.isPending} placeholder="Write a reply..." />
+      <MessageComposer
+        onSend={(payload) => sendMessage.mutate(payload)}
+        isSending={sendMessage.isPending}
+        placeholder="Write a reply..."
+        onSuggest={() => suggestReply.mutateAsync()}
+        isSuggesting={suggestReply.isPending}
+      />
     </div>
   );
 }

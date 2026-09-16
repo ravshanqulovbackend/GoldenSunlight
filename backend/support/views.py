@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from common.models import ActivityLog
 from users.permissions import IsAdminRole, IsSuperAdminRole
+from . import ai
 from .models import SupportMessage
 from .serializers import ConversationSerializer, SupportMessageSerializer
 
@@ -105,3 +106,21 @@ class ConversationDetailView(APIView):
             object_repr=f"{customer.get_full_name() or customer.username} bilan yozishma ({count} ta xabar)",
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SuggestReplyView(APIView):
+    """Drafts a suggested reply for an admin/superadmin to review before
+    sending — never writes a `SupportMessage` itself. See `support/ai.py`."""
+    permission_classes = [IsAdminRole]
+
+    def post(self, request, customer_id):
+        messages = list(SupportMessage.objects.filter(customer_id=customer_id).order_by('created_at'))
+        if not messages:
+            return Response({'detail': "This conversation has no messages yet."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            draft = ai.generate_suggested_reply(messages)
+        except ai.SupportAIError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response({'draft': draft})

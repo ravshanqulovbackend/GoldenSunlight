@@ -10,9 +10,20 @@ interface MessageComposerProps {
   onSend: (payload: { message?: string; image?: File }) => void;
   isSending: boolean;
   placeholder?: string;
+  /** Admin thread only (`ConversationThread`) — the customer-facing panel never
+   * passes this, so the AI-suggest button only ever appears for admins. Never
+   * sends anything itself; it only fills the text field for the admin to edit. */
+  onSuggest?: () => Promise<string>;
+  isSuggesting?: boolean;
 }
 
-export function MessageComposer({ onSend, isSending, placeholder = "Write a message..." }: MessageComposerProps) {
+export function MessageComposer({
+  onSend,
+  isSending,
+  placeholder = "Write a message...",
+  onSuggest,
+  isSuggesting,
+}: MessageComposerProps) {
   const [text, setText] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -48,6 +59,18 @@ export function MessageComposer({ onSend, isSending, placeholder = "Write a mess
     clearImage();
   }
 
+  async function handleSuggest() {
+    if (!onSuggest) return;
+    setError(null);
+    try {
+      const draft = await onSuggest();
+      setText(draft);
+    } catch {
+      // Xatolik toast orqali (chaqiruvchi `useSuggestReply`ning `onError`i) allaqachon
+      // ko'rsatilgan — bu yerda faqat matnni to'ldirmasdan qoldiramiz.
+    }
+  }
+
   return (
     <div className="border-t border-outline-variant bg-surface-container-lowest p-4">
       {imagePreview && (
@@ -66,6 +89,18 @@ export function MessageComposer({ onSend, isSending, placeholder = "Write a mess
           <Icon name="attach_file" />
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
+        {onSuggest && (
+          <button
+            type="button"
+            onClick={handleSuggest}
+            disabled={isSuggesting}
+            aria-label="Suggest an AI reply"
+            title="Suggest an AI reply — you review and edit before sending"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container disabled:opacity-40"
+          >
+            <Icon name={isSuggesting ? "hourglass_empty" : "auto_awesome"} />
+          </button>
+        )}
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}

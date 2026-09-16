@@ -53,3 +53,10 @@ export async function getConversationThread(customerId: number): Promise<Support
 export async function deleteConversation(customerId: number): Promise<void> {
   await http.delete(`/support/conversations/${customerId}/`);
 }
+
+/** AI'dan javob loyihasini so'raydi — hech qachon o'zi yubormaydi, admin ko'rib
+ * chiqib composer'ga tushirib, tahrirlab yuboradi (yoki tashlaydi). */
+export async function suggestSupportReply(customerId: number): Promise<string> {
+  const { data } = await http.post<{ draft: string }>(`/support/conversations/${customerId}/suggest-reply/`);
+  return data.draft;
+}

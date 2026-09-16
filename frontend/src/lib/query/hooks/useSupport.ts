@@ -7,6 +7,7 @@ import {
   getMyMessages,
   getMyUnreadCount,
   sendSupportMessage,
+  suggestSupportReply,
 } from "@/lib/api/endpoints/support";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { toast } from "@/lib/stores/toastStore";
@@ -88,6 +89,15 @@ export function useConversationThread(customerId: number | null) {
     queryFn: () => getConversationThread(customerId as number),
     enabled: customerId !== null,
     refetchInterval: customerId !== null ? 15_000 : false,
+  });
+}
+
+/** Drafts an AI-suggested reply for the admin to review — never sends anything
+ * itself. Caller drops the returned text into the composer for editing. */
+export function useSuggestReply(customerId: number | null) {
+  return useMutation({
+    mutationFn: () => suggestSupportReply(customerId as number),
+    onError: (error) => toast(parseApiError(error).message || "Failed to generate a suggestion", "error"),
   });
 }
 

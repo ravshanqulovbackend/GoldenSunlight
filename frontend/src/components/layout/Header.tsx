@@ -10,7 +10,7 @@ import { MobileNavDrawer } from "./MobileNavDrawer";
 import { LanguageToggle } from "./LanguageToggle";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { useCart } from "@/lib/query/hooks/useCart";
-import { useConversationsUnreadCount, useMyUnreadCount } from "@/lib/query/hooks/useSupport";
+import { useMyUnreadCount } from "@/lib/query/hooks/useSupport";
 import { SupportChatPanel } from "@/components/support/SupportChatPanel";
 
 function HeaderBadge({ count }: { count: number | undefined }) {
@@ -35,7 +35,6 @@ export function Header() {
   const isAuthenticated = isHydrated && !!access;
   const { data: cart } = useCart();
   const { data: myUnreadCount } = useMyUnreadCount();
-  const { data: conversationsUnreadCount } = useConversationsUnreadCount();
 
   const NAV_LINKS = [
     { href: "/", label: t("home") },
@@ -80,16 +79,6 @@ export function Header() {
                 <Icon name="support_agent" />
                 <HeaderBadge count={myUnreadCount} />
               </button>
-            )}
-            {isAdmin && (
-              <Link
-                href="/admin/support"
-                aria-label={tHeader("inquiries")}
-                className="gs-icon-btn relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
-              >
-                <Icon name="notifications" />
-                <HeaderBadge count={conversationsUnreadCount} />
-              </Link>
             )}
             <Link
               href="/products"

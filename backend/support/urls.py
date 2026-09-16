@@ -8,4 +8,5 @@ urlpatterns = [
     path('conversations/', views.ConversationListView.as_view(), name='support-conversations'),
     path('conversations/unread-count/', views.ConversationUnreadCountView.as_view(), name='support-conversations-unread-count'),
     path('conversations/<int:customer_id>/', views.ConversationDetailView.as_view(), name='support-conversation-detail'),
+    path('conversations/<int:customer_id>/suggest-reply/', views.SuggestReplyView.as_view(), name='support-suggest-reply'),
 ]

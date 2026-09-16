@@ -50,6 +50,9 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:?ALLOWED_HOSTS .env faylida majburiy}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS .env faylida majburiy}
+      # Ixtiyoriy — admin support panelidagi "AI taklif" tugmasi uchun. Bo'sh
+      # qoldirilsa (.env'da yo'q bo'lsa) shu funksiya o'chiq turadi.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy

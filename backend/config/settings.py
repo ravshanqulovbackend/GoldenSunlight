@@ -198,6 +198,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+# AI (admin support "suggest a reply" — support/ai.py). Optional: the feature
+# degrades to a clear 503 (instead of crashing) when no key is configured.
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+SUPPORT_AI_MODEL = os.environ.get('SUPPORT_AI_MODEL', 'claude-opus-5')
+
 # DRF Spectacular
 SPECTACULAR_SETTINGS = {
     'TITLE': 'GoldenSunlight API',
