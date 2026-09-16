@@ -27,9 +27,24 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         before = model_to_dict(serializer.instance)
+        was_active = serializer.instance.is_active
         # slug yaratilgandan keyin o'zgartirilmaydi — havolalar/bookmark'lar buzilmasin
         instance = serializer.save(slug=serializer.instance.slug)
-        log_activity(self.request.user, 'updated', instance, 'Category', diff_instance(before, instance))
+
+        diff = diff_instance(before, instance)
+        # Kategoriya faolsizlantirilganda unga tegishli mahsulotlar ham avtomatik
+        # faolsizlantiriladi — aks holda ular Product'ning o'z alohida `is_active`si
+        # orqali filtrlanadigani uchun kategoriya faolsiz bo'lsa ham katalog/qidiruv/
+        # dashboard hisoblarida faol bo'lib qolaveradi. Aksincha yo'nalish (kategoriya
+        # qayta faollashtirilganda mahsulotlarni ham avtomatik faollashtirish) ATAYLAB
+        # qilinmaydi — ba'zi mahsulotlar boshqa sababga ko'ra alohida o'chirilgan bo'lishi
+        # mumkin, ularni admin bila-bila qayta yoqishi kerak.
+        if was_active and not instance.is_active:
+            deactivated_count = instance.products.filter(is_active=True).update(is_active=False)
+            if deactivated_count:
+                diff['products_deactivated'] = [str(0), str(deactivated_count)]
+
+        log_activity(self.request.user, 'updated', instance, 'Category', diff)
 
     def perform_destroy(self, instance):
         if instance.products.exists() or instance.children.exists():
