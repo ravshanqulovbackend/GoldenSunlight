@@ -118,9 +118,6 @@ export default function OrderDetailPage() {
             {order.address_text && <p className="body-md text-on-surface-variant">{order.address_text}</p>}
             {order.landmark && <p className="body-md text-on-surface-variant">{t("landmark", { landmark: order.landmark })}</p>}
             {order.notes && <p className="body-md text-on-surface-variant">{t("notes", { notes: order.notes })}</p>}
-            {order.tracking_number && (
-              <p className="label-md text-on-surface">{t("trackingNumber", { number: order.tracking_number })}</p>
-            )}
           </Card>
         </div>
 

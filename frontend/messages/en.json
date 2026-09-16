@@ -290,7 +290,6 @@
     "customerInfo": "Customer Information",
     "landmark": "Landmark: {landmark}",
     "notes": "Note: {notes}",
-    "trackingNumber": "Tracking number: {number}",
     "payment": "Payment",
     "paymentMethod": "Payment method",
     "discount": "Discount",

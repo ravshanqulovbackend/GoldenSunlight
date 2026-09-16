@@ -290,7 +290,6 @@
     "customerInfo": "معلومات العميل",
     "landmark": "علامة مميزة: {landmark}",
     "notes": "ملاحظة: {notes}",
-    "trackingNumber": "رقم التتبع: {number}",
     "payment": "الدفع",
     "paymentMethod": "طريقة الدفع",
     "discount": "الخصم",
