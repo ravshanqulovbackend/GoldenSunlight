@@ -111,6 +111,11 @@ services:
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
+      # Admin support panelidagi "AI taklif" tugmasi uchun (backend/support/ai.py) —
+      # ixtiyoriy, bo'sh qolsa funksiya o'chiq turadi (503). Render dashboard'da
+      # Environment bo'limidan qiymatini kiriting — bu yerga yozmang.
+      - key: ANTHROPIC_API_KEY
+        sync: false
 
   - type: web
     name: goldensunlight-frontend
