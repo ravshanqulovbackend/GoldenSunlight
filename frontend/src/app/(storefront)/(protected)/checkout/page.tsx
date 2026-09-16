@@ -129,7 +129,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
+    <div className="mx-auto max-w-container-max-width px-margin-mobile pb-28 pt-10 md:px-margin-desktop lg:pb-10">
       <Breadcrumb items={[{ label: tCommon("home"), href: "/" }, { label: tCommon("cart"), href: "/cart" }, { label: t("title") }]} />
       <h1 className="headline-md mt-4 text-on-surface">{t("title")}</h1>
 
@@ -201,10 +201,27 @@ export default function CheckoutPage() {
               <span className="text-primary">{formatPrice(total, locale)}</span>
             </div>
 
-            <Button type="submit" size="lg" disabled={createOrder.isPending}>
+            <Button type="submit" size="lg" className="hidden lg:flex" disabled={createOrder.isPending}>
               {createOrder.isPending ? t("submitting") : t("confirmOrder")}
             </Button>
           </Card>
+        </div>
+
+        {/*
+         * Checkout formasi ancha uzun (kontakt/manzil/izoh) — mobilda "Buyurtmani
+         * tasdiqlash" tugmasi ekran pastida doim ko'rinib turadi, formani to'ldirish
+         * jarayonida foydalanuvchi istalgan payt buyurtma bera oladi.
+         */}
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 animate-fade-up border-t border-outline-variant bg-surface/95 p-3 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-md md:bottom-0 md:[padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
+          <div className="mx-auto flex max-w-container-max-width items-center gap-3">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="label-sm truncate text-on-surface-variant">{t("total")}</span>
+              <span className="title-lg truncate text-primary">{formatPrice(total, locale)}</span>
+            </div>
+            <Button type="submit" size="md" className="shrink-0" disabled={createOrder.isPending}>
+              {createOrder.isPending ? t("submitting") : t("confirmOrder")}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

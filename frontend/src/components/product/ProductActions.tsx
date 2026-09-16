@@ -87,6 +87,36 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           {t("share")}
         </Button>
       </div>
+
+      {/*
+       * Mobilda sahifa uzun bo'ladi (tavsif/sharhlar), shuning uchun asosiy
+       * "Savatga qo'shish" tugmasi ekran pastida doim ko'rinib turadi — foydalanuvchi
+       * pastga skroll qilib yurgan payti ham buyurtma bera oladi. `lg:` dan boshlab
+       * yashiriladi, chunki katta ekranda yuqoridagi blok allaqachon ko'rinib turadi.
+       */}
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 animate-fade-up border-t border-outline-variant bg-surface/95 p-3 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-md md:bottom-0 md:[padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
+        <div className="mx-auto flex max-w-container-max-width items-center gap-3">
+          <div className="flex min-w-0 flex-1 flex-col">
+            {quantity > 1 && (
+              <span className="label-sm truncate text-on-surface-variant">
+                {t("lineTotalBreakdown", { quantity: String(quantity), unit: formatPrice(unitPrice, locale) })}
+              </span>
+            )}
+            <span className="title-lg truncate text-primary">
+              {t("lineTotal", { total: formatPrice(unitPrice * quantity, locale) })}
+            </span>
+          </div>
+          <Button
+            size="md"
+            className="shrink-0"
+            disabled={!product.is_in_stock || addToCart.isPending}
+            onClick={() => requireAuth(() => addToCart.mutate({ product_id: product.id, quantity }))}
+          >
+            <Icon name="add_shopping_cart" className="text-[18px]" />
+            {product.is_in_stock ? t("addToCart") : t("outOfStock")}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

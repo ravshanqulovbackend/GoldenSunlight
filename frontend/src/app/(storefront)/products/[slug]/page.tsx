@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
   ];
 
   return (
-    <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
+    <div className="mx-auto max-w-container-max-width px-margin-mobile pb-28 pt-10 md:px-margin-desktop lg:pb-10">
       <Breadcrumb
         items={[
           { label: tCommon("home"), href: "/" },

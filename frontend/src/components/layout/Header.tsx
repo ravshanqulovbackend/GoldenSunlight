@@ -108,7 +108,7 @@ export function Header() {
             <Link
               href="/cart"
               aria-label={tHeader("cart")}
-              className="gs-icon-btn relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary sm:h-10 sm:w-10"
+              className="gs-icon-btn relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary"
             >
               <Icon name="shopping_bag" />
               {isAuthenticated && !!cart?.total_items && (
@@ -148,7 +148,7 @@ export function Header() {
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label={t("menu")}
-              className="gs-icon-btn flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary sm:h-10 sm:w-10 md:hidden"
+              className="gs-icon-btn flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:hidden"
             >
               <Icon name="menu" />
             </button>

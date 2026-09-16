@@ -68,7 +68,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
           aria-label={isFavorite ? t("removeFromWishlist") : t("addToWishlist")}
           disabled={toggleFavorite.isPending}
           className={cn(
-            "gs-icon-btn absolute end-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 shadow-sm backdrop-blur-sm hover:bg-surface sm:end-3 sm:top-3 sm:h-9 sm:w-9",
+            "gs-icon-btn absolute end-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-surface/90 shadow-sm backdrop-blur-sm hover:bg-surface sm:end-3 sm:top-3 sm:h-9 sm:w-9",
             // Desktopda karta ustiga kelinganda yuqoridan sirg'alib chiqadi.
             isFavorite
               ? "opacity-100"
@@ -124,7 +124,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
             onClick={() => requireAuth(() => addToCart.mutate({ product_id: product.id }))}
             disabled={!product.is_in_stock || addToCart.isPending}
             aria-label={t("addToCart")}
-            className="gs-press flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md hover:shadow-primary/30 disabled:opacity-40 disabled:hover:translate-y-0 sm:h-10 sm:w-10"
+            className="gs-press flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md hover:shadow-primary/30 disabled:opacity-40 disabled:hover:translate-y-0"
           >
             <Icon name="add_shopping_cart" className="text-[18px] sm:text-[20px]" />
           </button>

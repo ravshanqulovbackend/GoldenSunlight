@@ -20,26 +20,45 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
     router.push(buildProductsHref(searchParams, updates));
   }
 
+  const allChip = (
+    <Chip key="all" selected={!activeCategory} onClick={() => go({ category: null })} className="shrink-0 justify-start whitespace-nowrap">
+      {t("all")}
+    </Chip>
+  );
+  const categoryChips = categories.map((category) => (
+    <Chip
+      key={category.id}
+      selected={activeCategory === category.slug}
+      onClick={() => go({ category: activeCategory === category.slug ? null : category.slug })}
+      className="shrink-0 justify-start whitespace-nowrap"
+    >
+      {pickLocalized(category.name, category.name_ar, locale)} ({category.product_count})
+    </Chip>
+  ));
+
   return (
-    <div className="flex w-full flex-col gap-4 md:w-64">
-      <Card className="p-5">
-        <h3 className="label-sm mb-4 uppercase text-on-surface-variant">{t("categories")}</h3>
-        <div className="gs-stagger flex flex-col gap-2">
-          <Chip selected={!activeCategory} onClick={() => go({ category: null })} className="justify-start">
-            {t("all")}
-          </Chip>
-          {categories.map((category) => (
-            <Chip
-              key={category.id}
-              selected={activeCategory === category.slug}
-              onClick={() => go({ category: activeCategory === category.slug ? null : category.slug })}
-              className="justify-start"
-            >
-              {pickLocalized(category.name, category.name_ar, locale)} ({category.product_count})
-            </Chip>
-          ))}
-        </div>
-      </Card>
-    </div>
+    <>
+      {/*
+       * Kategoriyalar ko'payib ketsa mobilda vertikal ro'yxat butun ekranni
+       * egallab, mahsulotlarni ko'rish uchun ko'p skroll qildiradi — shuning
+       * uchun mobilda gorizontal, bir qatorli suriladigan chip panjarasi
+       * ishlatiladi (ekran chetlarigacha to'liq keladi). Planshet/desktopda
+       * esa odatdagi vertikal yon panel qoladi.
+       */}
+      <div className="-mx-margin-mobile flex gap-2 overflow-x-auto px-margin-mobile pb-1 custom-scrollbar md:hidden">
+        {allChip}
+        {categoryChips}
+      </div>
+
+      <div className="hidden w-full flex-col gap-4 md:flex md:w-64">
+        <Card className="p-5">
+          <h3 className="label-sm mb-4 uppercase text-on-surface-variant">{t("categories")}</h3>
+          <div className="gs-stagger flex flex-col gap-2">
+            {allChip}
+            {categoryChips}
+          </div>
+        </Card>
+      </div>
+    </>
   );
 }
