@@ -73,7 +73,9 @@ export default function ProfilePage() {
   const tMenu = useTranslations("ProfileMenu");
   const roleLabels = useRoleLabels();
   const user = useAuthStore((s) => s.user);
-  const { data: notifications } = useNotifications();
+  // Faqat "staff" (mijoz) uchun — bu sahifada bildirishnoma action-kartasi shu rol
+  // uchun ko'rsatiladi (pastga qarang); admin/superadmin uchun so'rov behuda bo'lardi.
+  const { data: notifications } = useNotifications(user?.role === "staff");
   const unreadNotifications = notifications?.filter((n) => !n.is_read).length ?? 0;
 
   if (!user) {

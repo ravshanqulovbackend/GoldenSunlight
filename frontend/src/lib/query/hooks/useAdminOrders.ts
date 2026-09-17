@@ -16,10 +16,14 @@ import type { OrderStatus } from "@/types/order";
 const ORDERS_KEY = ["admin-orders"];
 const orderKey = (id: number) => ["admin-orders", id];
 
+// Bildirishnoma "ko'rildi" belgisi (NotificationSeenTicks) mijoz o'z tomonidan
+// /notifications sahifasini ochganda o'zgaradi — bu sahifada bo'lmagan holda ham
+// admin buni ko'rib turishi uchun (support hooks'dagi kabi) davriy qayta so'rov.
 export function useAdminOrders(filters: AdminOrderFilters = {}) {
   return useQuery({
     queryKey: [...ORDERS_KEY, filters],
     queryFn: () => getAdminOrders(filters),
+    refetchInterval: 30_000,
   });
 }
 
@@ -28,6 +32,7 @@ export function useAdminOrder(id: number) {
     queryKey: orderKey(id),
     queryFn: () => getAdminOrder(id),
     enabled: !!id,
+    refetchInterval: id ? 20_000 : false,
   });
 }
 
