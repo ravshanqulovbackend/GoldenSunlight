@@ -40,8 +40,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
   const isSuperAdmin = user?.role === "superadmin";
-  const { data: notifications } = useNotifications();
-  const unreadCount = isSuperAdmin ? (notifications?.results.filter((n) => !n.is_read).length ?? 0) : 0;
+  const { data: notifications } = useNotifications(isSuperAdmin);
+  const unreadCount = isSuperAdmin ? (notifications?.filter((n) => !n.is_read).length ?? 0) : 0;
   const { NAV_ITEMS, DASHBOARD_NAV_ITEM, NOTIFICATIONS_NAV_ITEM } = useNavItems(t);
   const navItems = isSuperAdmin ? [DASHBOARD_NAV_ITEM, ...NAV_ITEMS, NOTIFICATIONS_NAV_ITEM] : NAV_ITEMS;
 

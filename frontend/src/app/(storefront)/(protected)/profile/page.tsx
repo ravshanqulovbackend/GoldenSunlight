@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRoleLabels } from "@/lib/utils/roles";
+import { useNotifications } from "@/lib/query/hooks/useNotifications";
 import { cn } from "@/lib/utils/cn";
 
 function DetailRow({ icon, label, value }: { icon: string; label: string; value: string }) {
@@ -29,17 +30,24 @@ function ActionCard({
   href,
   onClick,
   danger,
+  badge,
 }: {
   icon: string;
   title: string;
   href?: string;
   onClick?: () => void;
   danger?: boolean;
+  badge?: number;
 }) {
   const content = (
     <>
       <Icon name={icon} className={cn("text-[24px]", danger ? "text-error" : "text-primary")} />
-      <span className={cn("min-w-0 title-md", danger ? "text-error" : "text-on-surface")}>{title}</span>
+      <span className={cn("min-w-0 flex-1 title-md", danger ? "text-error" : "text-on-surface")}>{title}</span>
+      {!!badge && (
+        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-error px-1.5 label-sm text-on-error">
+          {badge}
+        </span>
+      )}
     </>
   );
   const className =
@@ -65,6 +73,8 @@ export default function ProfilePage() {
   const tMenu = useTranslations("ProfileMenu");
   const roleLabels = useRoleLabels();
   const user = useAuthStore((s) => s.user);
+  const { data: notifications } = useNotifications();
+  const unreadNotifications = notifications?.filter((n) => !n.is_read).length ?? 0;
 
   if (!user) {
     return (
@@ -120,7 +130,15 @@ export default function ProfilePage() {
           <ActionCard icon="edit" title={tMenu("editInformation")} href="/profile/edit" />
           <ActionCard icon="lock_reset" title={tMenu("changePassword")} href="/profile/password" />
           {user.role === "staff" && (
-            <ActionCard icon="package_2" title={tCommon("myOrders")} href="/orders" />
+            <>
+              <ActionCard icon="package_2" title={tCommon("myOrders")} href="/orders" />
+              <ActionCard
+                icon="notifications"
+                title={tMenu("notifications")}
+                href="/notifications"
+                badge={unreadNotifications}
+              />
+            </>
           )}
           <ActionCard icon="logout" title={tCommon("logOut")} onClick={() => logoutAndRedirect()} danger />
         </div>

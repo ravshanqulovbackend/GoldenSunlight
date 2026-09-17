@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from "@/lib/query/hooks/useNotifications";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Card } from "@/components/ui/Card";
@@ -12,21 +13,23 @@ import { formatDate } from "@/lib/utils/money";
 import { cn } from "@/lib/utils/cn";
 
 export default function NotificationsPage() {
+  const t = useTranslations("Notifications");
+  const tCommon = useTranslations("Common");
   const { data, isLoading, isError, refetch } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
-  const unreadCount = data?.results.filter((n) => !n.is_read).length ?? 0;
+  const unreadCount = data?.filter((n) => !n.is_read).length ?? 0;
 
   return (
     <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
-      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Notifications" }]} />
+      <Breadcrumb items={[{ label: tCommon("home"), href: "/" }, { label: t("title") }]} />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="headline-md text-on-surface">Notifications</h1>
+        <h1 className="headline-md text-on-surface">{t("title")}</h1>
         {unreadCount > 0 && (
           <Button variant="outline" disabled={markAllRead.isPending} onClick={() => markAllRead.mutate()}>
-            Mark All as Read
+            {t("markAllRead")}
           </Button>
         )}
       </div>
@@ -37,13 +40,13 @@ export default function NotificationsPage() {
         </div>
       )}
       {isError && <ErrorState onRetry={() => refetch()} />}
-      {data && data.results.length === 0 && (
-        <EmptyState icon="notifications" title="No notifications" description="There are no new notifications yet." />
+      {data && data.length === 0 && (
+        <EmptyState icon="notifications" title={t("emptyTitle")} description={t("emptyDescription")} />
       )}
 
-      {data && data.results.length > 0 && (
+      {data && data.length > 0 && (
         <div className="mt-8 flex flex-col gap-3">
-          {data.results.map((notification) => (
+          {data.map((notification) => (
             <Card
               key={notification.id}
               className={cn(
@@ -76,7 +79,7 @@ export default function NotificationsPage() {
                   onClick={() => markRead.mutate(notification.id)}
                   className="shrink-0"
                 >
-                  Mark as Read
+                  {t("markRead")}
                 </Button>
               )}
             </Card>

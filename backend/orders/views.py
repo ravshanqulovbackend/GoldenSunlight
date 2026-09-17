@@ -334,9 +334,13 @@ class AdminOrderNotifyReadyView(APIView):
             order.status = 'ready'
             order.save(update_fields=['status', 'updated_at'])
             log_activity(request.user, 'updated', order, 'Order', diff_instance(before, order))
+        # `order.id` — saytdagi barcha buyurtmalar bo'yicha umumiy ketma-ket raqam,
+        # mijozning "nechinchi buyurtmasi" emas — shuning uchun bildirishnoma matnida
+        # ko'rsatilmaydi (customer-facing buyurtma sahifalaridagi bilan bir xil qoida —
+        # `orders/[id]/page.tsx`ga qarang). Sana orqali farqlanadi.
         Notification.objects.create(
             user=order.user,
-            title=f'Order #{order.id} is ready!',
-            message=f'Your order (#{order.id}) is ready — you can come and pick it up now.',
+            title='Your order is ready!',
+            message=f'Your order from {order.created_at:%d.%m.%Y} is ready — you can come and pick it up now.',
         )
         return Response(OrderSerializer(order).data)

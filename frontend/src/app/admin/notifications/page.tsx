@@ -15,7 +15,7 @@ export default function AdminNotificationsPage() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
-  const unreadCount = data?.results.filter((n) => !n.is_read).length ?? 0;
+  const unreadCount = data?.filter((n) => !n.is_read).length ?? 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,13 +39,13 @@ export default function AdminNotificationsPage() {
         </div>
       )}
       {isError && <ErrorState onRetry={() => refetch()} />}
-      {data && data.results.length === 0 && (
+      {data && data.length === 0 && (
         <EmptyState icon="notifications" title="No notifications" description="There are no new notifications yet." />
       )}
 
-      {data && data.results.length > 0 && (
+      {data && data.length > 0 && (
         <div className="flex flex-col gap-3">
-          {data.results.map((notification) => (
+          {data.map((notification) => (
             <Card
               key={notification.id}
               className={cn(

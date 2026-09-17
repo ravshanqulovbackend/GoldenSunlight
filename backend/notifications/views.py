@@ -6,8 +6,13 @@ from .serializers import NotificationSerializer
 
 
 class NotificationListView(generics.ListAPIView):
+    """Sahifalanmagan — bitta userning butun bildirishnoma tarixi (`support`dagi
+    `MyMessagesView` bilan bir xil sabab: DEFAULT_PAGINATION_CLASS ostida faqat
+    birinchi sahifa (12 ta) qaytarilardi, va frontend hech qachon keyingi sahifani
+    so'ramagani uchun 12tadan eskilari doim ko'rinmas bo'lib qolardi)."""
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)

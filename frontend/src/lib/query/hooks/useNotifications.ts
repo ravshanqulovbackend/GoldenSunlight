@@ -7,14 +7,20 @@ import {
 import { queryKeys } from "@/lib/query/keys";
 import { useAuthStore } from "@/lib/stores/authStore";
 
-export function useNotifications() {
+/** `enabled` — pass `false` when the caller already knows the viewer can never
+ * have any (e.g. `AdminSidebar` for a plain `admin`: only superadmins get
+ * notifications, so there's no point polling for them). */
+export function useNotifications(enabled = true) {
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const access = useAuthStore((s) => s.access);
 
   return useQuery({
     queryKey: queryKeys.notifications,
     queryFn: getNotifications,
-    enabled: isHydrated && !!access,
+    enabled: enabled && isHydrated && !!access,
+    // Support'dagi kabi — admin/superadmin "buyurtma tayyor" yoki mahsulot/kategoriya
+    // o'chirilgani haqidagi bildirishnomani sahifani qayta ochmasdan ham ko'rishi uchun.
+    refetchInterval: enabled ? 60_000 : false,
   });
 }
 

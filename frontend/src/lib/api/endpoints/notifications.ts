@@ -1,9 +1,9 @@
 import { http } from "../http";
-import type { Paginated } from "@/types/api";
 import type { AppNotification } from "@/types/notification";
 
-export async function getNotifications(): Promise<Paginated<AppNotification>> {
-  const { data } = await http.get<Paginated<AppNotification>>("/notifications/");
+/** Sahifalanmagan — butun tarix (backend: `pagination_class = None`). */
+export async function getNotifications(): Promise<AppNotification[]> {
+  const { data } = await http.get<AppNotification[]>("/notifications/");
   return data;
 }
 
