@@ -53,11 +53,15 @@ class Order(models.Model):
     # Yetkazib berish yo'q — buyurtma faqat do'kondan olib ketiladi (pickup).
     # pending: mijoz endigina buyurtma berdi ("jarayonda"). preparing: admin buyurtmani
     # qabul qilib, tayyorlashni boshladi. ready: buyurtma tayyor, mijoz kelib olib
-    # ketishi mumkin — shu holatga o'tgach buyurtma tahrirlanmaydi (TERMINAL_STATUSES).
+    # ketishi mumkin. picked_up: mijoz haqiqatan kelib olib ketdi — shu holat "sotuv
+    # yakunlandi" deb hisoblanadi (dashboard'dagi revenue FAQAT shu holatdagi
+    # buyurtmalarni qo'shadi, `common/views.py`ga qarang). `ready`ga o'tgach buyurtma
+    # tahrirlanmaydi (TERMINAL_STATUSES, `orders/views.py`).
     STATUS_CHOICES = [
         ('pending', 'Processing'),
         ('preparing', 'Preparing'),
         ('ready', 'Ready for Pickup'),
+        ('picked_up', 'Picked Up'),
         ('cancelled', 'Cancelled'),
         ('refunded', 'Refunded'),
     ]

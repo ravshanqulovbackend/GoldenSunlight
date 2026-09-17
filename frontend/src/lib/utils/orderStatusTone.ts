@@ -6,6 +6,7 @@ const TONES: Record<OrderStatus, Tone> = {
   pending: "neutral",
   preparing: "secondary",
   ready: "primary",
+  picked_up: "tertiary",
   cancelled: "error",
   refunded: "error",
 };

@@ -23,23 +23,29 @@ class DashboardView(APIView):
         week_ago = now - timedelta(days=7)
         month_ago = now - timedelta(days=30)
 
-        total_revenue = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
+        # Daromad FAQAT haqiqatan olib ketilgan (`picked_up`) buyurtmalardan hisoblanadi —
+        # `pending`/`preparing`/`ready` hali yakunlanmagan (pul/mahsulot hali
+        # almashmagan), `cancelled`/`refunded` esa umuman sotuv emas. Avval BARCHA
+        # buyurtma (bekor qilingani ham) qo'shilib hisoblanardi.
+        completed_orders = Order.objects.filter(status='picked_up')
+        total_revenue = completed_orders.aggregate(total=Sum('total_amount'))['total'] or 0
         total_orders = Order.objects.count()
         total_users = User.objects.filter(role='staff').count()
         total_products = Product.objects.filter(is_active=True).count()
 
         today_orders = Order.objects.filter(created_at__date=today).count()
-        today_revenue = Order.objects.filter(created_at__date=today).aggregate(total=Sum('total_amount'))['total'] or 0
+        today_revenue = completed_orders.filter(created_at__date=today).aggregate(total=Sum('total_amount'))['total'] or 0
 
         week_orders = Order.objects.filter(created_at__gte=week_ago).count()
-        week_revenue = Order.objects.filter(created_at__gte=week_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        week_revenue = completed_orders.filter(created_at__gte=week_ago).aggregate(total=Sum('total_amount'))['total'] or 0
 
         month_orders = Order.objects.filter(created_at__gte=month_ago).count()
-        month_revenue = Order.objects.filter(created_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        month_revenue = completed_orders.filter(created_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
 
         pending_orders = Order.objects.filter(status='pending').count()
         preparing_orders = Order.objects.filter(status='preparing').count()
         ready_orders = Order.objects.filter(status='ready').count()
+        picked_up_orders = completed_orders.count()
         cancelled_orders = Order.objects.filter(status='cancelled').count()
         refunded_orders = Order.objects.filter(status='refunded').count()
 
@@ -65,14 +71,14 @@ class DashboardView(APIView):
                 'rating': str(p.rating),
             })
 
-        # Haftalik sotuvlar (real data)
+        # Haftalik sotuvlar (real data) — xuddi yuqoridagi revenue kabi, faqat
+        # `picked_up`.
         weekly_sales = []
         day_names = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya']
         for i in range(7):
             day = now - timedelta(days=6 - i)
-            day_revenue = Order.objects.filter(
+            day_revenue = completed_orders.filter(
                 created_at__date=day.date(),
-                status__in=['preparing', 'ready']
             ).aggregate(total=Sum('total_amount'))['total'] or 0
             weekly_sales.append({
                 'day': day_names[i],
@@ -94,6 +100,7 @@ class DashboardView(APIView):
                 'pending': pending_orders,
                 'preparing': preparing_orders,
                 'ready': ready_orders,
+                'picked_up': picked_up_orders,
                 'cancelled': cancelled_orders,
                 'refunded': refunded_orders,
             },

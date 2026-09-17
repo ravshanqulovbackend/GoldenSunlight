@@ -27,14 +27,21 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { getImageUrl } from "@/lib/utils/image";
 import { formatDate, formatPrice } from "@/lib/utils/money";
 import { orderStatusTone } from "@/lib/utils/orderStatusTone";
-import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS, type Order, type OrderItem, type OrderStatus } from "@/types/order";
+import {
+  ORDER_STATUS_LABELS,
+  PAYMENT_METHOD_LABELS,
+  TERMINAL_ORDER_STATUSES,
+  type Order,
+  type OrderItem,
+  type OrderStatus,
+} from "@/types/order";
 
 function ItemRow({ order, item }: { order: Order; item: OrderItem }) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [confirming, setConfirming] = useState(false);
   const updateQuantity = useUpdateOrderItemQuantity(order.id);
   const removeItem = useRemoveOrderItem(order.id);
-  const isTerminal = ["ready", "cancelled", "refunded"].includes(order.status);
+  const isTerminal = TERMINAL_ORDER_STATUSES.includes(order.status);
 
   return (
     <li className="flex flex-col gap-3 border-b border-outline-variant pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
@@ -172,7 +179,9 @@ function StatusForm({ order }: { order: Order }) {
   const updateStatus = useUpdateOrderStatus(order.id);
   const notifyReady = useNotifyOrderReady(order.id);
   const isReady = order.status === "ready";
-  const canNotify = !["cancelled", "refunded"].includes(order.status);
+  // Backend endi buni ham rad qiladi (`AdminOrderNotifyReadyView`) — bu yerda esa
+  // tugmani oldindan o'chirib qo'yish uchun.
+  const canNotify = !["picked_up", "cancelled", "refunded"].includes(order.status);
 
   return (
     <Card className="flex flex-col gap-4 p-6">
@@ -247,7 +256,7 @@ export default function AdminOrderDetailPage() {
                 <ItemRow key={item.id} order={order} item={item} />
               ))}
             </ul>
-            {!["ready", "cancelled", "refunded"].includes(order.status) && <AddItemForm order={order} />}
+            {!TERMINAL_ORDER_STATUSES.includes(order.status) && <AddItemForm order={order} />}
           </Card>
 
           <Card className="flex flex-col gap-2 p-6">

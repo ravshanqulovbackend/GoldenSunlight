@@ -2,6 +2,7 @@ export interface DashboardOrderStats {
   pending: number;
   preparing: number;
   ready: number;
+  picked_up: number;
   cancelled: number;
   refunded: number;
 }

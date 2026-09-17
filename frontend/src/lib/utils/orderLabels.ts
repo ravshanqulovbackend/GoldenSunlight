@@ -12,6 +12,7 @@ export function useOrderStatusLabels(): Record<OrderStatus, string> {
     pending: t("pending"),
     preparing: t("preparing"),
     ready: t("ready"),
+    picked_up: t("pickedUp"),
     cancelled: t("cancelled"),
     refunded: t("refunded"),
   };
@@ -29,13 +30,14 @@ export interface OrderTrackingStep {
 }
 
 /** No delivery — orders are picked up in-store, so the steps are just
- *  received -> preparing -> ready for pickup. */
+ *  received -> preparing -> ready for pickup -> picked up. */
 export function useOrderTrackingSteps(): OrderTrackingStep[] {
   const t = useTranslations("OrderTracking");
   return [
     { status: "pending", label: t("received"), icon: "receipt_long" },
     { status: "preparing", label: t("preparing"), icon: "inventory_2" },
     { status: "ready", label: t("ready"), icon: "storefront" },
+    { status: "picked_up", label: t("pickedUp"), icon: "task_alt" },
   ];
 }
 

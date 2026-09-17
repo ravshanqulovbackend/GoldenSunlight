@@ -1,6 +1,11 @@
 import type { ProductListItem } from "./product";
 
-export type OrderStatus = "pending" | "preparing" | "ready" | "cancelled" | "refunded";
+export type OrderStatus = "pending" | "preparing" | "ready" | "picked_up" | "cancelled" | "refunded";
+
+/** Once an order reaches one of these, it can no longer be edited (items) and
+ * dashboard revenue only ever counts `picked_up` — mirrors the backend's
+ * `orders/views.py` `TERMINAL_STATUSES`. */
+export const TERMINAL_ORDER_STATUSES: OrderStatus[] = ["ready", "picked_up", "cancelled", "refunded"];
 
 export type PaymentMethod = "cash" | "card";
 
@@ -67,6 +72,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Processing",
   preparing: "Preparing",
   ready: "Ready for Pickup",
+  picked_up: "Picked Up",
   cancelled: "Cancelled",
   refunded: "Refunded",
 };

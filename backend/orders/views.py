@@ -14,7 +14,7 @@ from notifications.models import Notification
 from users.permissions import IsAdminRole
 from common.utils import log_activity, diff_instance
 
-TERMINAL_STATUSES = ('ready', 'cancelled', 'refunded')
+TERMINAL_STATUSES = ('ready', 'picked_up', 'cancelled', 'refunded')
 
 
 def _adjust_stock(product, delta):
@@ -374,7 +374,15 @@ class AdminOrderNotifyReadyView(APIView):
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
-        if order.status not in TERMINAL_STATUSES:
+        # `picked_up`/cancelled/refunded — buyurtma allaqachon yakunlangan, "tayyor,
+        # kelib oling" xabari endi ma'nosiz (frontend tugmani shu holatlarda
+        # o'chirib qo'yadi, lekin backend'ning o'zi ham tekshirishi kerak).
+        if order.status in ('picked_up', 'cancelled', 'refunded'):
+            return Response(
+                {'detail': 'This order is already finalized — a ready notification cannot be resent.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status != 'ready':
             before = model_to_dict(order)
             order.status = 'ready'
             order.save(update_fields=['status', 'updated_at'])

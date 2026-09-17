@@ -302,6 +302,7 @@
     "pending": "قيد المعالجة",
     "preparing": "قيد التجهيز",
     "ready": "جاهز للاستلام",
+    "pickedUp": "تم الاستلام",
     "cancelled": "ملغى",
     "refunded": "تم استرداد المبلغ"
   },
@@ -313,6 +314,7 @@
     "received": "تم الاستلام",
     "preparing": "قيد التجهيز",
     "ready": "جاهز",
+    "pickedUp": "تم استلام الطلب",
     "cancelledTitle": "تم إلغاء الطلب",
     "cancelledDescription": "تم إلغاء هذا الطلب ولم يعد بالإمكان تتبعه.",
     "refundedTitle": "تم استرداد المبلغ",

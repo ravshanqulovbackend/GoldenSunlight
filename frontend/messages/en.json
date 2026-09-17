@@ -302,6 +302,7 @@
     "pending": "Processing",
     "preparing": "Preparing",
     "ready": "Ready for pickup",
+    "pickedUp": "Picked up",
     "cancelled": "Cancelled",
     "refunded": "Refunded"
   },
@@ -313,6 +314,7 @@
     "received": "Received",
     "preparing": "Preparing",
     "ready": "Ready",
+    "pickedUp": "Picked up",
     "cancelledTitle": "Order cancelled",
     "cancelledDescription": "This order has been cancelled and can no longer be tracked.",
     "refundedTitle": "Refunded",
