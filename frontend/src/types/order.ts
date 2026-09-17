@@ -38,6 +38,11 @@ export interface Order {
   items: OrderItem[];
   created_at: string;
   updated_at: string;
+  /** Read-receipt for the latest order-status notification sent to the customer
+   * (admin-only concern — `false`/`false` when no status-change notification has
+   * been sent yet, e.g. a brand-new "pending" order). */
+  notification_sent: boolean;
+  notification_seen: boolean;
 }
 
 export interface CreateOrderPayload {

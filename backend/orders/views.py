@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Prefetch
 from django.forms.models import model_to_dict
 from rest_framework import generics, permissions, status, filters
 from rest_framework.exceptions import ValidationError, NotFound
@@ -24,6 +25,39 @@ def _adjust_stock(product, delta):
     product.save(update_fields=['stock'])
 
 
+# List view'larda `OrderSerializer.notification_sent`/`notification_seen` N+1
+# so'rov qilmasligi uchun — `orders/serializers.py`dagi `_latest_notification`ga qarang.
+_NOTIFICATIONS_PREFETCH = Prefetch('notifications', queryset=Notification.objects.order_by('-created_at'), to_attr='prefetched_notifications')
+
+# `pending` — bu buyurtma yaratilgan paytdagi boshlang'ich holat, mijozning o'zi
+# shuni bilib turadi (o'zi hozirgina buyurtma berdi), shuning uchun ro'yxatda yo'q —
+# unga o'tish hech qachon bildirishnoma keltirib chiqarmaydi.
+_STATUS_NOTIFICATION_COPY = {
+    'preparing': ('Your order is being prepared', 'is now being prepared'),
+    'ready': ('Your order is ready!', 'is ready — you can come and pick it up now'),
+    'cancelled': ('Your order was cancelled', 'has been cancelled'),
+    'refunded': ('Your order was refunded', 'has been refunded'),
+}
+
+
+def _notify_customer_order_status(order, status_key):
+    """Mijozga buyurtma holati haqida xabar beradi — `AdminOrderStatusView` (har
+    qanday holat o'zgarishida) va `AdminOrderNotifyReadyView` ("Notify again")
+    tomonidan chaqiriladi. `order.id` (saytdagi umumiy ketma-ket raqam) ATAYLAB
+    matnda ko'rsatilmaydi — sababi `orders/[id]/page.tsx`dagi bilan bir xil: bu
+    mijozning "nechinchi buyurtmasi" emas, butun sayt bo'yicha umumiy hisob."""
+    copy = _STATUS_NOTIFICATION_COPY.get(status_key)
+    if not copy:
+        return
+    title, tail = copy
+    Notification.objects.create(
+        user=order.user,
+        order=order,
+        title=title,
+        message=f'Your order from {order.created_at:%d.%m.%Y} {tail}.',
+    )
+
+
 class AddressListCreateView(generics.ListCreateAPIView):
     serializer_class = AddressSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -45,7 +79,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).prefetch_related('items__product__category', 'items__product__brand')
+        return Order.objects.filter(user=self.request.user).prefetch_related(
+            'items__product__category', 'items__product__brand', _NOTIFICATIONS_PREFETCH
+        )
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -183,7 +219,9 @@ class AdminOrderListView(generics.ListAPIView):
     filterset_fields = ['status']
 
     def get_queryset(self):
-        return Order.objects.select_related('user').prefetch_related('items__product__category', 'items__product__brand').all()
+        return Order.objects.select_related('user').prefetch_related(
+            'items__product__category', 'items__product__brand', _NOTIFICATIONS_PREFETCH
+        ).all()
 
 
 class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
@@ -191,7 +229,9 @@ class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAdminRole]
 
     def get_queryset(self):
-        return Order.objects.select_related('user').prefetch_related('items__product__category', 'items__product__brand').all()
+        return Order.objects.select_related('user').prefetch_related(
+            'items__product__category', 'items__product__brand', _NOTIFICATIONS_PREFETCH
+        ).all()
 
     def perform_update(self, serializer):
         before = model_to_dict(serializer.instance)
@@ -212,6 +252,7 @@ class AdminOrderStatusView(APIView):
         if new_status not in valid_statuses:
             return Response({'detail': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
         before = model_to_dict(order)
+        status_changed = new_status != order.status
         # Bekor qilish/qaytarishga o'tilganda (avval shunday bo'lmagan bo'lsa) zaxira qaytariladi —
         # mijozning o'zi bekor qilgandagi CancelOrderView bilan bir xil xulq-atvor.
         if new_status in ('cancelled', 'refunded') and order.status not in ('cancelled', 'refunded'):
@@ -224,6 +265,10 @@ class AdminOrderStatusView(APIView):
             order.tracking_number = request.data['tracking_number']
         order.save()
         log_activity(request.user, 'updated', order, 'Order', diff_instance(before, order))
+        # Holat haqiqatan o'zgargandagina — bir xil holatni qayta "saqlash" (masalan
+        # faqat tracking number yangilash uchun) qayta-qayta bildirishnoma jo'natmasin.
+        if status_changed:
+            _notify_customer_order_status(order, new_status)
         return Response(OrderSerializer(order).data)
 
 
@@ -334,13 +379,9 @@ class AdminOrderNotifyReadyView(APIView):
             order.status = 'ready'
             order.save(update_fields=['status', 'updated_at'])
             log_activity(request.user, 'updated', order, 'Order', diff_instance(before, order))
-        # `order.id` — saytdagi barcha buyurtmalar bo'yicha umumiy ketma-ket raqam,
-        # mijozning "nechinchi buyurtmasi" emas — shuning uchun bildirishnoma matnida
-        # ko'rsatilmaydi (customer-facing buyurtma sahifalaridagi bilan bir xil qoida —
-        # `orders/[id]/page.tsx`ga qarang). Sana orqali farqlanadi.
-        Notification.objects.create(
-            user=order.user,
-            title='Your order is ready!',
-            message=f'Your order from {order.created_at:%d.%m.%Y} is ready — you can come and pick it up now.',
-        )
+        # Status allaqachon 'ready' bo'lsa ham — bu action tugmasining o'zi "Notify
+        # again" (mijoz bildirishnomani ko'rmagan/eslatish kerak bo'lgan holat uchun),
+        # shuning uchun `AdminOrderStatusView`dagi kabi `status_changed` tekshiruvi
+        # yo'q — har bosilganda qayta jo'natadi.
+        _notify_customer_order_status(order, 'ready')
         return Response(OrderSerializer(order).data)

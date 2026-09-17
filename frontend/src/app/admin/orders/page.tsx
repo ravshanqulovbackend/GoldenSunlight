@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { formatDate, formatPrice } from "@/lib/utils/money";
 import { orderStatusTone } from "@/lib/utils/orderStatusTone";
+import { NotificationSeenTicks } from "@/components/admin/orders/NotificationSeenTicks";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/types/order";
 
 const PAGE_SIZE = 12;
@@ -105,7 +106,10 @@ export default function AdminOrdersPage() {
                   <Td className="text-on-surface-variant">{formatDate(order.created_at)}</Td>
                   <Td>{formatPrice(order.total_amount)}</Td>
                   <Td>
-                    <Badge tone={orderStatusTone(order.status)}>{order.status_display}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge tone={orderStatusTone(order.status)}>{order.status_display}</Badge>
+                      <NotificationSeenTicks order={order} />
+                    </div>
                   </Td>
                   <Td>
                     <div className="flex justify-end">

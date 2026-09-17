@@ -13,6 +13,7 @@ import {
   useNotifyOrderReady,
 } from "@/lib/query/hooks/useAdminOrders";
 import { getAdminProducts } from "@/lib/api/endpoints/adminProducts";
+import { NotificationSeenTicks } from "@/components/admin/orders/NotificationSeenTicks";
 import { AppImage } from "@/components/ui/AppImage";
 import { Icon } from "@/components/ui/Icon";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -231,7 +232,10 @@ export default function AdminOrderDetailPage() {
           <h1 className="headline-md text-on-surface">Order #{order.id}</h1>
           <p className="label-md text-on-surface-variant">{formatDate(order.created_at)}</p>
         </div>
-        <Badge tone={orderStatusTone(order.status)}>{order.status_display}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge tone={orderStatusTone(order.status)}>{order.status_display}</Badge>
+          <NotificationSeenTicks order={order} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

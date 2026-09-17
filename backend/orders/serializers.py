@@ -25,6 +25,12 @@ class OrderSerializer(serializers.ModelSerializer):
     payment_display = serializers.CharField(source='get_payment_method_display', read_only=True)
     user = serializers.IntegerField(source='user_id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
+    # Admin order sahifasidagi "mijoz ko'rdimi" (ikki ptichka) belgisi uchun — eng
+    # so'nggi status-o'zgarish bildirishnomasiga qarab. Mijozning o'zi bu ikkisini
+    # ko'rsa ham hech qanday maxfiy narsa oshkor bo'lmaydi, shuning uchun serializer
+    # umumiy — faqat admin frontend'i buni haqiqatan render qiladi.
+    notification_sent = serializers.SerializerMethodField()
+    notification_seen = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -33,8 +39,31 @@ class OrderSerializer(serializers.ModelSerializer):
             'landmark', 'notes', 'payment_method', 'payment_display', 'subtotal',
             'delivery_fee', 'discount_amount', 'tax_amount', 'total_amount',
             'coupon', 'tracking_number', 'items', 'created_at', 'updated_at',
+            'notification_sent', 'notification_seen',
         )
         read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def _latest_notification(self, obj):
+        # Ro'yxat view'lari (`OrderListCreateView`/`AdminOrderListView`) N+1 so'rovning
+        # oldini olish uchun `notifications`ni `prefetched_notifications`ga
+        # Prefetch(to_attr=...) bilan oldindan yuklaydi — shu bo'lsa uni ishlatamiz,
+        # aks holda (bitta buyurtma qaytarilayotgan detail/action endpoint'lar) to'g'ridan-
+        # to'g'ri so'rov beramiz. Har ikki holatda ham natija instance ustida keshlanadi —
+        # bitta so'rovda `notification_sent` va `notification_seen` ikkisi ham chaqiradi.
+        if not hasattr(obj, '_latest_notification_cache'):
+            prefetched = getattr(obj, 'prefetched_notifications', None)
+            if prefetched is not None:
+                obj._latest_notification_cache = prefetched[0] if prefetched else None
+            else:
+                obj._latest_notification_cache = obj.notifications.order_by('-created_at').first()
+        return obj._latest_notification_cache
+
+    def get_notification_sent(self, obj):
+        return self._latest_notification(obj) is not None
+
+    def get_notification_seen(self, obj):
+        latest = self._latest_notification(obj)
+        return bool(latest and latest.is_read)
 
 
 class CreateOrderSerializer(serializers.Serializer):

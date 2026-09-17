@@ -320,8 +320,6 @@
   },
   "Notifications": {
     "title": "Notifications",
-    "markAllRead": "Mark All as Read",
-    "markRead": "Mark as Read",
     "emptyTitle": "No notifications",
     "emptyDescription": "There are no new notifications yet."
   },

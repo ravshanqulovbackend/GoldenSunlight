@@ -320,8 +320,6 @@
   },
   "Notifications": {
     "title": "الإشعارات",
-    "markAllRead": "تحديد الكل كمقروء",
-    "markRead": "تحديد كمقروء",
     "emptyTitle": "لا توجد إشعارات",
     "emptyDescription": "لا توجد إشعارات جديدة حتى الآن."
   },
