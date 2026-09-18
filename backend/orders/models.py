@@ -90,6 +90,13 @@ class Order(models.Model):
     tracking_number = models.CharField(max_length=100, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Status `picked_up`ga BIRINCHI marta o'tgan payt (`orders/views.py`dagi
+    # `AdminOrderStatusView.post`da to'ldiriladi, keyin qayta yozilmaydi). Dashboard'dagi
+    # kunlik/haftalik savdo shu maydon bo'yicha guruhlanadi — `created_at` (buyurtma
+    # BERILGAN sana) emas, chunki buyurtma bir kuni berilib boshqa kuni olib ketilishi
+    # mumkin, "savdo" esa haqiqatan olib ketilgan (pul/mahsulot almashgan) kunga tegishli
+    # bo'lishi kerak. `common/views.py`ga qarang.
+    picked_up_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getDashboardStats } from "@/lib/api/endpoints/dashboard";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { ActivityLogTable } from "@/components/admin/ActivityLogTable";
+import { SalesOverview } from "@/components/admin/SalesOverview";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -59,6 +60,8 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       )}
+
+      {data && user?.role === "superadmin" && <SalesOverview data={data} />}
 
       {user?.role === "superadmin" && <ActivityLogTable />}
     </div>

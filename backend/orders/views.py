@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Prefetch
 from django.forms.models import model_to_dict
+from django.utils import timezone
 from rest_framework import generics, permissions, status, filters
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.response import Response
@@ -260,6 +261,10 @@ class AdminOrderStatusView(APIView):
                 if item.product:
                     item.product.stock += item.quantity
                     item.product.save(update_fields=['stock'])
+        # `picked_up`ga birinchi marta o'tgandagina belgilanadi — dashboard'dagi kunlik/
+        # haftalik savdo shu sana bo'yicha hisoblanadi (orders/models.py'dagi izohga qarang).
+        if status_changed and new_status == 'picked_up' and not order.picked_up_at:
+            order.picked_up_at = timezone.now()
         order.status = new_status
         if request.data.get('tracking_number'):
             order.tracking_number = request.data['tracking_number']

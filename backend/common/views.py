@@ -33,14 +33,22 @@ class DashboardView(APIView):
         total_users = User.objects.filter(role='staff').count()
         total_products = Product.objects.filter(is_active=True).count()
 
+        # Kunlik/haftalik/oylik SAVDO — buyurtma qachon BERILGANI (`created_at`) emas,
+        # qachon haqiqatan OLIB KETILGANI (`picked_up_at`) bo'yicha guruhlanadi. Aks
+        # holda, masalan dushanba berilib payshanba olib ketilgan buyurtma na
+        # dushanbaning, na payshanbaning kunlik daromadiga to'g'ri tushmay qolardi
+        # (orders/models.py'dagi `picked_up_at` izohiga qarang). "Buyurtmalar soni"
+        # (`today_orders`/`week_orders`/`month_orders`) esa operatsion yuk ko'rsatkichi
+        # sifatida qasddan `created_at` bo'yicha qoladi — "bugun nechta yangi buyurtma
+        # tushdi" savoliga javob beradi, "bugun nechtasi yakunlandi"ga emas.
         today_orders = Order.objects.filter(created_at__date=today).count()
-        today_revenue = completed_orders.filter(created_at__date=today).aggregate(total=Sum('total_amount'))['total'] or 0
+        today_revenue = completed_orders.filter(picked_up_at__date=today).aggregate(total=Sum('total_amount'))['total'] or 0
 
         week_orders = Order.objects.filter(created_at__gte=week_ago).count()
-        week_revenue = completed_orders.filter(created_at__gte=week_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        week_revenue = completed_orders.filter(picked_up_at__gte=week_ago).aggregate(total=Sum('total_amount'))['total'] or 0
 
         month_orders = Order.objects.filter(created_at__gte=month_ago).count()
-        month_revenue = completed_orders.filter(created_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
+        month_revenue = completed_orders.filter(picked_up_at__gte=month_ago).aggregate(total=Sum('total_amount'))['total'] or 0
 
         pending_orders = Order.objects.filter(status='pending').count()
         preparing_orders = Order.objects.filter(status='preparing').count()
@@ -71,14 +79,14 @@ class DashboardView(APIView):
                 'rating': str(p.rating),
             })
 
-        # Haftalik sotuvlar (real data) — xuddi yuqoridagi revenue kabi, faqat
-        # `picked_up`.
+        # Oxirgi 7 kunlik savdo trendi — yuqoridagi kabi `picked_up_at` (olib ketilgan
+        # sana) bo'yicha, `created_at` emas.
         weekly_sales = []
         day_names = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya']
         for i in range(7):
             day = now - timedelta(days=6 - i)
             day_revenue = completed_orders.filter(
-                created_at__date=day.date(),
+                picked_up_at__date=day.date(),
             ).aggregate(total=Sum('total_amount'))['total'] or 0
             weekly_sales.append({
                 'day': day_names[i],
