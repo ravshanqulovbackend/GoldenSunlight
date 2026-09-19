@@ -25,6 +25,7 @@ interface MobileNavDrawerProps {
   user: User | null;
   onOpenSupport?: () => void;
   supportUnreadCount?: number;
+  notificationsUnreadCount?: number;
 }
 
 /** The mobile menu didn't exist at all in the frontend_html_reference mockups — built from scratch. */
@@ -36,6 +37,7 @@ export function MobileNavDrawer({
   user,
   onOpenSupport,
   supportUnreadCount,
+  notificationsUnreadCount,
 }: MobileNavDrawerProps) {
   const t = useTranslations("MobileNav");
   /*
@@ -137,6 +139,14 @@ export function MobileNavDrawer({
                   </Link>
                   <Link href="/profile/password" onClick={onClose} className="label-md text-on-surface-variant">
                     {t("changePassword")}
+                  </Link>
+                  <Link href="/notifications" onClick={onClose} className="flex items-center gap-2 label-md text-on-surface-variant">
+                    {t("notifications")}
+                    {!!notificationsUnreadCount && (
+                      <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-on-error">
+                        {notificationsUnreadCount}
+                      </span>
+                    )}
                   </Link>
                   {onOpenSupport && (
                     <button

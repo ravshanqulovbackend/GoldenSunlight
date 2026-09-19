@@ -11,6 +11,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { useAuthStore, logoutAndRedirect } from "@/lib/stores/authStore";
 import { useCart } from "@/lib/query/hooks/useCart";
 import { useMyUnreadCount } from "@/lib/query/hooks/useSupport";
+import { useNotifications } from "@/lib/query/hooks/useNotifications";
 import { SupportChatPanel } from "@/components/support/SupportChatPanel";
 
 function HeaderBadge({ count }: { count: number | undefined }) {
@@ -35,6 +36,11 @@ export function Header() {
   const isAuthenticated = isHydrated && !!access;
   const { data: cart } = useCart();
   const { data: myUnreadCount } = useMyUnreadCount();
+  // Faqat "staff" (mijoz) uchun — masalan "buyurtma tayyor" bildirishnomasi shu
+  // orqali ko'rinadi. `useProfile`dagi ActionCard bilan bir xil hisob-kitob, lekin
+  // bu yerda har qanday sahifada (faqat Profile'da emas) ko'rinadi.
+  const { data: notifications } = useNotifications(isAuthenticated && !isAdmin);
+  const unreadNotifications = notifications?.filter((n) => !n.is_read).length ?? 0;
 
   const NAV_LINKS = [
     { href: "/", label: t("home") },
@@ -48,7 +54,10 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 animate-fade-down border-b border-outline-variant bg-surface/80 backdrop-blur-md transition-shadow duration-300 sm:h-20">
+      {/* `[transform:translateZ(0)]` — without its own GPU layer, WebKit in-app
+          WebViews (Telegram/Instagram) detach `sticky`/`fixed` + `backdrop-filter`
+          elements from their pinned position during scroll. */}
+      <header className="sticky top-0 z-40 h-16 animate-fade-down border-b border-outline-variant bg-surface/80 backdrop-blur-md [transform:translateZ(0)] transition-shadow duration-300 sm:h-20">
         <div className="mx-auto flex h-full max-w-container-max-width items-center justify-between gap-2 px-margin-mobile md:px-margin-desktop">
           <Link
             href="/"
@@ -79,6 +88,16 @@ export function Header() {
                 <Icon name="support_agent" />
                 <HeaderBadge count={myUnreadCount} />
               </button>
+            )}
+            {isAuthenticated && !isAdmin && (
+              <Link
+                href="/notifications"
+                aria-label={tHeader("notifications")}
+                className="gs-icon-btn relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface-container-low hover:text-primary md:flex"
+              >
+                <Icon name="notifications" />
+                <HeaderBadge count={unreadNotifications} />
+              </Link>
             )}
             <Link
               href="/products"
@@ -153,6 +172,7 @@ export function Header() {
         user={user}
         onOpenSupport={isAdmin ? undefined : () => setSupportPanelOpen(true)}
         supportUnreadCount={myUnreadCount}
+        notificationsUnreadCount={isAdmin ? undefined : unreadNotifications}
       />
 
       {isAuthenticated && !isAdmin && (
