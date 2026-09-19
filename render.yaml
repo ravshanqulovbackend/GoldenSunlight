@@ -96,11 +96,15 @@ services:
         value: 20000/hour
       - key: THROTTLE_USER
         value: 20000/hour
-      # Frontend servisining haqiqiy domeni (pastda) bilan bir xil bo'lishi shart.
+      # Frontend servisining haqiqiy domeni (pastda) bilan bir xil bo'lishi shart. Custom
+      # domen (goldensunlight.org) Render dashboard'da frontend service'ga qo'shilgan —
+      # brauzer bu domendan API'ga so'rov yuborganda Origin header'i shu bo'ladi, shuning
+      # uchun u CORS_ALLOWED_ORIGINS ro'yxatida ham bo'lishi shart (aks holda brauzer
+      # backend javobini bloklaydi va bu "Network Error" sifatida ko'rinadi).
       - key: ALLOWED_HOSTS
         value: goldensunlight-backend.onrender.com
       - key: CORS_ALLOWED_ORIGINS
-        value: https://goldensunlight-frontend.onrender.com
+        value: https://goldensunlight-frontend.onrender.com,https://goldensunlight.org,https://www.goldensunlight.org
       # Birinchi superadmin'ni bootstrap qilish uchun (Render bepul rejada shell yo'q,
       # shuning uchun createsuperuser'ni --noinput bilan avtomatik ishga tushiramiz).
       # Keyingi qayta ishga tushishlarda user allaqachon mavjud bo'lgani uchun xato
