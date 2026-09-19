@@ -8,7 +8,10 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
   username: z.string().min(3, "At least 3 characters"),
-  password: z.string().min(6, "At least 6 characters"),
+  // Backend endi Django'ning AUTH_PASSWORD_VALIDATORS orqali tekshiradi (min 8 belgi,
+  // umumiy/faqat-raqamli/juda o'xshash parolni bloklaydi) — shu uzunlik bo'sagasi shu
+  // bilan mos, qolganini backend javobi (RegisterForm'dagi setError) ko'rsatadi.
+  password: z.string().min(8, "At least 8 characters"),
   email: z.union([z.literal(""), z.string().email("Invalid email")]).optional(),
   first_name: z.string().optional(),
   last_name: z.string().optional(),

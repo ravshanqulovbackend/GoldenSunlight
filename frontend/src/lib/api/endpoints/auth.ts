@@ -57,6 +57,16 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<{ 
   return data;
 }
 
+export async function verifyEmail(code: string): Promise<User> {
+  const { data } = await http.post<User>("/users/verify-email/", { code });
+  return data;
+}
+
+export async function resendVerificationEmail(): Promise<{ detail: string }> {
+  const { data } = await http.post<{ detail: string }>("/users/resend-verification/");
+  return data;
+}
+
 export async function logoutRequest(refresh: string): Promise<void> {
   await http.post("/users/logout/", { refresh });
 }

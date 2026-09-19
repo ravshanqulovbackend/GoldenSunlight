@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRoleLabels } from "@/lib/utils/roles";
 import { useNotifications } from "@/lib/query/hooks/useNotifications";
+import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
 import { cn } from "@/lib/utils/cn";
 
 function DetailRow({ icon, label, value }: { icon: string; label: string; value: string }) {
@@ -94,6 +95,10 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
       <h1 className="headline-md text-on-surface">{t("title")}</h1>
       <p className="mt-2 body-md text-on-surface-variant">{t("subtitle")}</p>
+
+      <div className="mt-6">
+        <EmailVerificationBanner />
+      </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <Card className="p-6 sm:p-8">

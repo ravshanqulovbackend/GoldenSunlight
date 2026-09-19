@@ -1,26 +1,52 @@
+import logging
+
 from rest_framework import generics, status, permissions, filters
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.db.models import Case, When, IntegerField
 from django.forms.models import model_to_dict
-from .serializers import UserSerializer, RegisterSerializer, ChangePasswordSerializer
+from .serializers import UserSerializer, RegisterSerializer, VerifyEmailSerializer, ChangePasswordSerializer
 from .permissions import IsAdminRole
+from .tasks import generate_and_send_verification_code, is_code_expired
 from common.utils import log_activity, diff_instance
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+def _try_send_verification_code(user):
+    """Email yuborish account yaratish/yangilashning asosiy oqimini hech qachon
+    buzmasligi kerak (SMTP vaqtincha ishlamasa ham) — shuning uchun xatolik faqat
+    loglanadi. Aniq "resend" so'rovi esa (ResendVerificationEmailView) buni ataylab
+    qilmaydi: u yerda foydalanuvchi natijani bilishi kerak."""
+    try:
+        generate_and_send_verification_code(user)
+    except Exception:
+        logger.exception('Failed to send verification email to user %s', user.pk)
 
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+    # O'zining 'register' chelagi — `config/settings.py`dagi umumiy 'anon' chelagidan
+    # ancha qattiqroq va mustaqil (bir botning ko'plab akkaunt ochishga urinishi
+    # saytni ko'zdan kechirayotgan haqiqiy mijozlarga ta'sir qilmasin uchun).
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'register'
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        # Email kiritilgan bo'lsa ham — akkaunt darhol, to'liq ishlaydigan holda
+        # yaratiladi (email tasdiqlanishi buni bloklamaydi, faqat `email_verified`
+        # keyinroq true bo'ladi).
+        if user.email:
+            _try_send_verification_code(user)
         refresh = RefreshToken.for_user(user)
         return Response({
             'user': UserSerializer(user).data,
@@ -31,6 +57,50 @@ class RegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class VerifyEmailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    # 6 xonali kod — cheklovsiz bo'lsa "brute force" qilib bo'ladi (config/settings.py).
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'email_verify'
+
+    def post(self, request):
+        user = request.user
+        if user.email_verified:
+            return Response({'detail': 'Email is already verified'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email:
+            return Response({'detail': 'Add an email address to your profile first'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = VerifyEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not user.email_verification_code or is_code_expired(user):
+            return Response({'code': ['This code has expired — request a new one']}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.validated_data['code'] != user.email_verification_code:
+            return Response({'code': ['Incorrect code']}, status=status.HTTP_400_BAD_REQUEST)
+        user.email_verified = True
+        user.email_verification_code = ''
+        user.email_verification_sent_at = None
+        user.save(update_fields=['email_verified', 'email_verification_code', 'email_verification_sent_at'])
+        # To'liq User qaytariladi — `updateProfile`dagi kabi — frontend Zustand
+        # store'ni (`setUser`) qayta so'rov yubormasdan darhol yangilay olishi uchun.
+        return Response(UserSerializer(user).data)
+
+
+class ResendVerificationEmailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'email_verify_resend'
+
+    def post(self, request):
+        user = request.user
+        if user.email_verified:
+            return Response({'detail': 'Email is already verified'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email:
+            return Response({'detail': 'Add an email address to your profile first'}, status=status.HTTP_400_BAD_REQUEST)
+        # Bu yerda xatolik yashirilmaydi (yuqoridagi `_try_send_verification_code`dan
+        # farqli) — foydalanuvchi ataylab "qayta yubor" bosgan, natijani bilishi kerak.
+        generate_and_send_verification_code(user)
+        return Response({'detail': 'Verification code sent'})
+
+
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -39,6 +109,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def perform_update(self, serializer):
+        previous_email = serializer.instance.email
         user = serializer.save()
         # Django admin orqali berilgan rol (pending_role) foydalanuvchi o'zi haqida
         # to'liq ma'lumot (ism, familiya, telefon, rasm) kiritgandan keyingina kuchga kiradi.
@@ -46,6 +117,16 @@ class ProfileView(generics.RetrieveUpdateAPIView):
             user.role = user.pending_role
             user.pending_role = ''
             user.save(update_fields=['role', 'pending_role'])
+        # Eski email uchun tasdiq yangi (hali tekshirilmagan) manzilga ko'chib
+        # o'tmasin — email o'zgargan bo'lsa qayta "tasdiqlanmagan" holatga qaytariladi
+        # va agar yangi manzil bo'sh bo'lmasa, unga darhol yangi kod yuboriladi.
+        if user.email != previous_email:
+            user.email_verified = False
+            user.email_verification_code = ''
+            user.email_verification_sent_at = None
+            user.save(update_fields=['email_verified', 'email_verification_code', 'email_verification_sent_at'])
+            if user.email:
+                _try_send_verification_code(user)
 
 
 class ChangePasswordView(APIView):

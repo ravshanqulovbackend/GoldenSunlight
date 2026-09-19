@@ -20,6 +20,11 @@ class User(AbstractUser):
     )
     is_verified = models.BooleanField(default=False)
     email_verified = models.BooleanField(default=False)
+    # `email_verified` bo'lgunga qadar shu ikkisi vaqtinchalik holatni saqlaydi
+    # (users/tasks.py: yuborish, users/views.py: tekshirish) — kod tasdiqlangach yoki
+    # muddati o'tgach bo'shatiladi, akkauntda doimiy iz qoldirmaydi.
+    email_verification_code = models.CharField(max_length=6, blank=True, default='')
+    email_verification_sent_at = models.DateTimeField(null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

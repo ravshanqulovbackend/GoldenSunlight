@@ -10,25 +10,8 @@ import { toast } from "@/lib/stores/toastStore";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { cn } from "@/lib/utils/cn";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { changePasswordSchema, type ChangePasswordFormValues } from "@/lib/utils/validators";
-
-type Strength = { label: string; percent: number; tone: string };
-
-function getStrength(value: string, t: (key: string) => string): Strength {
-  if (!value) return { label: "", percent: 0, tone: "bg-outline-variant" };
-  let score = 0;
-  if (value.length >= 6) score++;
-  if (value.length >= 10) score++;
-  if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
-  if (/[0-9]/.test(value)) score++;
-  if (/[^A-Za-z0-9]/.test(value)) score++;
-
-  if (value.length < 6) return { label: t("strengthTooShort"), percent: 15, tone: "bg-error" };
-  if (score <= 2) return { label: t("strengthWeak"), percent: 40, tone: "bg-error" };
-  if (score <= 3) return { label: t("strengthMedium"), percent: 65, tone: "bg-secondary" };
-  return { label: t("strengthStrong"), percent: 100, tone: "bg-primary" };
-}
 
 export function ChangePasswordForm() {
   const t = useTranslations("ChangePassword");
@@ -45,7 +28,6 @@ export function ChangePasswordForm() {
   });
 
   const newPassword = watch("new_password") || "";
-  const strength = getStrength(newPassword, t);
 
   const mutation = useMutation({
     mutationFn: (values: ChangePasswordFormValues) =>
@@ -90,17 +72,7 @@ export function ChangePasswordForm() {
           error={errors.new_password?.message}
           {...register("new_password")}
         />
-        {newPassword.length > 0 && (
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-container-high">
-              <div
-                className={cn("h-full rounded-full transition-all duration-200", strength.tone)}
-                style={{ width: `${strength.percent}%` }}
-              />
-            </div>
-            <span className="label-sm shrink-0 normal-case text-on-surface-variant">{strength.label}</span>
-          </div>
-        )}
+        {newPassword.length > 0 && <PasswordStrengthMeter password={newPassword} />}
       </div>
 
       <Input

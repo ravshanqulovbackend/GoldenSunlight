@@ -379,11 +379,26 @@
     "updatePassword": "Update Password",
     "updating": "Updating...",
     "updated": "Password successfully updated",
-    "updateError": "Failed to update password",
-    "strengthTooShort": "Too short",
-    "strengthWeak": "Weak",
-    "strengthMedium": "Medium",
-    "strengthStrong": "Strong"
+    "updateError": "Failed to update password"
+  },
+  "PasswordStrength": {
+    "tooShort": "Too short",
+    "weak": "Weak",
+    "medium": "Medium",
+    "strong": "Strong"
+  },
+  "EmailVerification": {
+    "title": "Verify your email",
+    "description": "We sent a 6-digit code to {email}. Enter it below to confirm this address.",
+    "codeLabel": "Code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "resend": "Resend code",
+    "resending": "Sending...",
+    "verified": "Email verified",
+    "resent": "Verification code sent",
+    "invalidCode": "Invalid code",
+    "resendError": "Failed to send the code"
   },
   "NotFound": {
     "title": "Page not found",

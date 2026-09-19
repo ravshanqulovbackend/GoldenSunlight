@@ -379,11 +379,26 @@
     "updatePassword": "تحديث كلمة المرور",
     "updating": "جارٍ التحديث...",
     "updated": "تم تحديث كلمة المرور بنجاح",
-    "updateError": "فشل تحديث كلمة المرور",
-    "strengthTooShort": "قصيرة جدًا",
-    "strengthWeak": "ضعيفة",
-    "strengthMedium": "متوسطة",
-    "strengthStrong": "قوية"
+    "updateError": "فشل تحديث كلمة المرور"
+  },
+  "PasswordStrength": {
+    "tooShort": "قصيرة جدًا",
+    "weak": "ضعيفة",
+    "medium": "متوسطة",
+    "strong": "قوية"
+  },
+  "EmailVerification": {
+    "title": "تأكيد بريدك الإلكتروني",
+    "description": "أرسلنا رمزًا مكونًا من 6 أرقام إلى {email}. أدخله أدناه لتأكيد هذا العنوان.",
+    "codeLabel": "الرمز",
+    "verify": "تأكيد",
+    "verifying": "جارٍ التأكيد...",
+    "resend": "إعادة إرسال الرمز",
+    "resending": "جارٍ الإرسال...",
+    "verified": "تم تأكيد البريد الإلكتروني",
+    "resent": "تم إرسال رمز التأكيد",
+    "invalidCode": "رمز غير صحيح",
+    "resendError": "فشل إرسال الرمز"
   },
   "NotFound": {
     "title": "الصفحة غير موجودة",
