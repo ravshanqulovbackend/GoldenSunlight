@@ -20,7 +20,10 @@ kontent/brending o'zgarishi bo'ldi).
   brauzerda sinovdan o'tgan, Phase 3 (admin panel) ham asosan qurilgan.** Phase 2 (marketing
   sahifalari) qisman — faqat `/about` bor. Batafsil pastda.
 - **DB:** PostgreSQL 16 (prod/docker), SQLite (lokal dev fallback)
-- **Cache/Queue:** Redis 7, Celery + Celery Beat
+- **Cache/Queue:** Redis 7, Celery (haqiqiy vazifa bor — `backend/users/tasks.py`,
+  email tasdiqlash kodi). Celery Beat esa yo'q — hech qanday davriy/rejalashtirilgan
+  vazifa yo'q, shuning uchun docker-compose'da faqat `celery` worker bor, `celery-beat`
+  yo'q (resurs tejash uchun ataylab).
 - **Deploy:** Docker Compose, Nginx (reverse proxy)
 
 Eslatma: repo tub papkasida `README.md` yo'q (`.gitignore`da istisno qilingan) — API/sahifalar
@@ -134,13 +137,33 @@ npm run lint                        # ESLint (next build endi avtomatik lint qil
 
 ```bash
 docker compose up --build -d        # barcha servislarni ishga tushiradi
-docker compose logs -f backend      # yoki: frontend / nginx / celery
+docker compose logs -f backend      # yoki: frontend / celery / nginx / db / redis
 docker compose exec backend bash
 docker compose exec backend python manage.py <command>
 docker compose exec db psql -U postgres -d goldensunlight_db
 docker compose down                 # to'xtatish
 docker compose down -v              # + volume'larni (DB ma'lumotlarini) o'chirish
 ```
+
+**HTTPS (Let's Encrypt) — VPS'da haqiqiy domen bilan birinchi marta deploy qilishda:**
+`nginx/nginx.conf`dagi barcha `REPLACE_WITH_YOUR_DOMAIN`ni haqiqiy domeningizga almashtiring
+(`sed -i 's/REPLACE_WITH_YOUR_DOMAIN/yourdomain.com/g' nginx/nginx.conf`), DNS'ning shu
+serverga (A record) yo'nalganini tekshiring, so'ng:
+
+```bash
+docker compose up -d db redis backend frontend celery   # nginx'siz — 443 blokidagi
+                                                          # sertifikat hali yo'q, nginx
+                                                          # boshlanmay xato beradi
+docker compose run --rm -p 80:80 --entrypoint certbot certbot certonly --standalone \
+  -d yourdomain.com -d www.yourdomain.com \
+  --email you@example.com --agree-tos --no-eff-email
+docker compose up -d nginx certbot   # endi sertifikat bor, nginx muvaffaqiyatli boshlanadi
+```
+
+Shundan keyin sertifikat `certbot_conf` volume'da saqlanadi va `certbot` servisi uni har
+12 soatda avtomatik yangilaydi (`certonly --webroot`, nginx orqali), nginx esa har 6 soatda
+o'zini qayta yuklab (`nginx -s reload`) yangi sertifikatni qo'llaydi — qayta qo'lda ishlov
+berish shart emas.
 
 ## Repo tuzilishi
 
@@ -162,7 +185,12 @@ frontend/            Next.js 16 — Phase 1 (mijoz-tomon) tayyor, Phase 3 (admin
   src/components/                layout/ ui/ product/ cart/ checkout/ auth/ admin/ about/ support/
 frontend_html_reference/   Statik HTML dizayn namunalari (asl referens, DESIGN.md tokenlar manbasi)
 nginx/nginx.conf     Reverse proxy config (/, /api/, /django-admin/, /admin/* marshrutlash)
-docker-compose.yml   db, redis, backend, celery, celery-beat, frontend, nginx servislari
+docker-compose.yml   db, redis, backend, celery, frontend, nginx servislari — `celery-beat`
+                     ATAYLAB yo'q (davriy vazifa yo'q), lekin `celery` bor (email
+                     tasdiqlash kodi haqiqiy asinxron vazifa orqali yuboriladi)
+deploy/render-single/  Render'da 4 ta alohida to'lovli resurs o'rniga BITTA pullik Web
+                     Service'ga (Postgres+Redis+Django+Next.js+nginx+celery,
+                     supervisord orqali) siqib joylashtirish uchun (render-single.yaml)
 ```
 
 ## Konventsiyalar

@@ -130,6 +130,29 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Dubai'
+# DEBUG'da (lokal dev, Docker'siz) alohida `celery worker` jarayoni odatda ishga
+# tushirilmaydi (pastdagi "Tez-tez ishlatiladigan buyruqlar"ga qarang) — shuning uchun
+# `.delay()` chaqirilgan task'lar (masalan email tasdiqlash kodi, users/tasks.py)
+# navbatga tushib, hech qachon bajarilmay qolib ketardi. Eager rejimda ular darhol,
+# joriy so'rov ichida bajariladi — production'da (Docker, DEBUG=False) haqiqiy worker
+# orqali asinxron ishlayveradi.
+CELERY_TASK_ALWAYS_EAGER = DEBUG
+
+# Email — tasdiqlash kodlari (users/tasks.py) shu orqali yuboriladi. EMAIL_HOST_USER
+# bo'sh qolsa (masalan boshqa dasturchi mail.ru ma'lumotlarisiz repo'ni klonlasa) xat
+# haqiqatan yuborilmaydi, konsolga chiqariladi — ANTHROPIC_API_KEY'siz "suggest a
+# reply"ning o'chib qolishi bilan bir xil mantiq (support/ai.py).
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+if EMAIL_HOST_USER:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.mail.ru')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465))
+    EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True').lower() == 'true'
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@goldensunlight.ae')
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -186,6 +209,17 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': os.environ.get('THROTTLE_ANON') or ('100/hour' if not DEBUG else '10000/hour'),
         'user': os.environ.get('THROTTLE_USER') or ('1000/hour' if not DEBUG else '100000/hour'),
+        # `RegisterView`ning o'zi uchun alohida, ancha qattiqroq chelak — aks holda u
+        # yuqoridagi umumiy 'anon' chelagini butun saytni ko'zdan kechirayotgan haqiqiy
+        # mijozlar bilan baham ko'radi, ya'ni bitta bot ko'plab akkaunt ochib, o'sha
+        # chelakni tugatib qo'yishi (va navbatdagi haqiqiy mijozlarni bloklashi) mumkin.
+        'register': os.environ.get('THROTTLE_REGISTER') or ('10/hour' if not DEBUG else '10000/hour'),
+        # Kod 6 xonali raqam (1 million variant) — cheklovsiz qolsa akkauntga kirib
+        # olgan kishi kodni "brute force" qilib emailni soxta tasdiqlashi mumkin edi.
+        'email_verify': os.environ.get('THROTTLE_EMAIL_VERIFY') or ('10/hour' if not DEBUG else '10000/hour'),
+        # Qayta yuborish shart emas — bu haqiqiy SMTP orqali xat jo'natadi, cheklanmasa
+        # birov o'z akkauntidan cheksiz "resend" bosib pochta xizmatini suiiste'mol qilishi mumkin.
+        'email_verify_resend': os.environ.get('THROTTLE_EMAIL_VERIFY_RESEND') or ('3/hour' if not DEBUG else '10000/hour'),
     },
 }
 

@@ -1,0 +1,93 @@
+# Render Blueprint — instead of 4 separate paid resources (goldensunlight-db /
+# -redis / -backend / -frontend, see `render.yaml`), this runs everything
+# (Postgres, Redis, Django, Next.js, nginx) inside ONE paid Web Service via
+# supervisord (`deploy/render-single/`). Goal: pay 1x$7/mo instead of 4x$7/mo.
+#
+# IMPORTANT TRADEOFFS (a deliberate choice, not standard practice):
+#   - Postgres runs as a process INSIDE this container (not a separately managed
+#     Render Postgres) — Render no longer takes automatic backups; you'll need to
+#     `pg_dump` manually from the Render Shell instead.
+#   - `plan` must be at least "starter". On the FREE plan a persistent Disk CANNOT
+#     be attached, meaning Postgres data and uploaded images are WIPED on every
+#     deploy/restart. "starter" is set deliberately below.
+#   - If the old 4-service setup (`render.yaml`) has real customer data, migrate it
+#     with `pg_dump`/`pg_restore` into this service's database BEFORE deleting those
+#     services — otherwise every order/user/review is lost.
+#   - On the 512 MB "starter" plan, Postgres+Redis+Django+Next.js+nginx ALL run
+#     together — RAM is tight. Move to "standard" if you see restarts/OOM.
+#
+# Usage: Render dashboard -> "New > Blueprint" -> select this file (both render.yaml
+# and render-single.yaml can coexist in the repo; Render lets you pick which one to
+# use at deploy time).
+
+services:
+  - type: web
+    name: goldensunlight-allinone
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerfilePath: ./deploy/render-single/Dockerfile
+    dockerContext: .
+    disk:
+      name: goldensunlight-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DB_NAME
+        value: goldensunlight_db
+      - key: DB_USER
+        value: goldensunlight
+      - key: DB_PASSWORD
+        generateValue: true
+      # Must match the `name` above — update these if you rename the service.
+      - key: ALLOWED_HOSTS
+        value: goldensunlight-allinone.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://goldensunlight-allinone.onrender.com
+      - key: SITE_URL
+        value: https://goldensunlight-allinone.onrender.com
+      # Backend and frontend share one domain behind the same nginx, so a relative
+      # "/api" is enough — unlike the separate-domain setup in render.yaml.
+      - key: NEXT_PUBLIC_API_URL
+        value: /api
+      - key: NEXT_PUBLIC_MEDIA_ORIGIN
+        value: ""
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://goldensunlight-allinone.onrender.com
+      - key: THROTTLE_ANON
+        value: 2000/hour
+      - key: THROTTLE_USER
+        value: 5000/hour
+      # First superadmin (via backend/render_bootstrap_admin.py — safe to re-run,
+      # it's a no-op once the account exists).
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      # Optional — powers the "suggest a reply" button in the admin support panel.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Email verification codes (backend/users/tasks.py), sent by the `celery`
+      # program in supervisord.conf. Leave EMAIL_HOST_USER unset and the code is
+      # just logged instead of actually emailed. Defaults below are for mail.ru —
+      # EMAIL_HOST_PASSWORD must be an app password, not the account login password.
+      - key: EMAIL_HOST
+        value: smtp.mail.ru
+      - key: EMAIL_PORT
+        value: "465"
+      - key: EMAIL_USE_SSL
+        value: "True"
+      - key: EMAIL_USE_TLS
+        value: "False"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false

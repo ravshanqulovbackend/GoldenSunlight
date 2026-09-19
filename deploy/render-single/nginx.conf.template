@@ -1,62 +1,37 @@
+# Single-container variant of nginx/nginx.conf: backend/frontend are no longer
+# separate Docker services, just processes on 127.0.0.1 inside this container.
+# entrypoint.sh fills in ${PORT} via envsubst before nginx starts (Render connects to
+# that port) — every other `$...` nginx variable (e.g. $host) is left untouched.
+
 upstream backend {
-    server backend:8000;
+    server 127.0.0.1:8000;
 }
 
 upstream frontend {
-    server frontend:3000;
-}
-
-# IMPORTANT: replace REPLACE_WITH_YOUR_DOMAIN below with your real domain (both
-# occurrences, server_name lines and the ssl_certificate paths) before first deploy:
-#   sed -i 's/REPLACE_WITH_YOUR_DOMAIN/yourdomain.com/g' nginx/nginx.conf
-# See the HTTPS bootstrap steps in CLAUDE.md before starting the nginx service.
-
-# Plain HTTP: only serves the Let's Encrypt ACME challenge and redirects everything
-# else to HTTPS. Real traffic never gets proxied here once TLS is set up.
-server {
-    listen 80;
-    server_name REPLACE_WITH_YOUR_DOMAIN www.REPLACE_WITH_YOUR_DOMAIN;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
+    server 127.0.0.1:3000;
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
-    server_name REPLACE_WITH_YOUR_DOMAIN www.REPLACE_WITH_YOUR_DOMAIN;
-
-    ssl_certificate     /etc/letsencrypt/live/REPLACE_WITH_YOUR_DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/REPLACE_WITH_YOUR_DOMAIN/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
+    listen ${PORT};
+    server_name _;
 
     client_max_body_size 20M;
 
-    # Gzip compression
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
     gzip_min_length 256;
 
-    # Static files from Django
     location /static/ {
-        alias /var/www/static/;
+        alias /app/backend/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
-    # Media files
     location /media/ {
-        alias /var/www/media/;
+        alias /app/backend/media/;
         expires 7d;
     }
 
-    # Django Admin (only at /django-admin/)
     location /django-admin/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
@@ -65,12 +40,10 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Redirect /admin to /admin/dashboard
     location = /admin {
         return 302 /admin/dashboard;
     }
 
-    # Admin login route
     location = /admin/login {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -79,7 +52,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Django API
     location /api/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
@@ -90,7 +62,6 @@ server {
         proxy_connect_timeout 60s;
     }
 
-    # Next.js admin panel routes (before Django admin catch-all)
     location ~ ^/admin/(dashboard|products|categories|orders|customers|news|gallery|certificates|contacts|partnerships|analytics|notifications|settings|roles)$ {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -99,7 +70,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Next.js admin panel routes (with trailing slash)
     location ~ ^/admin/(dashboard|products|categories|orders|customers|news|gallery|certificates|contacts|partnerships|analytics|notifications|settings|roles)/$ {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -108,7 +78,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Next.js frontend (everything else)
     location / {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -116,7 +85,6 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket support for Next.js HMR
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
