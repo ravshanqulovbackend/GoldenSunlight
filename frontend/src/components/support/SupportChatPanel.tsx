@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -22,6 +22,23 @@ export function SupportChatPanel({ open, onClose }: SupportChatPanelProps) {
   const user = useAuthStore((s) => s.user);
   const { data: messages, isLoading } = useMyMessages(open);
   const sendMessage = useSendSupportMessage();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Panel ochilganda va yangi xabar kelganda/yuborilganda ro'yxat eng oxirgi
+  // (eng yangi) xabargacha pastga tushirib qo'yiladi — aks holda foydalanuvchi
+  // har safar eski xabarlar bilan qoladi va pastga o'zi skroll qilishi kerak bo'ladi.
+  //
+  // Fondagi 20s'lik so'rov (`useMyMessages`) har safar `messages` uchun yangi massiv
+  // qaytaradi, hatto tarkib o'zgarmagan bo'lsa ham — shuning uchun bog'liqlik sifatida
+  // massivning o'zi emas, oxirgi xabar ID'si + soni ishlatiladi: aks holda foydalanuvchi
+  // eski xabarlarni o'qish uchun yuqoriga skroll qilib turganda ham har 20 soniyada
+  // qayta pastga tashlab yuborilardi.
+  const lastMessageId = messages?.at(-1)?.id;
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [open, lastMessageId, messages?.length]);
 
   // MobileNavDrawer'dagi bilan bir xil naqsh — izohlar o'sha yerda.
   /*
@@ -86,7 +103,7 @@ export function SupportChatPanel({ open, onClose }: SupportChatPanelProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-4">
           {isLoading && (
             <div className="flex justify-center py-10">
               <Spinner />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useConversationThread, useDeleteConversation, useSendSupportMessage, useSuggestReply } from "@/lib/query/hooks/useSupport";
 import { MessageBubbles } from "@/components/support/MessageBubbles";
@@ -30,6 +30,21 @@ export function ConversationThread({ customerId, conversation, onDeleted, onBack
   const sendMessage = useSendSupportMessage(customerId ?? undefined);
   const suggestReply = useSuggestReply(customerId);
   const deleteConversation = useDeleteConversation();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Suhbat almashtirilganda yoki yangi xabar kelganda/yuborilganda ro'yxat
+  // eng oxirgi xabargacha pastga tushiriladi — aks holda admin har safar
+  // suhbatning eng boshidagi eski xabarlarni ko'rib qoladi.
+  //
+  // 15s'lik fon so'rovi har safar `messages` uchun yangi massiv qaytaradi, shuning
+  // uchun bog'liqlik sifatida massivning o'zi emas, oxirgi xabar ID'si + soni
+  // ishlatiladi — aks holda admin eski yozishmalarni o'qib turganda ham har 15
+  // soniyada qayta pastga tashlab yuborilardi.
+  const lastMessageId = messages?.at(-1)?.id;
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [customerId, lastMessageId, messages?.length]);
 
   if (customerId === null) {
     return (
@@ -86,7 +101,7 @@ export function ConversationThread({ customerId, conversation, onDeleted, onBack
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-4">
         {isLoading && (
           <div className="flex justify-center py-10">
             <Spinner />

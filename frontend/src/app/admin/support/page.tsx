@@ -60,10 +60,20 @@ export default function AdminSupportPage() {
         <p className="body-md text-on-surface-variant">Conversations with customers.</p>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 overflow-hidden rounded-lg border border-outline-variant md:grid-cols-[320px_1fr]">
+      {/*
+       * `grid` edi — CSS Grid'da bitta "auto" qatorning balandligi konteynerga
+       * cho'zilsa ham, bu cho'zilgan balandlik ba'zan bolalar ichidagi foizli
+       * (`h-full`) balandlik hisoblanishi uchun "aniq" balandlik deb qabul
+       * qilinmasligi mumkin — natijada `ConversationThread` ichidagi xabar
+       * ro'yxati cheksiz o'sib, "Write a reply" maydonini konteynerdan
+       * (`overflow-hidden`) tashqariga chiqarib, ko'rinmas qilib qo'yardi.
+       * `flex` + `min-h-0` esa balandlikni har doim uzatadi — hech qanday
+       * noaniqlik qolmaydi.
+       */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-outline-variant md:flex-row">
         <div
           className={cn(
-            "overflow-y-auto custom-scrollbar border-outline-variant bg-surface-container-lowest md:block md:border-r",
+            "min-h-0 flex-1 overflow-y-auto custom-scrollbar border-outline-variant bg-surface-container-lowest md:block md:w-[320px] md:flex-none md:border-r",
             selectedCustomerId !== null ? "hidden md:block" : "block"
           )}
         >
@@ -71,7 +81,7 @@ export default function AdminSupportPage() {
         </div>
         <div
           className={cn(
-            "bg-surface-container-lowest md:block",
+            "min-h-0 min-w-0 flex-1 bg-surface-container-lowest md:block",
             selectedCustomerId === null ? "hidden md:block" : "block"
           )}
         >
