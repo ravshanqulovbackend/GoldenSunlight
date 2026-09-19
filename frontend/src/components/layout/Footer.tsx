@@ -58,7 +58,11 @@ export function Footer() {
               <Icon name="location_on" className="text-[18px]" /> {t("address")}
             </span>
             <span className="flex items-center gap-2 body-md text-primary-fixed">
-              <Icon name="call" className="text-[18px]" /> +971 4 123 4567
+              <Icon name="call" className="text-[18px]" />
+              {/* dir="ltr" shart — bo'lmasa arabcha (RTL) sahifada raqamlar/bo'shliq/"+"
+                  atrofida kuchli LTR belgi yo'qligi sababli Unicode Bidi algoritmi
+                  ularni teskari tartibda ko'rsatib qo'yadi (masalan "4567 123 4 971+"). */}
+              <span dir="ltr">+971 4 123 4567</span>
             </span>
             <span className="flex items-center gap-2 body-md text-primary-fixed">
               <Icon name="mail" className="text-[18px]" /> info@goldensunlight.ae

@@ -81,6 +81,10 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           type="tel"
           inputMode="numeric"
           autoComplete="tel"
+          // Arabcha (RTL) sahifada bo'lmasa raqamlar Unicode Bidi algoritmi tomonidan
+          // teskari tartibda ko'rsatiladi (Footer.tsx'dagi bilan bir xil sabab) —
+          // telefon raqami har doim chapdan o'ngga o'qilishi kerak, tilidan qat'i nazar.
+          dir="ltr"
           disabled={disabled}
           value={displayValue}
           placeholder="+971 50 123 4567"

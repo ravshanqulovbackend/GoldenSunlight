@@ -13,13 +13,17 @@ import { useNotifications } from "@/lib/query/hooks/useNotifications";
 import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
 import { cn } from "@/lib/utils/cn";
 
-function DetailRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+function DetailRow({ icon, label, value, ltr }: { icon: string; label: string; value: string; ltr?: boolean }) {
   return (
     <div className="flex items-start gap-4 py-4">
       <Icon name={icon} className="mt-0.5 text-[20px] text-on-surface-variant" />
       <div className="min-w-0">
         <p className="label-sm text-on-surface-variant">{label}</p>
-        <p className="body-lg break-words text-on-surface">{value}</p>
+        {/* dir="ltr" — arabcha (RTL) sahifada raqamlarning (telefon) Unicode Bidi
+            algoritmi tomonidan teskari ko'rsatilishining oldini oladi (Footer.tsx'dagi
+            bilan bir xil sabab). Faqat haqiqiy raqam bo'lganda beriladi — bo'sh bo'lsa
+            o'rniga chiqadigan "Not provided" matni ambient yo'nalishda qolishi kerak. */}
+        <p className="body-lg break-words text-on-surface" dir={ltr ? "ltr" : undefined}>{value}</p>
       </div>
     </div>
   );
@@ -120,7 +124,7 @@ export default function ProfilePage() {
             <DetailRow icon="person" label={t("fullName")} value={fullName} />
             <DetailRow icon="badge" label={t("username")} value={user.username} />
             <DetailRow icon="mail" label={t("email")} value={user.email || t("notProvided")} />
-            <DetailRow icon="call" label={t("phoneNumber")} value={user.phone || t("notProvided")} />
+            <DetailRow icon="call" label={t("phoneNumber")} value={user.phone || t("notProvided")} ltr={!!user.phone} />
             <DetailRow icon="calendar_today" label={t("memberSince")} value={formatDate(user.created_at)} />
             <DetailRow icon="verified_user" label={t("role")} value={roleLabels[user.role]} />
           </div>

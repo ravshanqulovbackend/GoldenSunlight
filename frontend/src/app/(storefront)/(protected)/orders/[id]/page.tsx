@@ -118,7 +118,9 @@ export default function OrderDetailPage() {
 
           <Card className="flex flex-col gap-2 p-6">
             <h2 className="title-lg mb-2 text-on-surface">{t("customerInfo")}</h2>
-            <p className="body-md text-on-surface-variant">{order.full_name} • {order.phone}</p>
+            <p className="body-md text-on-surface-variant">
+              {order.full_name} • <span dir="ltr">{order.phone}</span>
+            </p>
             {order.address_text && <p className="body-md text-on-surface-variant">{order.address_text}</p>}
             {order.landmark && <p className="body-md text-on-surface-variant">{t("landmark", { landmark: order.landmark })}</p>}
             {order.notes && <p className="body-md text-on-surface-variant">{t("notes", { notes: order.notes })}</p>}
