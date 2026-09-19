@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.db.models import Prefetch
 from django.forms.models import model_to_dict
@@ -9,11 +11,14 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Order, OrderItem, Coupon, Address
 from .serializers import OrderSerializer, CreateOrderSerializer, AddressSerializer, ValidateCouponSerializer
+from .tasks import send_order_status_notification_email
 from cart.models import Cart
 from products.models import Product
 from notifications.models import Notification
 from users.permissions import IsAdminRole
 from common.utils import log_activity, diff_instance
+
+logger = logging.getLogger(__name__)
 
 TERMINAL_STATUSES = ('ready', 'picked_up', 'cancelled', 'refunded')
 
@@ -57,6 +62,13 @@ def _notify_customer_order_status(order, status_key):
         title=title,
         message=f'Your order from {order.created_at:%d.%m.%Y} {tail}.',
     )
+    # Email yuborilishi saytdagi bildirishnomaning o'zini hech qachon buzmasin —
+    # SMTP vaqtincha ishlamasa ham (`users/views.py`dagi `_try_send_verification_code`
+    # bilan bir xil mantiq).
+    try:
+        send_order_status_notification_email(order, status_key)
+    except Exception:
+        logger.exception('Failed to send order status email for order %s', order.pk)
 
 
 class AddressListCreateView(generics.ListCreateAPIView):
