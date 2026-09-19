@@ -53,7 +53,13 @@ export function ProductFilters({ categories }: { categories: Category[] }) {
       <div className="hidden w-full flex-col gap-4 md:flex md:w-64">
         <Card className="p-5">
           <h3 className="label-sm mb-4 uppercase text-on-surface-variant">{t("categories")}</h3>
-          <div className="gs-stagger flex flex-col gap-2">
+          {/*
+           * Kategoriyalar ko'payib ketsa (masalan 10-15 ta), bu panel mahsulotlar
+           * ustunidan ancha uzunroq bo'lib, sahifani cho'zib yuborardi — endi
+           * ro'yxat o'zining ichida skroll bo'ladi, panel balandligi doim bir xil
+           * (qulay) qoladi.
+           */}
+          <div className="gs-stagger flex max-h-[22rem] flex-col gap-2 overflow-y-auto pe-1 custom-scrollbar">
             {allChip}
             {categoryChips}
           </div>

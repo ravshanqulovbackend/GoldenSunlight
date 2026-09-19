@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   },
   description:
     "A company that manufactures and supplies wet wipes, feminine hygiene products, baby products, and household cleaning products under the Sunlight, Peri, Rio, and Natural Fresh brands.",
+  verification: {
+    google: "-QOiVcG7pCVItQa6ySoaerbQuWy9AKTYemK2muBn_gY",
+  },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
