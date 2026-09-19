@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useOrder, useCancelOrder } from "@/lib/query/hooks/useOrders";
 import { AppImage } from "@/components/ui/AppImage";
 import { Icon } from "@/components/ui/Icon";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -24,7 +23,6 @@ const CANCELLABLE_STATUSES = ["pending", "preparing"];
 
 export default function OrderDetailPage() {
   const t = useTranslations("Orders");
-  const tCommon = useTranslations("Common");
   const locale = useLocale() as Locale;
   const statusLabels = useOrderStatusLabels();
   const paymentMethodLabels = usePaymentMethodLabels();
@@ -51,13 +49,19 @@ export default function OrderDetailPage() {
 
   return (
     <div className="mx-auto max-w-container-max-width px-margin-mobile py-10 md:px-margin-desktop">
-      <Breadcrumb
-        items={[
-          { label: tCommon("home"), href: "/" },
-          { label: t("title"), href: "/orders" },
-          { label: formatDate(order.created_at) },
-        ]}
-      />
+      {/*
+       * Ilgari 3 bosqichli breadcrumb ("Home > My Orders > 16.09.2026") ishlatilardi —
+       * oxirgi bosqich shunchaki sana bo'lib, hech qanday ma'noli navigatsiya bermasdi
+       * va pastdagi sarlavha ostida allaqachon takrorlanardi. Ikki bosqichli sahifada
+       * (ro'yxat -> tafsilot) endi eng ommabop yechim — oddiy "Orqaga" tugmasi.
+       */}
+      <Link
+        href="/orders"
+        className="gs-press group inline-flex items-center gap-1 label-md text-on-surface-variant hover:text-primary"
+      >
+        <Icon name="arrow_back" mirrorInRtl className="text-[18px] transition-transform duration-200 group-hover:-translate-x-0.5" />
+        {t("title")}
+      </Link>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <h1 className="headline-md text-on-surface">{t("order")}</h1>

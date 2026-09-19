@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { getProduct, getRelatedProducts } from "@/lib/api/endpoints/products";
@@ -8,7 +9,6 @@ import { ProductActions } from "@/components/product/ProductActions";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { ReviewForm } from "@/components/product/ReviewForm";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Badge } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icon";
 import { getImageUrl } from "@/lib/utils/image";
@@ -74,13 +74,19 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 
   return (
     <div className="mx-auto max-w-container-max-width px-margin-mobile pb-28 pt-10 md:px-margin-desktop lg:pb-10">
-      <Breadcrumb
-        items={[
-          { label: tCommon("home"), href: "/" },
-          { label: tCommon("products"), href: "/products" },
-          { label: name },
-        ]}
-      />
+      {/*
+       * Ilgari 3 bosqichli breadcrumb ("Home > Products > <uzun mahsulot nomi>")
+       * ishlatilardi — oxirgi bosqich mahsulot nomining o'zi bo'lib, hech qanday
+       * navigatsiya bermasdi va sarlavha ostida allaqachon takrorlanardi (orders/[id]
+       * sahifasidagi bilan bir xil sabab). Oddiy "Orqaga" tugmasi endi buning o'rnida.
+       */}
+      <Link
+        href="/products"
+        className="gs-press group inline-flex items-center gap-1 label-md text-on-surface-variant hover:text-primary"
+      >
+        <Icon name="arrow_back" mirrorInRtl className="text-[18px] transition-transform duration-200 group-hover:-translate-x-0.5" />
+        {tCommon("products")}
+      </Link>
 
       <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-12">
         <div className="animate-fade-side lg:col-span-7">
