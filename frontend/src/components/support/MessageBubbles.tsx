@@ -64,7 +64,7 @@ export function MessageBubbles({ messages, currentUserId }: MessageBubblesProps)
 
       {enlargedImage && (
         <div
-          className="fixed inset-0 z-[200] flex animate-fade-in items-center justify-center bg-inverse-surface/80 p-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex animate-fade-in items-center justify-center bg-inverse-surface/80 p-6 backdrop-blur-sm [transform:translateZ(0)]"
           onClick={() => setEnlargedImage(null)}
         >
           <button

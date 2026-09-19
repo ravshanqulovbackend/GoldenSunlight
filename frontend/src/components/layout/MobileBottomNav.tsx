@@ -48,7 +48,10 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-outline-variant bg-surface/95 backdrop-blur-md md:hidden [padding-bottom:env(safe-area-inset-bottom)]"
+      // `[transform:translateZ(0)]` — without its own GPU layer, WebKit in-app
+      // WebViews (Telegram/Instagram) detach `fixed` + `backdrop-filter` bars
+      // from the viewport edge during scroll, letting them float mid-page.
+      className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-outline-variant bg-surface/95 backdrop-blur-md [transform:translateZ(0)] md:hidden [padding-bottom:env(safe-area-inset-bottom)]"
       aria-label={t("menu")}
     >
       {tabs.map((tab) => {
